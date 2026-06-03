@@ -1,0 +1,171 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Couleurs TerangaLearn */
+  .text-green { color: #1A7A4A; }
+  .bg-green { background-color: #1A7A4A; }
+  .bg-green-light { background-color: #E8F5EE; }
+  .text-gold { color: #C8A400; }
+  .bg-gold { background-color: #C8A400; }
+  .border-green { border-color: #1A7A4A; }
+  .ring-green { --tw-ring-color: #1A7A4A; }
+
+  /* Gradients */
+  .gradient-senegal {
+    background: linear-gradient(135deg, #1A7A4A 0%, #C8A400 50%, #C0392B 100%);
+  }
+  .gradient-green {
+    background: linear-gradient(135deg, #1A7A4A 0%, #27ae60 100%);
+  }
+  .gradient-gold {
+    background: linear-gradient(135deg, #C8A400 0%, #f39c12 100%);
+  }
+
+  /* Shadows */
+  .card-shadow {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card-shadow-hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .shadow-green {
+    box-shadow: 0 4px 16px rgba(26,122,74,0.25);
+  }
+
+  /* Hover lift */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl p-5 transition-all duration-200;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  }
+
+  /* Glass effect */
+  .glass {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(26,122,74,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(26,122,74,0); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+.animate-slideInLeft {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out forwards;
+}
+.animate-pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #1A7A4A40; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #1A7A4A; }
+
+/* Focus styles */
+input:focus, select:focus, textarea:focus, button:focus-visible {
+  outline: 2px solid #1A7A4A;
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background: #E8F5EE;
+  color: #1A7A4A;
+}
+
+/* Transitions globales douces */
+a, button {
+  transition: all 0.15s ease;
+}
+
+/* ===== OPTIMISATIONS MOBILE ===== */
+
+/* Empêcher le zoom sur les inputs iOS */
+@media (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Touch feedback */
+@media (hover: none) {
+  button:active, a:active {
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+}
+
+/* Améliorer le scroll sur mobile */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area pour les iPhones avec encoche */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Texte plus lisible sur mobile */
+@media (max-width: 640px) {
+  .prose { font-size: 0.9rem; }
+}

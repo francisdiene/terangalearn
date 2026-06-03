@@ -1,0 +1,71 @@
+# ================================
+# Stage 1 : Installation des dépendances
+# ================================
+FROM node:20-alpine AS deps
+
+# Installer les dépendances système nécessaires
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Copier les fichiers de dépendances
+COPY package.json package-lock.json* ./
+
+# Installer les dépendances
+RUN npm install --legacy-peer-deps
+# ================================
+# Stage 2 : Build de l'application
+# ================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copier les dépendances installées
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copier tout le code source
+COPY . .
+
+# Variables d'environnement pour le build
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Builder l'application
+RUN npm run build
+
+# ================================
+# Stage 3 : Image de production
+# ================================
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copier les fichiers publics
+COPY --from=builder /app/public ./public
+
+# Copier les fichiers de build
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Utiliser l'utilisateur non-root
+USER nextjs
+
+# Exposer le port
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Démarrer l'application
+CMD ["node", "server.js"]
