@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -16,9 +15,6 @@ const nextConfig = {
     ],
     formats: ['image/webp'],
     minimumCacheTTL: 3600,
-  },
-  experimental: {
-    optimizeCss: true,
   },
 }
 
