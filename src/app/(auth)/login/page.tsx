@@ -44,7 +44,15 @@ export default function LoginPage() {
     />
 
     {/* Overlay sombre vert */}
-    <div className="absolute inset-0 bg-gradient-to-b from-green-950/40 via-green-900/60 to-black/70" />
+    <div
+  className="
+    absolute inset-0
+    bg-gradient-to-b
+    from-transparent
+    via-green-900/15
+    to-black/50
+  "
+/>
 
     {/* Contenu */}
     <div className="relative z-10 min-h-screen flex flex-col justify-center px-6">
