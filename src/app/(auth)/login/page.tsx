@@ -32,144 +32,182 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+  <div className="relative min-h-screen overflow-hidden">
 
-      {/* ===== MOBILE : Header avec background ===== */}
-      <div className="md:hidden relative w-full h-56 flex flex-col items-center justify-center">
-        {/* Background image */}
-        <Image
-          src="/bg-login.png"
-          alt="Background"
-          fill
-          className="object-cover"
-          priority
-        />
-        {/* Overlay vert */}
-        <div className="absolute inset-0 bg-green/75" />
+    {/* Background fullscreen */}
+    <Image
+      src="/bg-login.png"
+      alt="Background"
+      fill
+      priority
+      className="object-cover"
+    />
 
-        {/* Contenu */}
-        <div className="relative z-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-3">
-            <Image
-              src="/logo.png"
-              alt="TerangaLearn"
-              width={60}
-              height={60}
-              className="object-contain"
-            />
-          </div>
-          <h1 className="text-2xl font-bold text-white">TerangaLearn</h1>
-          <p className="text-white/80 text-sm mt-1">Réussis ton BFEM et ton BAC 🎓</p>
+    {/* Overlay sombre vert */}
+    <div className="absolute inset-0 bg-gradient-to-b from-green-950/40 via-green-900/60 to-black/70" />
+
+    {/* Contenu */}
+    <div className="relative z-10 min-h-screen flex flex-col justify-center px-6">
+
+      {/* Logo */}
+      <div className="text-center mb-10">
+        <div className="mx-auto w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+          <Image
+            src="/logo.png"
+            alt="logo"
+            width={60}
+            height={60}
+          />
         </div>
+
+        <h1 className="mt-5 text-white text-4xl font-bold">
+          TerangaLearn
+        </h1>
+
+        <p className="text-white/80 mt-2">
+          Réussis ton BFEM et ton BAC
+        </p>
       </div>
 
-      {/* ===== DESKTOP : Panneau gauche ===== */}
-      <div className="hidden md:flex md:w-1/2 relative flex-col items-center justify-center p-12">
-        <Image
-          src="/bg-login.png"
-          alt="Background"
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-green/70" />
-        <div className="relative z-10 flex flex-col items-center text-white">
-          <div className="w-24 h-24 bg-white rounded-2xl flex items-center justify-center shadow-lg mb-5">
-            <Image
-              src="/logo.png"
-              alt="TerangaLearn"
-              width={72}
-              height={72}
-              className="object-contain"
-            />
+      {/* Formulaire glass */}
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-3xl p-6">
+
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Bienvenue 👋
+        </h2>
+
+        <p className="text-white/70 mb-6">
+          Connectez-vous pour continuer
+        </p>
+
+        {error && (
+          <div className="bg-red-500/20 border border-red-400/30 text-white rounded-xl p-3 mb-4">
+            {error}
           </div>
-          <h1 className="text-4xl font-bold text-center">TerangaLearn</h1>
-          <p className="text-white/80 mt-3 text-lg text-center max-w-sm">
-            La lumière du savoir pour chaque élève sénégalais
-          </p>
-          <div className="space-y-3 w-full max-w-sm mt-8">
-            {[
-              { emoji: '🎓', text: 'Cours conformes au programme sénégalais' },
-              { emoji: '🤖', text: 'Coach IA personnalisé 24h/24' },
-              { emoji: '🏆', text: 'Gamification et classements nationaux' },
-              { emoji: '📊', text: 'Suivi de progression intelligent' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 bg-white/10 rounded-xl p-3 backdrop-blur-sm">
-                <span className="text-2xl">{item.emoji}</span>
-                <span className="text-sm text-white/90">{item.text}</span>
-              </div>
-            ))}
-          </div>
+        )}
+
+        {/* Email */}
+        <div className="mb-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="
+              w-full
+              bg-white/10
+              border border-white/20
+              text-white
+              placeholder:text-white/50
+              rounded-2xl
+              px-4
+              py-4
+              outline-none
+              focus:border-green-400
+            "
+          />
         </div>
-      </div>
 
-      {/* ===== Formulaire ===== */}
-      <div className="flex-1 flex items-start md:items-center justify-center p-6 bg-white">
-        <div className="w-full max-w-md">
+        {/* Password */}
+        <div className="relative mb-4">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Mot de passe"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="
+              w-full
+              bg-white/10
+              border border-white/20
+              text-white
+              placeholder:text-white/50
+              rounded-2xl
+              px-4
+              py-4
+              pr-12
+              outline-none
+            "
+          />
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">Bon retour ! 👋</h2>
-          <p className="text-gray-500 mb-6 text-sm">Connecte-toi pour continuer à apprendre</p>
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70"
+          >
+            {showPassword ? (
+              <EyeOff size={20} />
+            ) : (
+              <Eye size={20} />
+            )}
+          </button>
+        </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 mb-5 text-sm">
-              {error}
-            </div>
+        {/* Mot de passe oublié */}
+        <div className="text-right mb-5">
+          <Link
+            href="/forgot-password"
+            className="text-green-300 text-sm"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </div>
+
+        {/* Bouton */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="
+            w-full
+            rounded-2xl
+            py-4
+            bg-green-500
+            text-white
+            font-semibold
+            hover:bg-green-600
+            transition
+          "
+        >
+          {loading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="animate-spin h-5 w-5" />
+              Connexion...
+            </span>
+          ) : (
+            'Se connecter'
           )}
+        </button>
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="ton@email.com"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green transition text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green transition text-sm pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3.5 bg-green text-white rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2 disabled:opacity-60"
-            >
-              {loading
-                ? <><Loader2 className="w-5 h-5 animate-spin" /> Connexion...</>
-                : 'Se connecter'
-              }
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-gray-500 mt-5">
-            Pas encore de compte ?{' '}
-            <Link href="/register" className="text-green font-semibold hover:underline">
-              Créer un compte
-            </Link>
-          </p>
+        {/* Divider */}
+        <div className="flex items-center my-6">
+          <div className="h-px flex-1 bg-white/20" />
+          <span className="px-3 text-white/60 text-sm">
+            ou continuer avec
+          </span>
+          <div className="h-px flex-1 bg-white/20" />
         </div>
+
+        {/* Social */}
+        <div className="grid grid-cols-2 gap-3">
+          <button className="bg-white/10 border border-white/20 rounded-2xl py-3 text-white">
+            Google
+          </button>
+
+          <button className="bg-white/10 border border-white/20 rounded-2xl py-3 text-white">
+            Facebook
+          </button>
+        </div>
+
+        <p className="text-center text-white/70 mt-6">
+          Pas encore de compte ?
+          <Link
+            href="/register"
+            className="text-green-300 font-semibold ml-1"
+          >
+            Créer un compte
+          </Link>
+        </p>
       </div>
     </div>
-  )
+  </div>
+)
 }
