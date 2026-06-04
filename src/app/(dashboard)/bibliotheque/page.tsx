@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import BibliothequeClient from '@/components/bibliotheque/BibliothequeClient'
 
+export const revalidate = 60 // Cache 60 secondes
+
 export default async function BibliothequePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

@@ -14,6 +14,11 @@ const nextConfig = {
         hostname: 'dmgzqkegfwxwhntsopbq.supabase.co',
       },
     ],
+    formats: ['image/webp'],
+    minimumCacheTTL: 3600,
+  },
+  experimental: {
+    optimizeCss: true,
   },
 }
 

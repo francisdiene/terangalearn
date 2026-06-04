@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { PenTool, Trophy, Zap, FileText, Eye } from 'lucide-react'
 import ExercicesPDFSection from '@/components/exercices/ExercicesPDFSection'
 
+export const revalidate = 60 // Cache 60 secondes
+
 export default async function ExercicesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

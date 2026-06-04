@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Trophy, Medal, Zap, Flame } from 'lucide-react'
 
+export const revalidate = 60 // Cache 60 secondes
+
 export default async function ClassementPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

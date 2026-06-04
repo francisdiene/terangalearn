@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { BookOpen } from 'lucide-react'
 
+export const revalidate = 60 // Cache 60 secondes
+
 export default async function CoursPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
