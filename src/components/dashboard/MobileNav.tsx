@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Profile } from '@/types'
 import {
   Menu, X, LayoutDashboard, BookOpen, PenTool,
@@ -46,36 +47,40 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   return (
     <>
       {/* Header mobile */}
-      <header className="md:hidden glass border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
-        {/* Hamburger */}
-        <button
-          onClick={() => setOpen(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition"
-        >
-          <Menu className="w-5 h-5 text-gray-700" />
-        </button>
+<header className="md:hidden glass border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+  {/* Hamburger */}
+  <button
+    onClick={() => setOpen(true)}
+    className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition"
+  >
+    <Menu className="w-5 h-5 text-gray-700" />
+  </button>
 
-        {/* Logo centré */}
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-green rounded-lg flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-green text-base">TerangaLearn</span>
-        </div>
+  {/* Logo centré */}
+  <div className="flex items-center gap-2">
+    <Image
+      src="/logo.png"
+      alt="TerangaLearn"
+      width={28}
+      height={28}
+      className="object-contain"
+    />
+    <span className="font-bold text-green text-base">TerangaLearn</span>
+  </div>
 
-        {/* XP + Streak */}
-        <div className="flex items-center gap-1.5">
-          {(profile?.streak ?? 0) > 0 && (
-            <span className="text-xs bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-medium">
-              🔥{profile?.streak}
-            </span>
-          )}
-          <div className="bg-green text-white text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
-            <Zap className="w-3 h-3" />
-            {xp}
-          </div>
-        </div>
-      </header>
+  {/* XP + Streak */}
+  <div className="flex items-center gap-1.5">
+    {(profile?.streak ?? 0) > 0 && (
+      <span className="text-xs bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-medium">
+        🔥{profile?.streak}
+      </span>
+    )}
+    <div className="bg-green text-white text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+      <Zap className="w-3 h-3" />
+      {profile?.xp ?? 0}
+    </div>
+  </div>
+</header>
 
       {/* Overlay */}
       {open && (
