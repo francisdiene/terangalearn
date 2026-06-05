@@ -58,16 +58,16 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   </button>
 
   {/* Logo centré */}
-  <div className="flex items-center gap-2">
-    <Image
-      src="/logo.png"
-      alt="TerangaLearn"
-      width={28}
-      height={28}
-      className="object-contain"
-    />
-    <span className="font-bold text-green text-base">TerangaLearn</span>
-  </div>
+<div className="flex items-center gap-2">
+  <Image
+    src="/logo.png"
+    alt="TerangaLearn"
+    width={34}
+    height={34}
+    className="object-contain"
+  />
+  <span className="font-bold text-green text-lg">TerangaLearn</span>
+</div>
 
   {/* XP + Streak */}
   <div className="flex items-center gap-1.5">
@@ -224,17 +224,17 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   className="w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-gray-100 transition"
 >
   <span className={cn(
-    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
-    open && 'rotate-45 translate-y-2'
-  )} />
-  <span className={cn(
-    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
-    open && 'opacity-0 scale-x-0'
-  )} />
-  <span className={cn(
-    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
-    open && '-rotate-45 -translate-y-2'
-  )} />
+  'w-6 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+  open && 'rotate-45 translate-y-2'
+)} />
+<span className={cn(
+  'w-6 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+  open && 'opacity-0 scale-x-0'
+)} />
+<span className={cn(
+  'w-6 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+  open && '-rotate-45 -translate-y-2'
+)} />
 </button>
         </div>
 
