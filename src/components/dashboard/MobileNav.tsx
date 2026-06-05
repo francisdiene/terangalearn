@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Profile } from '@/types'
@@ -82,13 +83,119 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   </div>
 </header>
 
-       {/* Overlay avec animation */}
-{open && (
-  <div
-    className="md:hidden fixed inset-0 bg-black/50 z-50 transition-opacity duration-300"
-    onClick={() => setOpen(false)}
-  />
-)}
+        {/* Overlay */}
+<AnimatePresence>
+  {open && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="md:hidden fixed inset-0 bg-black/50 z-50"
+      onClick={() => setOpen(false)}
+    />
+  )}
+</AnimatePresence>
+
+{/* Drawer */}
+<AnimatePresence>
+  {open && (
+    <motion.div
+      initial={{ x: '-100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '-100%' }}
+      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+      className="md:hidden fixed top-0 left-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl"
+    >
+      {/* Header drawer */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+        <div className="flex items-center gap-2">
+          <Image
+            src="/logo.png"
+            alt="TerangaLearn"
+            width={32}
+            height={32}
+            className="object-contain"
+          />
+          <span className="font-bold text-green">TerangaLearn</span>
+        </div>
+        <button
+          onClick={() => setOpen(false)}
+          className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 transition"
+        >
+          <X className="w-5 h-5 text-gray-500" />
+        </button>
+      </div>
+
+      {/* Profil XP */}
+      <div className="mx-4 mt-4 bg-green-light rounded-xl p-3">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-sm font-semibold text-green truncate">
+            {profile?.full_name?.split(' ')[0] ?? 'Élève'}
+          </span>
+          <div className="flex items-center gap-1 bg-green text-white text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+            <Zap className="w-3 h-3" />
+            <span>{xp} XP</span>
+          </div>
+        </div>
+        <div className="text-xs text-gray-500 mb-1">Niveau {niveau}</div>
+        <div className="w-full bg-white rounded-full h-1.5">
+          <div
+            className="bg-green h-1.5 rounded-full transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        {(profile?.streak ?? 0) > 0 && (
+          <div className="flex items-center gap-1 mt-2 text-xs text-orange-500">
+            <Flame className="w-3 h-3" />
+            <span>{profile?.streak} jours de streak</span>
+          </div>
+        )}
+      </div>
+
+      {/* Navigation avec animation par item */}
+      <nav className="flex-1 overflow-y-auto p-3 space-y-0.5 mt-2">
+        {navItems.map(({ href, icon: Icon, label }, index) => {
+          const active = pathname === href || pathname.startsWith(href + '/')
+          return (
+            <motion.div
+              key={href}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.04, duration: 0.2 }}
+            >
+              <Link
+                href={href}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                  active
+                    ? 'bg-green text-white'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-green'
+                )}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="truncate">{label}</span>
+                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
+              </Link>
+            </motion.div>
+          )
+        })}
+      </nav>
+
+      {/* Déconnexion */}
+      <div className="p-3 border-t border-gray-100">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition"
+        >
+          <LogOut className="w-5 h-5" />
+          Déconnexion
+        </button>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
 {/* Drawer avec animation */}
 <div className={cn(
