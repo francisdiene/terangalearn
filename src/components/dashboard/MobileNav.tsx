@@ -82,13 +82,22 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   </div>
 </header>
 
-      {/* Overlay */}
-      {open && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/50 z-50"
-          onClick={() => setOpen(false)}
-        />
-      )}
+       {/* Overlay avec animation */}
+{open && (
+  <div
+    className="md:hidden fixed inset-0 bg-black/50 z-50 transition-opacity duration-300"
+    onClick={() => setOpen(false)}
+  />
+)}
+
+{/* Drawer avec animation */}
+<div className={cn(
+  'md:hidden fixed top-0 left-0 h-full w-72 bg-white z-50 flex flex-col shadow-2xl',
+  'transition-transform duration-300 ease-in-out',
+  open ? 'translate-x-0' : '-translate-x-full'
+)}>
+  
+</div>
 
       {/* Drawer */}
       <div className={cn(
@@ -104,11 +113,22 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
             <span className="font-bold text-green">TerangaLearn</span>
           </div>
           <button
-            onClick={() => setOpen(false)}
-            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 transition"
-          >
-            <X className="w-5 h-5 text-gray-500" />
-          </button>
+  onClick={() => setOpen(true)}
+  className="w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-gray-100 transition"
+>
+  <span className={cn(
+    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+    open && 'rotate-45 translate-y-2'
+  )} />
+  <span className={cn(
+    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+    open && 'opacity-0 scale-x-0'
+  )} />
+  <span className={cn(
+    'w-5 h-0.5 bg-gray-700 rounded-full transition-all duration-300',
+    open && '-rotate-45 -translate-y-2'
+  )} />
+</button>
         </div>
 
         {/* Profil XP */}
