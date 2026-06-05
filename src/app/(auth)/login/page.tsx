@@ -67,7 +67,7 @@ export default function LoginPage() {
       <div className="flex-1" />
 
       {/* Formulaire en bas */}
-      <div className="relative z-10 bg-black/15 backdrop-blur-sm rounded-t-3xl px-6 pt-6 pb-10 border-t border-white/10">
+      <div className="relative z-10 bg-black/15 backdrop-blur-[2px] rounded-t-3xl px-6 pt-6 pb-10 border-t border-white/10">
 
         {/* Onglets Se connecter / S'inscrire */}
         <div className="flex mb-6">
