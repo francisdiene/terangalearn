@@ -217,8 +217,8 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
             <Image
            src="/logo.png"
            alt="TerangaLearn"
-           width={60}
-           height={60}
+           width={80}
+           height={80}
            className="object-contain"
            />
             <span className="font-bold text-green">TerangaLearn</span>
