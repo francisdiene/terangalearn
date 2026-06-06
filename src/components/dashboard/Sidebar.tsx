@@ -51,8 +51,8 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
           <Image
           src="/logo.png"
           alt="TerangaLearn"
-          width={44}
-          height={44}
+          width={56}
+          height={56}
           className="object-contain"
           />
           <div>
