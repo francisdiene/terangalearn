@@ -48,14 +48,14 @@ export default function LoginPage() {
 
       {/* Logo + Nom en haut */}
       <div className="relative z-10 flex flex-col items-center pt-16 pb-4 px-6">
-        <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30">
-          <Image
-            src="/logo.png"
-            alt="TerangaLearn"
-            width={56}
-            height={56}
-            className="object-contain"
-          />
+        <div className="w-28 h-28 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mb-4 border border-white/30">
+       <Image
+        src="/logo.png"
+        alt="TerangaLearn"
+        width={80}
+        height={80}
+        className="object-contain"
+        />
         </div>
         <h1 className="text-3xl font-bold text-white">TerangaLearn</h1>
         <p className="text-white/80 text-sm mt-2 text-center">

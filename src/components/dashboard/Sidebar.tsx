@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Profile } from '@/types'
 import {
   LayoutDashboard, BookOpen, PenTool, Bot,
@@ -47,9 +48,13 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
       {/* Logo */}
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green rounded-xl flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-white" />
-          </div>
+          <Image
+          src="/logo.png"
+          alt="TerangaLearn"
+          width={44}
+          height={44}
+          className="object-contain"
+          />
           <div>
             <h1 className="font-bold text-green text-lg leading-none">TerangaLearn</h1>
             <p className="text-xs text-gray-400 mt-0.5">Réussis ton examen</p>

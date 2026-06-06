@@ -214,9 +214,13 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
         {/* Header drawer */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-green rounded-lg flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
+            <Image
+           src="/logo.png"
+           alt="TerangaLearn"
+           width={32}
+           height={32}
+           className="object-contain"
+           />
             <span className="font-bold text-green">TerangaLearn</span>
           </div>
           <button
