@@ -78,7 +78,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/confirmation')
+      router.push('/onboarding')
 
     } else {
       // Inscription par téléphone
@@ -103,7 +103,7 @@ export default function RegisterPage() {
         return
       }
 
-      router.push('/confirmation')
+      router.push('/onboarding')
     }
   }
 

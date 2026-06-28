@@ -48,36 +48,36 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
   return (
     <>
       {/* Header mobile */}
-<header className="md:hidden glass border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+<header className="md:hidden glass border-b border-gray-100 px-3 py-3 flex items-center justify-between gap-2 sticky top-0 z-40 max-w-full overflow-hidden">
   {/* Hamburger */}
   <button
     onClick={() => setOpen(true)}
-    className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition"
+    className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-gray-100 transition flex-shrink-0"
   >
     <Menu className="w-5 h-5 text-gray-700" />
   </button>
 
   {/* Logo centré */}
-<div className="flex items-center gap-2">
-  <Image
-    src="/logo.png"
-    alt="TerangaLearn"
-    width={34}
-    height={34}
-    className="object-contain"
-  />
-  <span className="font-bold text-green text-lg">TerangaLearn</span>
-</div>
+  <div className="flex items-center gap-1.5 min-w-0 flex-shrink overflow-hidden">
+    <Image
+      src="/logo.png"
+      alt="TerangaLearn"
+      width={28}
+      height={28}
+      className="object-contain flex-shrink-0"
+    />
+    <span className="font-bold text-green text-sm truncate">TerangaLearn</span>
+  </div>
 
   {/* XP + Streak */}
-  <div className="flex items-center gap-1.5">
+  <div className="flex items-center gap-1 flex-shrink-0">
     {(profile?.streak ?? 0) > 0 && (
-      <span className="text-xs bg-orange-50 text-orange-500 px-2 py-0.5 rounded-full font-medium">
+      <span className="text-xs bg-orange-50 text-orange-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap">
         🔥{profile?.streak}
       </span>
     )}
-    <div className="bg-green text-white text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
-      <Zap className="w-3 h-3" />
+    <div className="bg-green text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 whitespace-nowrap">
+      <Zap className="w-3 h-3 flex-shrink-0" />
       {profile?.xp ?? 0}
     </div>
   </div>
