@@ -256,32 +256,30 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
           ) : (
             <div className="space-y-3">
               {postsFiltres.map(post => (
-                <div key={post.id} className="bg-white rounded-2xl p-5 card-shadow">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-green/10 rounded-xl flex items-center justify-center text-green font-bold text-sm flex-shrink-0">
-                        {post.profiles?.full_name?.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {post.profiles?.full_name}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          Niv. {post.profiles?.niveau} •{' '}
-                          {new Date(post.created_at).toLocaleDateString('fr-FR')}
-                        </p>
-                      </div>
-                    </div>
-                    {post.matiere && (
-                      <span className="text-xs bg-green-light text-green px-2 py-1 rounded-full font-medium flex-shrink-0">
-                        {MATIERE_LABELS[post.matiere]}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="font-bold text-gray-900 mb-1">{post.titre}</h3>
-                  <p className="text-sm text-gray-600 leading-relaxed">{post.contenu}</p>
-                </div>
-              ))}
+  <div key={post.id} className="bg-white rounded-2xl p-4 card-shadow overflow-hidden">
+    <div className="flex items-start gap-3 mb-3">
+      <div className="w-9 h-9 bg-green/10 rounded-xl flex items-center justify-center text-green font-bold text-sm flex-shrink-0">
+        {post.profiles?.full_name?.charAt(0).toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-gray-900 truncate">
+          {post.profiles?.full_name}
+        </p>
+        <p className="text-xs text-gray-400">
+          Niv. {post.profiles?.niveau} •{' '}
+          {new Date(post.created_at).toLocaleDateString('fr-FR')}
+        </p>
+      </div>
+      {post.matiere && (
+        <span className="text-xs bg-green-light text-green px-2 py-1 rounded-full font-medium flex-shrink-0">
+          {MATIERE_LABELS[post.matiere]}
+        </span>
+      )}
+    </div>
+    <h3 className="font-bold text-gray-900 mb-1 break-words">{post.titre}</h3>
+    <p className="text-sm text-gray-600 leading-relaxed break-words">{post.contenu}</p>
+  </div>
+))}
             </div>
           )}
         </div>
