@@ -5,6 +5,9 @@ import { Search, X, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
+import PDFViewer from '@/components/ui/PDFViewer'
+
+
 
 interface Epreuve {
   id: string
@@ -287,11 +290,7 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <iframe
-                  src={`${pdfOuvert.pdf_url}#toolbar=0`}
-                  className="w-full h-full"
-                  title={pdfOuvert.titre}
-                />
+                <PDFViewer url={pdfOuvert.pdf_url} titre={pdfOuvert.titre} />
               </div>
             </motion.div>
           </motion.div>

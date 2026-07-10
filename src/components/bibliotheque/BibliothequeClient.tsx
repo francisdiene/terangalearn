@@ -5,6 +5,9 @@ import { BookOpen, Search, Eye, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
+import PDFViewer from '@/components/ui/PDFViewer'
+
+
 
 interface Livre {
   id: string
@@ -194,11 +197,7 @@ export default function BibliothequeClient({ userId, profile, livres }: Props) {
                 </button>
               </div>
               <div className="flex-1 overflow-hidden">
-                <iframe
-                  src={`${livreOuvert.pdf_url}#toolbar=0`}
-                  className="w-full h-full"
-                  title={livreOuvert.titre}
-                />
+                <PDFViewer url={livreOuvert.pdf_url} titre={livreOuvert.titre} />
               </div>
             </motion.div>
           </motion.div>
