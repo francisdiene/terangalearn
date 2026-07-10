@@ -64,8 +64,8 @@ const MATIERE_LABELS: Record<string, string> = {
 }
 
 const MATIERE_ICONES: Record<string, string> = {
-  MATH: '📐', PC: '⚗️', SVT: '🧬', FR: '📖',
-  HG: '🌍', EN: '🇬🇧', PHILO: '🧠', ECO: '📊'
+  MATH: '', PC: '⚗️', SVT: '', FR: '',
+  HG: '', EN: '🇬🇧', PHILO: '', ECO: ''
 }
 
 // Coefficients par matière et série
@@ -79,13 +79,13 @@ const COEFFICIENTS: Record<string, Record<string, number>> = {
 
 const ORIENTATION_RULES = [
   {
-    domaine: 'Sciences & Ingénierie', emoji: '🔬',
+    domaine: 'Sciences & Ingénierie', emoji: '',
     matieres: ['MATH', 'PC', 'SVT'], seuil: 13,
     filieres: ['Génie Logiciel', 'Médecine', 'Pharmacie', 'Ingénierie', 'Intelligence Artificielle'],
     description: 'Tu as un profil scientifique solide. Les filières scientifiques et techniques sont faites pour toi.'
   },
   {
-    domaine: 'Informatique & Technologie', emoji: '💻',
+    domaine: 'Informatique & Technologie', emoji: '',
     matieres: ['MATH', 'PC'], seuil: 12,
     filieres: ['Génie Logiciel', 'Réseaux & Systèmes', 'Cybersécurité', 'Data Science'],
     description: 'Tes bases en maths et sciences exactes te prédisposent aux métiers du numérique.'
@@ -97,19 +97,19 @@ const ORIENTATION_RULES = [
     description: 'Tu as le profil pour les métiers de la gestion, du commerce et de la finance.'
   },
   {
-    domaine: 'Droit & Sciences Sociales', emoji: '⚖️',
+    domaine: 'Droit & Sciences Sociales', emoji: '',
     matieres: ['FR', 'HG', 'PHILO'], seuil: 12,
     filieres: ['Droit', 'Sciences Politiques', 'Sociologie', 'Communication'],
     description: "Tes compétences en expression et analyse sociale t'ouvrent les portes du droit."
   },
   {
-    domaine: 'Lettres & Communication', emoji: '📝',
+    domaine: 'Lettres & Communication', emoji: '',
     matieres: ['FR', 'EN', 'PHILO'], seuil: 12,
     filieres: ['Lettres Modernes', 'Traduction', 'Communication', 'Journalisme'],
     description: "Tu excelles dans les matières littéraires."
   },
   {
-    domaine: 'Santé & Sciences du Vivant', emoji: '🏥',
+    domaine: 'Santé & Sciences du Vivant', emoji: '',
     matieres: ['SVT', 'PC', 'MATH'], seuil: 14,
     filieres: ['Médecine', 'Pharmacie', 'Infirmerie', 'Nutrition', 'Biologie'],
     description: "Tes excellents résultats en sciences du vivant t'ouvrent les portes des métiers de la santé."
@@ -725,7 +725,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
             <>
               <div className="bg-green-light rounded-2xl p-4">
                 <p className="text-green font-semibold text-sm">
-                  🎯 Basé sur ton bulletin du S2, voici les domaines qui correspondent à ton profil :
+                   Basé sur ton bulletin du S2, voici les domaines qui correspondent à ton profil :
                 </p>
               </div>
 
@@ -773,7 +773,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
           {orientationsRecommandees.length > 0 && (
             <div className="bg-green-light rounded-2xl p-4">
               <p className="text-green font-semibold text-sm">
-                🏫 Écoles recommandées selon ton profil : {orientationsRecommandees[0]?.domaine}
+                 Écoles recommandées selon ton profil : {orientationsRecommandees[0]?.domaine}
               </p>
             </div>
           )}

@@ -25,9 +25,9 @@ interface Props {
 
 const MATIERES = ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO', 'ECO']
 const MATIERE_LABELS: Record<string, string> = {
-  MATH: '📐 Maths', PC: '⚗️ Physique-Chimie', SVT: '🧬 SVT',
-  FR: '📖 Français', HG: '🌍 Histoire-Géo', EN: '🇬🇧 Anglais',
-  PHILO: '🧠 Philo', ECO: '📊 Économie'
+  MATH: ' Maths', PC: ' Physique-Chimie', SVT: ' SVT',
+  FR: ' Français', HG: ' Histoire-Géo', EN: '🇬🇧 Anglais',
+  PHILO: ' Philo', ECO: ' Économie'
 }
 
 const TYPE_CONFIG = {
@@ -188,7 +188,7 @@ export default function PlanificationClient({ userId, profile, planningInitial }
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Planification 📅</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Planification </h1>
         <p className="text-gray-500 mt-1">Organise tes révisions intelligemment</p>
       </div>
 
@@ -269,10 +269,10 @@ export default function PlanificationClient({ userId, profile, planningInitial }
                 onChange={e => setForm(f => ({ ...f, type: e.target.value as PlanItem['type'] }))}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm bg-white"
               >
-                <option value="revision">📚 Révision</option>
-                <option value="examen">📝 Examen</option>
-                <option value="devoir">✏️ Devoir</option>
-                <option value="rappel">🔔 Rappel</option>
+                <option value="revision"> Révision</option>
+                <option value="examen"> Examen</option>
+                <option value="devoir"> Devoir</option>
+                <option value="rappel"> Rappel</option>
               </select>
 
               <select

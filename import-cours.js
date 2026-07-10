@@ -180,7 +180,7 @@ async function importCours() {
       try {
         const texteRaw = fs.readFileSync(filePath, 'utf8')
         
-        console.log(`🤖 Correction IA: ${titre}...`)
+        console.log(` Correction IA: ${titre}...`)
         const texteCorrige = await corrigerAvecIA(texteRaw, titre)
         
         const contenu = formatContenu(texteCorrige, titre)

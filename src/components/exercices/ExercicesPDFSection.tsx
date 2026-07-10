@@ -24,9 +24,9 @@ interface Props {
 }
 
 const MATIERES_LABELS: Record<string, string> = {
-  MATH: '📐 Maths', PC: '⚗️ Physique-Chimie', SVT: '🧬 SVT',
-  FR: '📖 Français', HG: '🌍 Histoire-Géo', EN: '🇬🇧 Anglais',
-  PHILO: '🧠 Philo', ECO: '📊 Économie'
+  MATH: ' Maths', PC: ' Physique-Chimie', SVT: '🧬 SVT',
+  FR: ' Français', HG: ' Histoire-Géo', EN: '🇬🇧 Anglais',
+  PHILO: ' Philo', ECO: ' Économie'
 }
 
 export default function ExercicesPDFSection({ epreuves, profile }: Props) {

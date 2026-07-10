@@ -28,9 +28,9 @@ interface Props {
 }
 
 const MATIERE_LABELS: Record<string, string> = {
-  MATH: '📐 Maths', PC: '⚗️ Physique-Chimie', SVT: '🧬 SVT',
-  FR: '📖 Français', HG: '🌍 Histoire-Géo', EN: '🇬🇧 Anglais',
-  PHILO: '🧠 Philo', ECO: '📊 Économie'
+  MATH: ' Maths', PC: ' Physique-Chimie', SVT: ' SVT',
+  FR: ' Français', HG: ' Histoire-Géo', EN: ' Anglais',
+  PHILO: ' Philo', ECO: ' Économie'
 }
 
 export default function BibliothequeClient({ userId, profile, livres }: Props) {
@@ -50,7 +50,7 @@ export default function BibliothequeClient({ userId, profile, livres }: Props) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Bibliothèque 📚</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Bibliothèque </h1>
         <p className="text-gray-500 mt-1">Œuvres au programme et ressources pédagogiques</p>
       </div>
 

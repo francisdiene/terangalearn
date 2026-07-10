@@ -34,9 +34,9 @@ interface Props {
 
 const MATIERES = ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO', 'ECO']
 const MATIERE_LABELS: Record<string, string> = {
-  MATH: '📐 Maths', PC: '⚗️ Physique-Chimie', SVT: '🧬 SVT',
-  FR: '📖 Français', HG: '🌍 Histoire-Géo', EN: '🇬🇧 Anglais',
-  PHILO: '🧠 Philo', ECO: '📊 Économie'
+  MATH: ' Maths', PC: ' Physique-Chimie', SVT: ' SVT',
+  FR: ' Français', HG: ' Histoire-Géo', EN: ' Anglais',
+  PHILO: ' Philo', ECO: ' Économie'
 }
 
 export default function CommunauteClient({ userId, profile, postsInitiaux, groupes }: Props) {
@@ -134,7 +134,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Communauté 👥</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Communauté </h1>
         <p className="text-gray-500 mt-1">Échange avec tes camarades et révise ensemble</p>
       </div>
 

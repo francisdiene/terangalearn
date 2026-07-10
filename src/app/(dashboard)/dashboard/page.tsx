@@ -47,7 +47,7 @@ export default async function DashboardPage() {
     {/* Salutation */}
     <div>
       <h1 className="text-xl md:text-2xl font-bold text-gray-900">
-        Bonjour, {prenom} 👋
+        Bonjour, {prenom} 
       </h1>
       <p className="text-gray-500 mt-0.5 text-sm">
         {streak > 0
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
 
     {/* CTA */}
     <div className="gradient-green rounded-2xl p-4 md:p-6 text-white">
-      <h3 className="font-bold text-base md:text-lg mb-1">Prêt à réviser ? 🚀</h3>
+      <h3 className="font-bold text-base md:text-lg mb-1">Prêt à réviser ? </h3>
       <p className="text-white/80 text-xs md:text-sm mb-3 md:mb-4">
         Ton coach IA est disponible maintenant.
       </p>

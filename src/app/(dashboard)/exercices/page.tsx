@@ -40,7 +40,7 @@ export default async function ExercicesPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Exercices 📝</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Exercices </h1>
         <p className="text-gray-500 mt-1">QCM interactifs et exercices PDF par chapitre</p>
       </div>
 

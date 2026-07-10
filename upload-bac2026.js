@@ -112,7 +112,7 @@ async function uploadDossier(dossierPath, type, annee) {
       if (dbError) {
         console.log(`❌ DB erreur: ${titre} — ${dbError.message}`)
       } else {
-        console.log(`✅ ${isCorrige ? '📝 Corrigé' : '📋 Sujet'}: ${titre}`)
+        console.log(`✅ ${isCorrige ? ' Corrigé' : ' Sujet'}: ${titre}`)
       }
 
     } catch (err) {

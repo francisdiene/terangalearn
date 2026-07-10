@@ -8,25 +8,25 @@ import { Target, BookOpen, Loader2, ArrowRight, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const OBJECTIFS = [
-  { id: 'reussir_examen', label: 'Réussir mon examen', emoji: '🎯', desc: 'BFEM ou BAC' },
-  { id: 'ameliorer_notes', label: 'Améliorer mes notes', emoji: '📈', desc: 'Progresser chaque jour' },
-  { id: 'combler_lacunes', label: 'Combler mes lacunes', emoji: '🧩', desc: 'Renforcer les bases' },
-  { id: 'orientation', label: "Préparer mon orientation", emoji: '🧭', desc: 'Choisir ma filière' },
+  { id: 'reussir_examen', label: 'Réussir mon examen', emoji: '', desc: 'BFEM ou BAC' },
+  { id: 'ameliorer_notes', label: 'Améliorer mes notes', emoji: '', desc: 'Progresser chaque jour' },
+  { id: 'combler_lacunes', label: 'Combler mes lacunes', emoji: '', desc: 'Renforcer les bases' },
+  { id: 'orientation', label: "Préparer mon orientation", emoji: '', desc: 'Choisir ma filière' },
 ]
 
 const MATIERES_3EME = [
-  { code: 'MATH', label: 'Mathématiques', emoji: '📐' },
-  { code: 'PC', label: 'Physique-Chimie', emoji: '⚗️' },
-  { code: 'SVT', label: 'SVT', emoji: '🧬' },
-  { code: 'FR', label: 'Français', emoji: '📖' },
-  { code: 'HG', label: 'Histoire-Géo', emoji: '🌍' },
-  { code: 'EN', label: 'Anglais', emoji: '🇬🇧' },
+  { code: 'MATH', label: 'Mathématiques', emoji: '' },
+  { code: 'PC', label: 'Physique-Chimie', emoji: '' },
+  { code: 'SVT', label: 'SVT', emoji: '' },
+  { code: 'FR', label: 'Français', emoji: '' },
+  { code: 'HG', label: 'Histoire-Géo', emoji: '' },
+  { code: 'EN', label: 'Anglais',  },
 ]
 
 const MATIERES_TERMINALE = [
   ...MATIERES_3EME,
-  { code: 'PHILO', label: 'Philosophie', emoji: '🧠' },
-  { code: 'ECO', label: 'Économie', emoji: '📊' },
+  { code: 'PHILO', label: 'Philosophie', emoji: '' },
+  { code: 'ECO', label: 'Économie', emoji: '' },
 ]
 
 export default function OnboardingPage() {
@@ -124,7 +124,7 @@ export default function OnboardingPage() {
                   <Target className="w-6 h-6 text-green" />
                 </div>
                 <h1 className="text-xl font-bold text-gray-900 mb-1">
-                  Quel est ton objectif ? 🎯
+                  Quel est ton objectif ? 
                 </h1>
                 <p className="text-gray-500 text-sm mb-6">
                   Ça nous aide à personnaliser ton expérience
@@ -168,7 +168,7 @@ export default function OnboardingPage() {
                   <BookOpen className="w-6 h-6 text-green" />
                 </div>
                 <h1 className="text-xl font-bold text-gray-900 mb-1">
-                  Quelles matières veux-tu réviser en priorité ? 📚
+                  Quelles matières veux-tu réviser en priorité ? 
                 </h1>
                 <p className="text-gray-500 text-sm mb-6">
                   Choisis-en une ou plusieurs (optionnel)
