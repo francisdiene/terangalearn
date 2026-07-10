@@ -3,6 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Clock, Zap, BookOpen } from 'lucide-react'
 import MarkCoursDone from '@/components/cours/MarkCoursDone'
+import GenerateExercise from '@/components/cours/GenerateExercise'
 
 function formatContenu(contenu: string) {
   const lignes = contenu.split('\n')
@@ -113,6 +114,13 @@ export default async function CoursDetailPage({
           <p className="text-sm text-gray-700 leading-relaxed">{cours.resume}</p>
         </div>
       )}
+
+      {/* Exercice généré par IA */}
+      <GenerateExercise
+     userId={user.id}
+     coursTitre={cours.titre}
+     coursContenu={cours.contenu}
+     />
 
       {/* Contenu structuré */}
       <div className="bg-white rounded-2xl p-6 card-shadow space-y-4">
