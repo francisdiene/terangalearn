@@ -53,7 +53,7 @@ export default async function MatiereCoursPage({
             className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
             style={{ backgroundColor: matiere.couleur + '20' }}
           >
-            {matiere.icone}
+           <span className="text-xs font-bold text-green">{matiere.code}</span>
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{matiere.nom}</h1>

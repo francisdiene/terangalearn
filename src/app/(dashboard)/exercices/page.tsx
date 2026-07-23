@@ -79,7 +79,7 @@ export default async function ExercicesPage() {
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                     style={{ backgroundColor: matiere.couleur + '20' }}
                   >
-                    {matiere.icone}
+                   <span className="text-xs font-bold text-green">{matiere.code}</span>
                   </div>
                   <div>
                     <h3 className="font-bold text-gray-900">{matiere.nom}</h3>

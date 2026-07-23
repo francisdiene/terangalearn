@@ -30,6 +30,11 @@ export default function LoginPage() {
     router.refresh()
   }
 
+  const fillDemo = () => {
+    setEmail('demo@terangalearn.sn')
+    setPassword('demo2025')
+  }
+
   const FormContent = (
     <>
       {error && (
@@ -81,6 +86,16 @@ export default function LoginPage() {
         </button>
       </form>
 
+      {/* Bouton démo */}
+      <button
+        type="button"
+        onClick={fillDemo}
+        className="w-full mt-3 py-3 bg-white/10 border border-white/20 md:bg-amber-50 md:border-amber-200 rounded-2xl text-white md:text-amber-700 text-sm font-medium hover:bg-white/20 md:hover:bg-amber-100 transition flex items-center justify-center gap-2"
+      >
+         Utiliser le compte démo
+      </button>
+
+      {/* Séparateur */}
       <div className="flex items-center gap-3 my-5">
         <div className="flex-1 h-px bg-white/20 md:bg-gray-200" />
         <span className="text-white/40 md:text-gray-400 text-xs">ou continuer avec</span>
@@ -117,7 +132,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen relative flex flex-col md:flex-row">
 
-      {/* ===== MOBILE : Background plein écran (inchangé) ===== */}
+      {/* ===== MOBILE ===== */}
       <div className="md:hidden fixed inset-0 z-0">
         <Image src="/bg-login.png" alt="Background" fill sizes="100vw" className="object-cover object-center" priority />
         <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/30 to-black/70" />
@@ -149,43 +164,39 @@ export default function LoginPage() {
 
       {/* ===== DESKTOP : Split screen ===== */}
       {/* Colonne gauche — fond vert uni */}
-      <div className="hidden md:flex md:w-1/2 relative items-center justify-center bg-green">
-
-        {/* Logo en haut à gauche */}
+      <div className="hidden md:flex md:w-1/2 min-h-screen relative items-center justify-center bg-green">
         <div className="absolute top-8 left-8 z-10 flex items-center gap-3">
-  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-    <Image src="/logo.png" alt="TerangaLearn" width={60} height={60} className="object-contain" />
-  </div>
-  <span className="text-white font-bold text-3xl">TerangaLearn</span>
-</div>
+          <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
+            <Image src="/logo.png" alt="TerangaLearn" width={60} height={60} className="object-contain" />
+          </div>
+          <span className="text-white font-bold text-3xl">TerangaLearn</span>
+        </div>
 
         <div className="relative z-10 flex flex-col items-center text-center px-10">
           <p className="text-white/80 text-base max-w-sm">Apprendre aujourd'hui, réussir demain.</p>
-
           <div className="space-y-3 w-full max-w-sm mt-10">
-  {[
-    { emoji: '🎓', text: 'Cours conformes au programme sénégalais', slug: 'cours' },
-    { emoji: '🤖', text: 'Coach IA personnalisé 24h/24', slug: 'coach-ia' },
-    { emoji: '🏆', text: 'Gamification et classements nationaux', slug: 'gamification' },
-    { emoji: '📊', text: 'Suivi de progression intelligent', slug: 'progression' },
-  ].map((item, i) => (
-    <Link
-      key={i}
-      href={`/decouvrir/${item.slug}`}
-      className="flex items-center gap-6 bg-white/10 rounded-xl p-6 backdrop-blur-sm hover:bg-white/20 transition cursor-pointer group"
-    >
-      <span className="text-2xl">{item.emoji}</span>
-      <span className="text-sm text-white/90 text-left flex-1">{item.text}</span>
-      <span className="text-white/40 group-hover:text-white/70 transition">→</span>
-    </Link>
-  ))}
-</div>
+            {[
+              { text: 'Cours conformes au programme sénégalais', slug: 'cours' },
+              { text: 'Coach IA personnalisé 24h/24', slug: 'coach-ia' },
+              { text: 'Gamification et classements nationaux', slug: 'gamification' },
+              { text: 'Suivi de progression intelligent', slug: 'progression' },
+            ].map((item, i) => (
+              <Link
+                key={i}
+                href={`/decouvrir/${item.slug}`}
+                className="flex items-center gap-4 bg-white/10 rounded-xl p-4 backdrop-blur-sm hover:bg-white/20 transition cursor-pointer group"
+              >
+                <span className="text-sm text-white/90 text-left flex-1">{item.text}</span>
+                <span className="text-white/40 group-hover:text-white/70 transition">→</span>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Colonne droite — image fille en fond + formulaire */}
-      <div className="hidden md:flex md:w-1/2 relative items-center justify-center p-10">
-       <Image src="/bg-login.png" alt="Background" fill sizes="50vw" className="object-cover" style={{ objectPosition: '90% 55%' }} priority />
+      {/* Colonne droite — image + formulaire */}
+      <div className="hidden md:flex md:w-1/2 min-h-screen relative items-center justify-center p-10">
+        <Image src="/bg-login.png" alt="Background" fill sizes="50vw" className="object-cover" priority />
         <div className="absolute inset-0 bg-white/15" />
 
         <div className="relative z-10 w-full max-w-sm">

@@ -119,7 +119,7 @@ export default async function DashboardPage() {
               className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center text-lg md:text-xl mb-2"
               style={{ backgroundColor: matiere.couleur + '20' }}
             >
-              {matiere.icone}
+             <span className="text-xs font-bold text-green">{matiere.code}</span>
             </div>
             <h3 className="font-semibold text-xs md:text-sm text-gray-900 leading-tight line-clamp-2">
               {matiere.nom}
