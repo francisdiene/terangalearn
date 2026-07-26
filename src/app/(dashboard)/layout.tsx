@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MobileNav from '@/components/dashboard/MobileNav'
 import PageTransition from '@/components/ui/PageTransition'
+import NuitRevision from '@/components/ui/NuitRevision'
 
 export default async function DashboardLayout({
   children,
@@ -31,6 +32,7 @@ export default async function DashboardLayout({
           </PageTransition>
         </main>
       </div>
+      <NuitRevision />
     </div>
   )
 }

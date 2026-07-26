@@ -262,3 +262,64 @@ html, body {
     padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
   }
 }
+
+/* ===== DARK MODE ===== */
+.dark {
+  --bg-primary: #0F1117;
+  --bg-card: #1A1D27;
+  --bg-sidebar: #141720;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --border: #2D3148;
+}
+
+.dark body {
+  background-color: #0F1117;
+  color: #F1F5F9;
+}
+
+.dark .bg-white {
+  background-color: #1A1D27 !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #141720 !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1E2235 !important;
+}
+
+.dark .text-gray-900 {
+  color: #F1F5F9 !important;
+}
+
+.dark .text-gray-700 {
+  color: #CBD5E1 !important;
+}
+
+.dark .text-gray-600 {
+  color: #94A3B8 !important;
+}
+
+.dark .text-gray-500 {
+  color: #64748B !important;
+}
+
+.dark .text-gray-400 {
+  color: #475569 !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200 {
+  border-color: #2D3148 !important;
+}
+
+.dark .card-shadow {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.4) !important;
+}
+
+.dark .glass {
+  background: rgba(26, 29, 39, 0.95) !important;
+  backdrop-filter: blur(12px);
+}
