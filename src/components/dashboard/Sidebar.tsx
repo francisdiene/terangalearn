@@ -9,7 +9,8 @@ import { Profile } from '@/types'
 import {
   LayoutDashboard, BookOpen, PenTool, Bot,
   Trophy, User, LogOut, Zap, Users, Calendar,
-  GraduationCap, FileText, Library
+  GraduationCap, FileText, Library,
+  Settings
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -25,6 +26,8 @@ const navItems = [
   { href: '/orientation', icon: GraduationCap, label: 'Analyse & Orientation' },
   { href: '/classement', icon: Trophy, label: 'Classement' },
   { href: '/profil', icon: User, label: 'Mon Profil' },
+  { href: '/examen', icon: GraduationCap, label: 'Examen simulé BAC' },
+  { href: '/parametres', icon: Settings, label: 'Paramètres' },
 ]
 
 export default function Sidebar({ profile }: { profile: Profile | null }) {

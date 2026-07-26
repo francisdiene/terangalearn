@@ -11,7 +11,8 @@ import { Profile } from '@/types'
 import {
   Menu, X, LayoutDashboard, BookOpen, PenTool,
   Bot, Users, GraduationCap, Trophy, User,
-  Calendar, FileText, Library, LogOut, Zap, Flame
+  Calendar, FileText, Library, LogOut, Zap, Flame,
+  Settings
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -27,6 +28,8 @@ const navItems = [
   { href: '/orientation', icon: GraduationCap, label: 'Analyse & Orientation' },
   { href: '/classement', icon: Trophy, label: 'Classement' },
   { href: '/profil', icon: User, label: 'Mon Profil' },
+  { href: '/examen', icon: GraduationCap, label: 'Examen simulé BAC' },
+  { href: '/parametres', icon: Settings, label: 'Paramètres' },
 ]
 
 export default function MobileNav({ profile }: { profile: Profile | null }) {
