@@ -7,11 +7,10 @@ import { Moon, Sun, Play, Pause, RotateCcw, Music, Volume2, VolumeX, X } from 'l
 import { cn } from '@/lib/utils'
 
 const SONS = [
-  { id: 'pluie', label: 'Pluie', url: 'https://assets.mixkit.co/sfx/preview/mixkit-light-rain-loop-2393.mp3' },
-  { id: 'foret', label: 'Forêt', url: 'https://assets.mixkit.co/sfx/preview/mixkit-forest-birds-ambience-1210.mp3' },
-  { id: 'cafe', label: 'Café', url: 'https://assets.mixkit.co/sfx/preview/mixkit-restaurant-crowd-talking-ambience-444.mp3' },
-  { id: 'ocean', label: 'Océan', url: 'https://assets.mixkit.co/sfx/preview/mixkit-ocean-waves-loop-1196.mp3' },
-]
+  { id: 'pluie', label: 'Pluie', url: '/sounds/pluie.mp3' },
+  { id: 'foret', label: 'Forêt', url: '/sounds/foret.mp3' },
+  { id: 'ocean', label: 'Océan', url: '/sounds/ocean.mp3' },
+] 
 
 const DUREES_POMODORO = [
   { label: '25 min', travail: 25, pause: 5 },
@@ -85,22 +84,35 @@ export default function NuitRevision() {
 
   // Audio
   useEffect(() => {
+  if (audioRef.current) {
+    audioRef.current.pause()
+    audioRef.current = null
+  }
+  if (sonActif) {
+    const son = SONS.find(s => s.id === sonActif)
+    if (son) {
+      const audio = new Audio()
+      audio.src = son.url
+      audio.loop = true
+      audio.volume = mute ? 0 : volume
+      audioRef.current = audio
+      
+      const jouer = () => {
+        audio.play().catch(err => {
+          console.error('Son bloqué:', err)
+          setSonActif(null)
+        })
+      }
+      jouer()
+    }
+  }
+  return () => {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current = null
     }
-    if (sonActif) {
-      const son = SONS.find(s => s.id === sonActif)
-      if (son) {
-        const audio = new Audio(son.url)
-        audio.loop = true
-        audio.volume = mute ? 0 : volume
-        audio.play().catch(() => {})
-        audioRef.current = audio
-      }
-    }
-    return () => { audioRef.current?.pause() }
-  }, [sonActif])
+  }
+}, [sonActif])
 
   useEffect(() => {
     if (audioRef.current) {
