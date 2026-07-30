@@ -74,8 +74,10 @@ export default function LoginPage() {
         </div>
 
         <div className="text-right">
-          <span className="text-white/60 md:text-gray-500 text-xs">Mot de passe oublié ?</span>
-        </div>
+  <Link href="/mot-de-passe-oublie" className="text-white/60 md:text-gray-500 text-xs hover:underline">
+    Mot de passe oublié ?
+  </Link>
+</div>
 
         <button
           type="submit"
