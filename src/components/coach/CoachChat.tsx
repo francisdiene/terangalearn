@@ -130,17 +130,31 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         body: JSON.stringify({ message: texte, contexte, userId })
       })
 
-      const data = await response.json()
+       const data = await response.json()
       const reponse = data.reponse ?? "Désolé, je n'ai pas pu répondre."
 
+      const msgId = crypto.randomUUID()
       const assistantMsg: Message = {
-        id: crypto.randomUUID(),
+        id: msgId,
         role: 'assistant',
-        contenu: reponse,
+        contenu: '',
         created_at: new Date().toISOString(),
       }
 
+      // Ajouter le message vide puis le remplir progressivement
       setMessages(m => [...m, assistantMsg])
+      setLoading(false)
+
+      // Effet streaming mot par mot
+      const mots = reponse.split(' ')
+      let texteActuel = ''
+      for (let i = 0; i < mots.length; i++) {
+        texteActuel += (i === 0 ? '' : ' ') + mots[i]
+        setMessages(m => m.map(msg =>
+          msg.id === msgId ? { ...msg, contenu: texteActuel } : msg
+        ))
+        await new Promise(resolve => setTimeout(resolve, 40))
+      }
 
       await supabase.from('messages_coach').insert({
         user_id: userId,
