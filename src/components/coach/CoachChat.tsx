@@ -49,7 +49,6 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  // Charger les messages d'une conversation
   const chargerConversation = async (convId: string) => {
     setConvActive(convId)
     setSidebarOpen(false)
@@ -61,7 +60,6 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
     setMessages(data ?? [])
   }
 
-  // Nouvelle conversation (vide, pas encore sauvegardée)
   const nouvelleConversation = () => {
     setConvActive(null)
     setMessages([])
@@ -69,7 +67,6 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
     setSidebarOpen(false)
   }
 
-  // Supprimer une conversation
   const supprimerConversation = async (convId: string, e: React.MouseEvent) => {
     e.stopPropagation()
     await supabase.from('coach_conversations').delete().eq('id', convId)
@@ -84,7 +81,6 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
 
     let currentConvId = convActive
 
-    // Créer une nouvelle conversation si aucune active
     if (!currentConvId) {
       const titre = texte.slice(0, 40) + (texte.length > 40 ? '...' : '')
       const { data: newConv } = await supabase
@@ -130,7 +126,7 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         body: JSON.stringify({ message: texte, contexte, userId })
       })
 
-       const data = await response.json()
+      const data = await response.json()
       const reponse = data.reponse ?? "Désolé, je n'ai pas pu répondre."
 
       const msgId = crypto.randomUUID()
@@ -141,11 +137,9 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         created_at: new Date().toISOString(),
       }
 
-      // Ajouter le message vide puis le remplir progressivement
       setMessages(m => [...m, assistantMsg])
       setLoading(false)
 
-      // Effet streaming mot par mot
       const mots = reponse.split(' ')
       let texteActuel = ''
       for (let i = 0; i < mots.length; i++) {
@@ -163,7 +157,6 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         contenu: reponse,
       })
 
-      // Mettre à jour updated_at de la conversation
       await supabase
         .from('coach_conversations')
         .update({ updated_at: new Date().toISOString() })
@@ -177,12 +170,10 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         contenu: "Désolé, une erreur s'est produite. Réessaie dans quelques secondes.",
         created_at: new Date().toISOString(),
       }])
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
-  // Rendu simple du markdown (gras uniquement)
   const renderContenu = (texte: string) => {
     const parts = texte.split(/(\*\*[^*]+\*\*)/g)
     return parts.map((part, i) => {
@@ -194,20 +185,24 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
   }
 
   return (
-    <div className="flex-1 flex bg-white rounded-2xl card-shadow overflow-hidden min-h-0 h-full">
+    <div className="relative flex-1 flex bg-white rounded-2xl card-shadow overflow-hidden min-h-0 h-full">
 
       {/* ===== SIDEBAR CONVERSATIONS ===== */}
       <div className={cn(
-  'absolute z-30 w-72 bg-gray-50 border-r border-gray-100 flex flex-col h-full transition-transform shadow-xl',
-  sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-)}>
-  {/* Bouton fermer */}
-  <button
-    onClick={() => setSidebarOpen(false)}
-    className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 z-10"
-  >
-    <X className="w-5 h-5" />
-  </button>
+        'absolute inset-y-0 left-0 z-30 w-72 bg-gray-50 border-r border-gray-100 flex flex-col transition-transform shadow-xl',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      )}>
+        {/* Header sidebar avec bouton fermer */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+          <span className="text-sm font-bold text-gray-700">Historique</span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
         <div className="p-3 flex-shrink-0">
           <button
             onClick={nouvelleConversation}
@@ -255,27 +250,27 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         </div>
       </div>
 
-      {/* Overlay mobile */}
+      {/* Overlay */}
       {sidebarOpen && (
-  <div
-    className="fixed inset-0 bg-black/30 z-20"
-    onClick={() => setSidebarOpen(false)}
-  />
-)}
+        <div
+          className="absolute inset-0 bg-black/30 z-20"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
       {/* ===== ZONE CHAT ===== */}
       <div className="flex-1 flex flex-col min-h-0">
 
-        {/* Header */}
+        {/* Header (fixe en haut) */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center gap-3">
             <button
-  onClick={() => setSidebarOpen(true)}
-  className="flex items-center gap-1.5 text-gray-500 hover:text-green transition text-sm font-medium"
->
-  <Menu className="w-5 h-5" />
-  <span className="hidden sm:inline">Historique</span>
-</button>
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center gap-1.5 text-gray-500 hover:text-green transition text-sm font-medium"
+            >
+              <Menu className="w-5 h-5" />
+              <span className="hidden sm:inline">Historique</span>
+            </button>
             <div className="w-10 h-10 bg-green rounded-xl flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
@@ -289,8 +284,8 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Messages (zone scrollable qui prend tout l'espace) */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
 
           {messages.length === 0 && (
             <div className="space-y-4">
@@ -366,8 +361,8 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <div className="p-4 border-t border-gray-100 flex-shrink-0">
+        {/* Input (fixe en bas) */}
+        <div className="p-4 border-t border-gray-100 flex-shrink-0 bg-white">
           <div className="flex gap-3">
             <input
               type="text"
