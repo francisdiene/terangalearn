@@ -13,28 +13,28 @@ export default async function CoachPage() {
     .eq('id', user.id)
     .single()
 
-  const { data: historique } = await supabase
-    .from('messages_coach')
+  // Charger la liste des conversations
+  const { data: conversations } = await supabase
+    .from('coach_conversations')
     .select('*')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: true })
-    .limit(50)
+    .order('updated_at', { ascending: false })
 
   return (
-  <div className="max-w-3xl mx-auto flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-80px)]">
-    <div className="mb-3 flex-shrink-0">
-      <h1 className="text-xl md:text-2xl font-bold text-gray-900">Coach IA 🤖</h1>
-      <p className="text-gray-500 text-sm mt-0.5">
-        Pose toutes tes questions sur le programme sénégalais
-      </p>
+    <div className="max-w-5xl mx-auto flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-80px)]">
+      <div className="mb-3 flex-shrink-0">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">Coach IA</h1>
+        <p className="text-gray-500 text-sm mt-0.5">
+          Pose toutes tes questions sur le programme sénégalais
+        </p>
+      </div>
+      <div className="flex-1 min-h-0">
+        <CoachChat
+          userId={user.id}
+          profile={profile}
+          conversationsInitiales={conversations ?? []}
+        />
+      </div>
     </div>
-    <div className="flex-1 min-h-0">
-      <CoachChat
-        userId={user.id}
-        profile={profile}
-        historique={historique ?? []}
-      />
-    </div>
-  </div>
-)
+  )
 }
