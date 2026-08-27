@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
@@ -25,24 +25,26 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // getSession() lit le cookie local — pas d appel réseau — donc jamais de timeout
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user ?? null
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
-                     request.nextUrl.pathname.startsWith('/register')
+  const pathname = request.nextUrl.pathname
 
-  const isDashboardPage = request.nextUrl.pathname.startsWith('/dashboard') ||
-                          request.nextUrl.pathname.startsWith('/cours') ||
-                          request.nextUrl.pathname.startsWith('/exercices') ||
-                          request.nextUrl.pathname.startsWith('/coach') ||
-                          request.nextUrl.pathname.startsWith('/classement') ||
-                          request.nextUrl.pathname.startsWith('/profil')
+  const isAuthPage = pathname.startsWith('/login') ||
+                     pathname.startsWith('/register')
 
-  // Pas connecté → redirige vers login
+  const isDashboardPage = pathname.startsWith('/dashboard') ||
+                          pathname.startsWith('/cours') ||
+                          pathname.startsWith('/exercices') ||
+                          pathname.startsWith('/coach') ||
+                          pathname.startsWith('/classement') ||
+                          pathname.startsWith('/profil')
+
   if (!user && isDashboardPage) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Déjà connecté → redirige vers dashboard
   if (user && isAuthPage) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
@@ -52,6 +54,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
