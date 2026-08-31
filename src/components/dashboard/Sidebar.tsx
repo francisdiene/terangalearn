@@ -22,7 +22,7 @@ const navItems = [
   { href: '/epreuves', icon: FileText, label: 'Épreuves & Annales' },
   { href: '/bibliotheque', icon: Library, label: 'Bibliothèque' },
   { href: '/coach', icon: Bot, label: 'Coach IA' },
-  { href: '/examen', icon: GraduationCap, label: 'Examen simulé BAC' },
+  { href: '/examen', icon: GraduationCap, label: 'Simulation d\'examen' },
   { href: '/duel', icon: Swords, label: 'Mode Duel' },
   { href: '/communaute', icon: Users, label: 'Communauté' },
   { href: '/planification', icon: Calendar, label: 'Planification' },
