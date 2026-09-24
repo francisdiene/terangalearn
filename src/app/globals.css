@@ -323,3 +323,137 @@ html, body {
   background: rgba(26, 29, 39, 0.95) !important;
   backdrop-filter: blur(12px);
 }
+
+/* =========================================================
+   TERANGALEARN - GLOBAL ANIMATIONS
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: rgba(22, 163, 74, 0.2);
+  color: #14532d;
+}
+
+/* Floating */
+
+@keyframes terangaFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.teranga-float {
+  animation: terangaFloat 5s ease-in-out infinite;
+}
+
+/* Floating slow */
+
+@keyframes terangaFloatSlow {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  50% {
+    transform: translateY(-12px) translateX(4px);
+  }
+}
+
+.teranga-float-slow {
+  animation: terangaFloatSlow 7s ease-in-out infinite;
+}
+
+/* Pulse */
+
+@keyframes terangaPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.03);
+    opacity: 0.92;
+  }
+}
+
+.teranga-pulse {
+  animation: terangaPulse 3s ease-in-out infinite;
+}
+
+/* Glow */
+
+@keyframes terangaGlow {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.45;
+    transform: scale(1.08);
+  }
+}
+
+.teranga-glow {
+  animation: terangaGlow 6s ease-in-out infinite;
+}
+
+/* Button */
+
+.teranga-button {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.teranga-button:hover {
+  transform: translateY(-2px);
+}
+
+/* Cards */
+
+.teranga-card {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.teranga-card:hover {
+  transform: translateY(-7px);
+}
+
+/* Images */
+
+.teranga-hero-image {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

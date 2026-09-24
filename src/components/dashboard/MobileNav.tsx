@@ -29,7 +29,7 @@ const navItems = [
   { href: '/orientation', icon: GraduationCap, label: 'Analyse & Orientation' },
   { href: '/classement', icon: Trophy, label: 'Classement' },
   { href: '/profil', icon: User, label: 'Mon Profil' },
-  { href: '/examen',  icon: GraduationCap, label: 'Examen simulé' },
+  { href: '/examen',  icon: GraduationCap, label: 'Simulation d\'examen' },
   { href: '/duel', icon: Swords, label: 'Mode Duel' },
   { href: '/parametres', icon: Settings, label: 'Paramètres' },
   
