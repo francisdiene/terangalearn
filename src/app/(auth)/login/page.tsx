@@ -1,5 +1,7 @@
 "use client"
 
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
@@ -23,13 +25,15 @@ import {
   Trophy,
   Users,
   Zap,
+  Moon,
+  Sun,
 } from "lucide-react"
 
 /* =========================================================
    ANIMATIONS
    ========================================================= */
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: {
     opacity: 0,
     y: 45,
@@ -44,7 +48,7 @@ const fadeUp = {
   },
 }
 
-const fadeLeft = {
+const fadeLeft: Variants = {
   hidden: {
     opacity: 0,
     x: -60,
@@ -74,7 +78,7 @@ const fadeRight: Variants = {
   },
 }
 
-const scaleIn = {
+const scaleIn: Variants = {
   hidden: {
     opacity: 0,
     scale: 0.88,
@@ -89,7 +93,7 @@ const scaleIn = {
   },
 }
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
@@ -98,7 +102,7 @@ const staggerContainer = {
   },
 }
 
-const cardAnimation = {
+const cardAnimation: Variants = {
   hidden: {
     opacity: 0,
     y: 35,
@@ -363,6 +367,29 @@ function SubjectCard({
    PAGE
    ========================================================= */
 
+/* =========================================================
+   THEME TOGGLE
+   ========================================================= */
+
+function ThemeToggleBtn() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  if (!mounted) return (
+    <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800" />
+  )
+  return (
+    <button
+      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      className="w-9 h-9 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition border border-slate-200 dark:border-slate-700"
+      title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+    >
+      {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+    </button>
+  )
+}
+
+
 export default function LoginPage() {
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-slate-900">
@@ -389,7 +416,7 @@ export default function LoginPage() {
           <nav className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-lg shadow-slate-900/5 backdrop-blur-xl sm:px-6">
             {/* Logo */}
 
-            <Link href="/login" className="group flex items-center gap-3">
+            <Link href="/" className="group flex items-center gap-3">
               <motion.div
                 whileHover={{
                   scale: 1.06,
@@ -452,23 +479,32 @@ export default function LoginPage() {
 
             {/* CTA */}
 
-            <motion.div
-              whileHover={{
-                scale: 1.04,
-              }}
-              whileTap={{
-                scale: 0.97,
-              }}
-            >
+            <div className="flex items-center gap-2">
+              {/* Toggle dark/light */}
+              <ThemeToggleBtn />
+
+              {/* Se connecter */}
               <Link
-                href="/register"
-                className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition-colors hover:bg-green-700 sm:px-5"
+                href="/connexion"
+                className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
-                <span className="hidden sm:inline">Commencer</span>
-                <span className="sm:hidden">Go</span>
-                <ArrowRight className="h-4 w-4" />
+                🔐 Se connecter
               </Link>
-            </motion.div>
+
+              {/* Commencer */}
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <Link
+                  href="/register"
+                  className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition-colors hover:bg-green-700 sm:px-5"
+                >
+                  🚀 <span className="hidden sm:inline">Commencer</span>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </motion.div>
+            </div>
           </nav>
         </div>
       </motion.header>
@@ -669,7 +705,7 @@ export default function LoginPage() {
                 className="relative z-10"
               >
                 <Image
-                  src="/bg-login.png"
+                  src="/logob.png"
                   alt="Étudiante TerangaLearn"
                   width={1536}
                   height={1024}
@@ -1288,28 +1324,28 @@ export default function LoginPage() {
 
               <div className="mt-5 space-y-3">
                 <a
-                  href="#"
+                  href="/register"
                   className="block text-sm text-green-100/60 transition-colors hover:text-white"
                 >
                   Cours
                 </a>
 
                 <a
-                  href="#"
+                  href="/register"
                   className="block text-sm text-green-100/60 transition-colors hover:text-white"
                 >
                   Exercices
                 </a>
 
                 <a
-                  href="#"
+                  href="/register"
                   className="block text-sm text-green-100/60 transition-colors hover:text-white"
                 >
                   Annales
                 </a>
 
                 <a
-                  href="#"
+                  href="/register"
                   className="block text-sm text-green-100/60 transition-colors hover:text-white"
                 >
                   Coach IA

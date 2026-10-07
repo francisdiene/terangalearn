@@ -41,19 +41,50 @@ export async function POST(req: NextRequest) {
         const reponseQO = reponsesMatiere['question_ouverte'] ?? ''
         const maxPts = data.question_ouverte.points ?? 8
 
-        const prompt = `Tu es un correcteur sénégalais expert.
-Question : "${data.question_ouverte.question}"
-Réponse modèle : "${data.question_ouverte.reponse_modele}"
-Réponse de l'élève : "${reponseQO}"
+        const prompt = `
+Tu es un correcteur pédagogique sénégalais expert.
 
-Évalue la réponse sur ${maxPts} points et réponds UNIQUEMENT en JSON :
+Question :
+"${data.question_ouverte.question}"
+
+Réponse modèle :
+"${data.question_ouverte.reponse_modele}"
+
+Réponse de l'élève :
+"${reponseQO}"
+
+Évalue la réponse de l'élève sur ${maxPts} points.
+
+Compare la réponse de l'élève avec les éléments attendus
+dans la réponse modèle.
+
+Ne sanctionne pas une formulation différente si l'idée est correcte.
+
+Évalue notamment :
+- la compréhension ;
+- les idées essentielles ;
+- la pertinence ;
+- l'exactitude ;
+- la qualité du raisonnement.
+
+Retourne UNIQUEMENT ce JSON valide :
+
 {
   "points_obtenus": X,
   "points_max": ${maxPts},
-  "appreciation": "Bien/Moyen/Insuffisant",
+  "appreciation": "Bien",
   "commentaire": "Commentaire constructif en 2 phrases"
-}`
+}
 
+RÈGLES :
+- points_obtenus doit être compris entre 0 et ${maxPts}.
+- Ne donne pas de note supérieure à ${maxPts}.
+- Le commentaire doit expliquer brièvement ce qui est réussi
+  et ce qui peut être amélioré.
+- N'invente pas d'éléments absents de la réponse de l'élève.
+- Aucun Markdown.
+- Aucun texte avant ou après le JSON.
+`;
         const response = await fetch(GROQ_API_URL, {
           method: 'POST',
           headers: {

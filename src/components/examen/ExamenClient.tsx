@@ -343,7 +343,7 @@ export default function ExamenClient({ userId, profile }: Props) {
       <div className="gradient-green rounded-2xl p-6 text-white text-center">
         <Trophy className="w-10 h-10 mx-auto mb-2 opacity-80" />
         <p className="text-white/70 text-sm mb-1">Note finale</p>
-        <p className="text-6xl font-bold">{noteFinale.toFixed(2)}</p>
+        
         <p className="text-white/70 text-sm mt-1">/ 20</p>
         <p className="mt-2 font-bold text-lg">{getNiveauNote(noteFinale).label}</p>
         <p className="text-white/60 text-xs mt-1">

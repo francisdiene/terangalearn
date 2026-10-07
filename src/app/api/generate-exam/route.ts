@@ -26,8 +26,12 @@ export async function POST(req: NextRequest) {
       const coeff = COEFFICIENTS[serie]?.[matiere] ?? 2
       const nbQCM = Math.max(2, coeff)
 
-      const prompt = `Tu es un professeur sénégalais expert en ${MATIERE_NOMS[matiere]} pour la classe de Terminale série ${serie}.
-Génère un mini-examen en JSON avec exactement cette structure :
+      const prompt = `
+Tu es un professeur sénégalais expert en ${MATIERE_NOMS[matiere]}
+pour la classe de Terminale série ${serie}.
+
+Génère un mini-examen en JSON STRICT avec exactement cette structure :
+
 {
   "matiere": "${matiere}",
   "nom": "${MATIERE_NOMS[matiere]}",
@@ -36,7 +40,12 @@ Génère un mini-examen en JSON avec exactement cette structure :
     {
       "id": 1,
       "question": "...",
-      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "options": [
+        "A. ...",
+        "B. ...",
+        "C. ...",
+        "D. ..."
+      ],
       "reponse_correcte": "A. ...",
       "explication": "..."
     }
@@ -44,13 +53,35 @@ Génère un mini-examen en JSON avec exactement cette structure :
   "question_ouverte": {
     "id": "qo",
     "question": "...",
-    "reponse_modele": "Réponse attendue en 3-5 phrases clés",
+    "reponse_modele": "...",
     "points": ${coeff * 4}
   }
 }
-Génère ${nbQCM} QCM sur des concepts clés du programme officiel sénégalais de ${MATIERE_NOMS[matiere]} Terminale ${serie}.
-La question ouverte doit être une question de réflexion ou d'analyse.
-RÉPONDS UNIQUEMENT EN JSON VALIDE, sans texte avant ou après.`
+
+CONSIGNES :
+
+- Génère exactement ${nbQCM} QCM.
+- Les questions doivent correspondre au niveau Terminale ${serie}.
+- Utilise uniquement des notions pertinentes du programme scolaire
+  sénégalais de ${MATIERE_NOMS[matiere]}.
+- Chaque QCM doit avoir exactement 4 propositions.
+- Une seule proposition doit être correcte.
+- Vérifie que la réponse correcte correspond réellement à
+  "reponse_correcte".
+- Vérifie chaque calcul avant de générer la question.
+- Les distracteurs doivent être plausibles mais clairement faux.
+- L'explication doit justifier la bonne réponse.
+- La question ouverte doit demander une réflexion ou une analyse.
+- La réponse modèle doit contenir les éléments essentiels attendus.
+- Ne crée aucune information scolaire fictive.
+- N'utilise pas de HTML ou de SVG.
+
+IMPORTANT :
+RÉPONDS UNIQUEMENT AVEC UN JSON VALIDE.
+Aucun texte avant ou après.
+Aucun bloc Markdown.
+Aucune balise.
+`;
 
       const response = await fetch(GROQ_API_URL, {
         method: 'POST',
