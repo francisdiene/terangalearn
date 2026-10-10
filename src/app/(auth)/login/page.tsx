@@ -392,7 +392,7 @@ function ThemeToggleBtn() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen overflow-x-hidden bg-white text-slate-900">
+    <main className="min-h-screen overflow-x-hidden bg-slate-50/50 text-slate-900">
       {/* =====================================================
           NAVBAR
       ===================================================== */}
@@ -486,9 +486,9 @@ export default function LoginPage() {
               {/* Se connecter */}
               <Link
                 href="/connexion"
-                className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                className="flex items-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm"
               >
-                🔐 Se connecter
+                🔐 <span className="hidden sm:inline">Se connecter</span><span className="sm:hidden">Connexion</span>
               </Link>
 
               {/* Commencer */}
@@ -498,10 +498,10 @@ export default function LoginPage() {
               >
                 <Link
                   href="/register"
-                  className="flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-green-600/20 transition-colors hover:bg-green-700 sm:px-5"
+                  className="flex items-center gap-1.5 rounded-xl bg-green-600 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-green-600/20 transition-colors hover:bg-green-700 sm:gap-2 sm:px-5 sm:py-2.5 sm:text-sm"
                 >
                   🚀 <span className="hidden sm:inline">Commencer</span>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </Link>
               </motion.div>
             </div>
@@ -515,38 +515,38 @@ export default function LoginPage() {
 
       <section
         id="accueil"
-        className="relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white pt-24 sm:pt-32 lg:pt-40"
+        className="relative overflow-hidden bg-gradient-to-b from-green-50/60 via-white to-green-50/20 pt-20 sm:pt-28 lg:pt-32"
       >
         {/* Décorations */}
 
         <motion.div
           animate={{
             scale: [1, 1.08, 1],
-            opacity: [0.2, 0.35, 0.2],
+            opacity: [0.12, 0.22, 0.12],
           }}
           transition={{
             duration: 7,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-green-200/40 blur-3xl"
+          className="pointer-events-none absolute -left-40 top-20 h-96 w-96 rounded-full bg-green-300/30 blur-3xl"
         />
 
         <motion.div
           animate={{
             scale: [1, 1.1, 1],
-            opacity: [0.15, 0.3, 0.15],
+            opacity: [0.08, 0.16, 0.08],
           }}
           transition={{
             duration: 8,
             repeat: Infinity,
             ease: "easeInOut",
           }}
-          className="pointer-events-none absolute -right-40 top-40 h-[500px] w-[500px] rounded-full bg-yellow-200/30 blur-3xl"
+          className="pointer-events-none absolute -right-40 top-40 h-[500px] w-[500px] rounded-full bg-yellow-200/20 blur-3xl"
         />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
-          <div className="grid items-center gap-8 pb-10 sm:pb-0 lg:min-h-[700px] lg:grid-cols-2 lg:gap-4">
+          <div className="grid items-center gap-8 pb-10 sm:pb-0 lg:min-h-[620px] lg:grid-cols-2 lg:gap-4">
             {/* LEFT */}
 
             <motion.div
@@ -889,7 +889,7 @@ export default function LoginPage() {
 
       <section
         id="matieres"
-        className="scroll-mt-24 bg-white py-14 sm:py-20 lg:py-28"
+        className="scroll-mt-24 bg-slate-50/60 py-14 sm:py-20 lg:py-28"
       >
         <motion.div
           className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8"
@@ -1117,7 +1117,7 @@ export default function LoginPage() {
           CTA
       ===================================================== */}
 
-      <section className="bg-white py-14 sm:py-20 lg:py-28">
+      <section className="bg-white/70 py-14 sm:py-20 lg:py-28">
         <motion.div
           className="mx-auto max-w-5xl px-4 sm:px-5"
           initial="hidden"
