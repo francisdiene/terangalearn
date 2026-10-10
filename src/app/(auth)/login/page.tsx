@@ -238,7 +238,7 @@ function FeatureCard({
         y: -8,
         scale: 1.02,
       }}
-      className="group rounded-3xl border border-slate-100 bg-white p-7 shadow-sm transition-shadow duration-300 hover:shadow-2xl"
+      className="group rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow duration-300 hover:shadow-2xl sm:rounded-3xl sm:p-7"
     >
       <motion.div
         whileHover={{
@@ -249,12 +249,12 @@ function FeatureCard({
           type: "spring",
           stiffness: 300,
         }}
-        className={`mb-6 flex h-14 w-14 items-center justify-center rounded-2xl ${colors[color]}`}
+        className={`mb-4 flex h-12 w-12 items-center justify-center rounded-xl sm:mb-6 sm:h-14 sm:w-14 sm:rounded-2xl ${colors[color]}`}
       >
         <Icon className="h-7 w-7" />
       </motion.div>
 
-      <h3 className="text-xl font-black text-slate-900">{title}</h3>
+      <h3 className="text-base font-black text-slate-900 sm:text-xl">{title}</h3>
 
       <p className="mt-3 text-sm leading-6 text-slate-500">
         {description}
@@ -328,7 +328,7 @@ function SubjectCard({
         y: -7,
         scale: 1.025,
       }}
-      className="group rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-shadow duration-300 hover:shadow-xl"
+      className="group rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-xl sm:rounded-3xl sm:p-6"
     >
       <motion.div
         whileHover={{
@@ -339,16 +339,16 @@ function SubjectCard({
           type: "spring",
           stiffness: 300,
         }}
-        className={`mb-5 flex h-14 w-14 items-center justify-center rounded-2xl ${style.bg}`}
+        className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl sm:mb-5 sm:h-14 sm:w-14 sm:rounded-2xl ${style.bg}`}
       >
         <span className={`text-sm font-black ${style.text}`}>
           {short}
         </span>
       </motion.div>
 
-      <h3 className="text-lg font-black text-slate-900">{name}</h3>
+      <h3 className="text-sm font-black text-slate-900 sm:text-lg">{name}</h3>
 
-      <p className="mt-2 text-sm leading-6 text-slate-500">
+      <p className="mt-1.5 hidden text-xs leading-5 text-slate-500 sm:mt-2 sm:block sm:text-sm sm:leading-6">
         {description}
       </p>
 
@@ -412,8 +412,8 @@ export default function LoginPage() {
         }}
         className="fixed left-0 right-0 top-0 z-50"
       >
-        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/85 px-4 py-3 shadow-lg shadow-slate-900/5 backdrop-blur-xl sm:px-6">
+        <div className="mx-auto max-w-7xl px-3 pt-3 sm:px-6 lg:px-8">
+          <nav className="flex items-center justify-between rounded-2xl border border-white/70 bg-white/85 px-3 py-2.5 shadow-lg shadow-slate-900/5 backdrop-blur-xl sm:px-6 sm:py-3">
             {/* Logo */}
 
             <Link href="/" className="group flex items-center gap-3">
@@ -433,8 +433,8 @@ export default function LoginPage() {
                 />
               </motion.div>
 
-              <div className="hidden sm:block">
-                <div className="text-lg font-black tracking-tight">
+              <div className="hidden xs:block sm:block">
+                <div className="text-base sm:text-lg font-black tracking-tight">
                   <span className="text-green-700">Teranga</span>
                   <span className="text-yellow-500">Learn</span>
                 </div>
@@ -515,7 +515,7 @@ export default function LoginPage() {
 
       <section
         id="accueil"
-        className="relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white pt-32 lg:pt-40"
+        className="relative overflow-hidden bg-gradient-to-b from-white via-green-50/30 to-white pt-24 sm:pt-32 lg:pt-40"
       >
         {/* Décorations */}
 
@@ -545,8 +545,8 @@ export default function LoginPage() {
           className="pointer-events-none absolute -right-40 top-40 h-[500px] w-[500px] rounded-full bg-yellow-200/30 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="grid min-h-[700px] items-center gap-12 lg:grid-cols-2 lg:gap-4">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
+          <div className="grid items-center gap-8 pb-10 sm:pb-0 lg:min-h-[700px] lg:grid-cols-2 lg:gap-4">
             {/* LEFT */}
 
             <motion.div
@@ -559,7 +559,7 @@ export default function LoginPage() {
 
               <motion.div
                 variants={fadeUp}
-                className="mb-7 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-4 py-2 text-sm font-bold text-green-700"
+                className="mb-5 inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs sm:text-sm font-bold text-green-700"
               >
                 <Sparkles className="h-4 w-4" />
                 Ta réussite, notre mission
@@ -569,7 +569,7 @@ export default function LoginPage() {
 
               <motion.h1
                 variants={fadeUp}
-                className="text-5xl font-black leading-[1.02] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl"
+                className="text-[2.35rem] font-black leading-[1.05] tracking-tight text-slate-950 sm:text-5xl lg:text-7xl"
               >
                 Révise
                 <span className="text-green-600"> intelligemment,</span>
@@ -582,7 +582,7 @@ export default function LoginPage() {
 
               <motion.p
                 variants={fadeUp}
-                className="mt-7 max-w-xl text-lg leading-8 text-slate-600"
+                className="mt-4 max-w-xl text-base leading-7 text-slate-600 sm:mt-6 sm:text-lg sm:leading-8"
               >
                 TerangaLearn accompagne les élèves du Sénégal dans leur
                 préparation aux examens avec des cours, des exercices, des
@@ -593,7 +593,7 @@ export default function LoginPage() {
 
               <motion.div
                 variants={fadeUp}
-                className="mt-9 flex flex-col gap-4 sm:flex-row"
+                className="mt-6 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:gap-4"
               >
                 <motion.div
                   whileHover={{
@@ -606,10 +606,10 @@ export default function LoginPage() {
                 >
                   <Link
                     href="/register"
-                    className="inline-flex w-full items-center justify-center gap-3 rounded-2xl bg-green-600 px-7 py-4 font-bold text-white shadow-xl shadow-green-600/25 transition-colors hover:bg-green-700 sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3.5 text-sm font-bold text-white shadow-xl shadow-green-600/25 transition-colors hover:bg-green-700 sm:w-auto sm:px-7 sm:py-4 sm:text-base"
                   >
                     Commencer maintenant
-                    <ArrowRight className="h-5 w-5" />
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Link>
                 </motion.div>
 
@@ -621,9 +621,9 @@ export default function LoginPage() {
                   whileTap={{
                     scale: 0.97,
                   }}
-                  className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-green-200 bg-white px-7 py-4 font-bold text-green-700 shadow-sm sm:w-auto"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-green-200 bg-white px-5 py-3.5 text-sm font-bold text-green-700 shadow-sm sm:w-auto sm:px-7 sm:py-4 sm:text-base"
                 >
-                  <Play className="h-5 w-5 fill-current" />
+                  <Play className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
                   Découvrir
                 </motion.a>
               </motion.div>
@@ -632,35 +632,35 @@ export default function LoginPage() {
 
               <motion.div
                 variants={fadeUp}
-                className="mt-10 flex flex-wrap items-center gap-6"
+                className="mt-6 flex items-center gap-4 sm:mt-10 sm:gap-6"
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-100 text-green-600">
-                    <Users className="h-5 w-5" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-green-100 text-green-600 sm:h-9 sm:w-9">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
 
                   <div>
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="text-xs font-black text-slate-900 sm:text-sm">
                       Élèves
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[10px] text-slate-500 sm:text-xs">
                       motivés chaque jour
                     </p>
                   </div>
                 </div>
 
-                <div className="hidden h-10 w-px bg-slate-200 sm:block" />
+                <div className="h-8 w-px bg-slate-200" />
 
                 <div className="flex items-center gap-2">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-yellow-600">
-                    <Star className="h-5 w-5 fill-current" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-yellow-100 text-yellow-600 sm:h-9 sm:w-9">
+                    <Star className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
                   </div>
 
                   <div>
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="text-xs font-black text-slate-900 sm:text-sm">
                       Révision
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-[10px] text-slate-500 sm:text-xs">
                       simple et intelligente
                     </p>
                   </div>
@@ -742,18 +742,18 @@ export default function LoginPage() {
                     ease: "easeInOut",
                   },
                 }}
-                className="absolute left-0 top-20 z-20 rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl shadow-slate-900/10"
+                className="absolute left-0 top-16 z-20 rounded-xl border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:top-20 sm:rounded-2xl sm:p-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-yellow-100 text-yellow-600">
-                    <Zap className="h-5 w-5 fill-current" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-100 text-yellow-600 sm:h-11 sm:w-11">
+                    <Zap className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-slate-500">
+                    <p className="text-[10px] font-semibold text-slate-500 sm:text-xs">
                       Aujourd'hui
                     </p>
-                    <p className="text-lg font-black text-slate-900">
+                    <p className="text-base font-black text-slate-900 sm:text-lg">
                       +50 XP
                     </p>
                   </div>
@@ -788,16 +788,16 @@ export default function LoginPage() {
                     ease: "easeInOut",
                   },
                 }}
-                className="absolute right-0 top-36 z-20 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-2xl shadow-slate-900/10"
+                className="absolute right-0 top-28 z-20 rounded-xl border border-slate-100 bg-white px-3 py-2.5 shadow-2xl shadow-slate-900/10 sm:top-36 sm:rounded-2xl sm:px-4 sm:py-3"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-500">
-                    <Flame className="h-5 w-5 fill-current" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-100 text-orange-500 sm:h-10 sm:w-10">
+                    <Flame className="h-4 w-4 fill-current sm:h-5 sm:w-5" />
                   </div>
 
                   <div>
-                    <p className="text-xs text-slate-500">Streak</p>
-                    <p className="font-black text-slate-900">7 jours</p>
+                    <p className="text-[10px] text-slate-500 sm:text-xs">Streak</p>
+                    <p className="text-sm font-black text-slate-900 sm:text-base">7 jours</p>
                   </div>
                 </div>
               </motion.div>
@@ -817,7 +817,7 @@ export default function LoginPage() {
                   delay: 1.2,
                   duration: 0.8,
                 }}
-                className="absolute bottom-12 right-5 z-20 rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl shadow-slate-900/10"
+                className="absolute bottom-8 right-3 z-20 rounded-xl border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10 sm:bottom-12 sm:right-5 sm:rounded-2xl sm:p-4"
               >
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green-100 text-green-600">
@@ -843,10 +843,10 @@ export default function LoginPage() {
 
       <section
         id="fonctionnalites"
-        className="scroll-mt-24 bg-slate-50 py-24 lg:py-32"
+        className="scroll-mt-24 bg-slate-50 py-14 sm:py-20 lg:py-28"
       >
         <motion.div
-          className="mx-auto max-w-7xl px-5 lg:px-8"
+          className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8"
           initial="hidden"
           whileInView="visible"
           viewport={{
@@ -857,7 +857,7 @@ export default function LoginPage() {
         >
           <motion.div
             variants={fadeUp}
-            className="mx-auto mb-14 max-w-2xl text-center"
+            className="mx-auto mb-10 max-w-2xl text-center sm:mb-14"
           >
             <div className="mb-3 inline-flex items-center gap-2 text-sm font-bold text-green-600">
               <span className="h-0.5 w-8 bg-green-600" />
@@ -865,7 +865,7 @@ export default function LoginPage() {
               <span className="h-0.5 w-8 bg-green-600" />
             </div>
 
-            <h2 className="text-4xl font-black tracking-tight text-slate-950 lg:text-5xl">
+            <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
               Une plateforme complète pour ta réussite
             </h2>
 
@@ -875,7 +875,7 @@ export default function LoginPage() {
             </p>
           </motion.div>
 
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
               <FeatureCard key={feature.title} {...feature} />
             ))}
@@ -889,10 +889,10 @@ export default function LoginPage() {
 
       <section
         id="matieres"
-        className="scroll-mt-24 bg-white py-24 lg:py-32"
+        className="scroll-mt-24 bg-white py-14 sm:py-20 lg:py-28"
       >
         <motion.div
-          className="mx-auto max-w-7xl px-5 lg:px-8"
+          className="mx-auto max-w-7xl px-4 sm:px-5 lg:px-8"
           initial="hidden"
           whileInView="visible"
           viewport={{
@@ -903,14 +903,14 @@ export default function LoginPage() {
         >
           <motion.div
             variants={fadeUp}
-            className="mb-14 flex flex-col justify-between gap-6 md:flex-row md:items-end"
+            className="mb-10 flex flex-col justify-between gap-4 sm:mb-14 md:flex-row md:items-end"
           >
             <div className="max-w-2xl">
-              <div className="mb-3 text-sm font-bold uppercase tracking-wider text-green-600">
+              <div className="mb-3 text-xs font-bold uppercase tracking-wider text-green-600 sm:text-sm">
                 Tes matières
               </div>
 
-              <h2 className="text-4xl font-black tracking-tight text-slate-950 lg:text-5xl">
+              <h2 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
                 Révise toutes tes matières
               </h2>
 
@@ -931,7 +931,7 @@ export default function LoginPage() {
             </motion.div>
           </motion.div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
             {subjects.map((subject) => (
               <SubjectCard key={subject.name} {...subject} />
             ))}
@@ -945,7 +945,7 @@ export default function LoginPage() {
 
       <section
         id="temoignage"
-        className="scroll-mt-24 relative overflow-hidden bg-green-950 py-24 text-white lg:py-32"
+        className="scroll-mt-24 relative overflow-hidden bg-green-950 py-14 text-white sm:py-20 lg:py-28"
       >
         {/* Décoration */}
 
@@ -975,8 +975,8 @@ export default function LoginPage() {
           className="pointer-events-none absolute -bottom-40 -left-40 h-[400px] w-[400px] rounded-full bg-yellow-400 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-7xl px-5 lg:px-8">
-          <div className="grid items-center gap-14 lg:grid-cols-2">
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-5 lg:px-8">
+          <div className="grid items-center gap-10 sm:gap-14 lg:grid-cols-2">
             {/* LEFT */}
 
             <motion.div
@@ -992,13 +992,13 @@ export default function LoginPage() {
                 Pourquoi TerangaLearn ?
               </span>
 
-              <h2 className="mt-5 text-4xl font-black leading-tight lg:text-5xl">
+              <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-5 sm:text-4xl lg:text-5xl">
                 Plus qu'une plateforme,
                 <br />
                 ton compagnon de réussite.
               </h2>
 
-              <p className="mt-6 max-w-xl text-lg leading-8 text-green-100/75">
+              <p className="mt-4 max-w-xl text-base leading-7 text-green-100/75 sm:mt-6 sm:text-lg sm:leading-8">
                 Tout est pensé pour t'aider à apprendre à ton rythme,
                 suivre tes performances et garder la motivation jusqu'au
                 jour de l'examen.
@@ -1057,11 +1057,11 @@ export default function LoginPage() {
                 transition={{
                   duration: 0.3,
                 }}
-                className="rounded-[2rem] border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-md lg:p-10"
+                className="rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur-md sm:p-8 lg:p-10"
               >
                 {/* Stars */}
 
-                <div className="mb-6 flex gap-1">
+                <div className="mb-5 flex gap-1 sm:mb-6">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <motion.div
                       key={i}
@@ -1087,7 +1087,7 @@ export default function LoginPage() {
                   ))}
                 </div>
 
-                <blockquote className="text-2xl font-bold leading-relaxed text-white">
+                <blockquote className="text-xl font-bold leading-relaxed text-white sm:text-2xl">
                   "Avec TerangaLearn, je peux réviser quand je veux,
                   comprendre mes erreurs et suivre mes progrès."
                 </blockquote>
@@ -1117,9 +1117,9 @@ export default function LoginPage() {
           CTA
       ===================================================== */}
 
-      <section className="bg-white py-24 lg:py-32">
+      <section className="bg-white py-14 sm:py-20 lg:py-28">
         <motion.div
-          className="mx-auto max-w-5xl px-5"
+          className="mx-auto max-w-5xl px-4 sm:px-5"
           initial="hidden"
           whileInView="visible"
           viewport={{
@@ -1129,7 +1129,7 @@ export default function LoginPage() {
         >
           <motion.div
             variants={scaleIn}
-            className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-green-600 via-emerald-700 to-green-950 px-8 py-16 text-center text-white shadow-2xl shadow-green-900/20 lg:px-16"
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-green-600 via-emerald-700 to-green-950 px-5 py-12 text-center text-white shadow-2xl shadow-green-900/20 sm:rounded-[2.5rem] sm:px-8 sm:py-16 lg:px-16"
           >
             {/* Decorative circles */}
 
@@ -1175,11 +1175,11 @@ export default function LoginPage() {
                 <Rocket className="h-8 w-8" />
               </motion.div>
 
-              <h2 className="text-4xl font-black lg:text-5xl">
+              <h2 className="text-3xl font-black sm:text-4xl lg:text-5xl">
                 Prêt à réussir ton examen ?
               </h2>
 
-              <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-green-50/80">
+              <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-green-50/80 sm:mt-5 sm:text-lg sm:leading-8">
                 Commence dès maintenant à apprendre, pratiquer et progresser
                 avec TerangaLearn.
               </p>
@@ -1226,8 +1226,8 @@ export default function LoginPage() {
         }}
         className="bg-green-950 text-white"
       >
-        <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-5 sm:py-14 lg:px-8">
+          <div className="grid gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-4">
             {/* Brand */}
 
             <motion.div
