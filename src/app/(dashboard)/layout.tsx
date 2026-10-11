@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
 import MobileNav from '@/components/dashboard/MobileNav'
+import BottomNav from '@/components/dashboard/BottomNav'
 import PageTransition from '@/components/ui/PageTransition'
 import NuitRevision from '@/components/ui/NuitRevision'
 
@@ -26,12 +27,13 @@ export default async function DashboardLayout({
       <Sidebar profile={profile} />
       <div className="flex-1 flex flex-col min-h-screen md:ml-64">
         <MobileNav profile={profile} />
-        <main className="flex-1 p-3 md:p-8 pb-24 md:pb-8 max-w-full overflow-x-hidden">
+        <main className="flex-1 pb-24 md:pb-8 max-w-full overflow-x-hidden">
           <PageTransition>
             {children}
           </PageTransition>
         </main>
       </div>
+      <BottomNav />
       <NuitRevision />
     </div>
   )
