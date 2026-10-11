@@ -1398,17 +1398,24 @@ export default function LoginPage() {
 
               <div className="flex gap-5">
                 <a
-                  href="#"
+                  href="/politique-confidentialite"
                   className="transition-colors hover:text-white"
                 >
                   Confidentialité
                 </a>
 
                 <a
-                  href="#"
+                  href="/cgu"
                   className="transition-colors hover:text-white"
                 >
-                  Conditions
+                  CGU
+                </a>
+
+                <a
+                  href="/mentions-legales"
+                  className="transition-colors hover:text-white"
+                >
+                  Mentions légales
                 </a>
               </div>
             </div>
