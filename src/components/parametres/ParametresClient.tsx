@@ -7,9 +7,11 @@ import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   User, Lock, Bell, ChevronRight,
-  Loader2, CheckCircle2, Eye, EyeOff, LogOut
+  Loader2, CheckCircle2, Eye, EyeOff, LogOut,
+  BellRing, BellOff, Smartphone
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
 
 interface Props {
   userId: string
@@ -68,6 +70,9 @@ export default function ParametresClient({ userId, email, profile }: Props) {
   const [notifEmail, setNotifEmail] = useState(true)
   const [notifStreak, setNotifStreak] = useState(true)
   const [langue, setLangue] = useState('fr')
+
+  // Push notifications
+  const { state: pushState, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications()
 
   const showSuccess = (msg: string) => {
     setSuccess(msg)
@@ -358,10 +363,65 @@ export default function ParametresClient({ userId, email, profile }: Props) {
         <div className="bg-white rounded-2xl p-6 card-shadow space-y-5">
           <h2 className="font-bold text-gray-900">Préférences</h2>
 
-          {/* Notifications */}
+          {/* Notifications Push */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Notifications</h3>
             <div className="space-y-3">
+
+              {/* Push PWA */}
+              {pushState === 'unsupported' ? (
+                <div className="flex items-center gap-3 py-3 px-4 bg-gray-50 rounded-xl text-sm text-gray-400">
+                  <BellOff className="w-5 h-5 flex-shrink-0" />
+                  <span>Notifications non supportées sur ce navigateur</span>
+                </div>
+              ) : pushState === 'denied' ? (
+                <div className="flex items-start gap-3 py-3 px-4 bg-orange-50 rounded-xl">
+                  <BellOff className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-orange-700">Notifications bloquées</p>
+                    <p className="text-xs text-orange-500 mt-0.5">Autorise-les dans les paramètres de ton navigateur puis recharge la page.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      'w-9 h-9 rounded-xl flex items-center justify-center',
+                      pushState === 'granted' ? 'bg-green-50' : 'bg-gray-100'
+                    )}>
+                      {pushState === 'loading' ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                      ) : pushState === 'granted' ? (
+                        <BellRing className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Smartphone className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">Notifications sur cet appareil</p>
+                      <p className="text-xs text-gray-400">
+                        {pushState === 'granted' ? 'Activées — streak, rappels, badges' : 'Reçois les rappels et alertes de streak'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={pushState === 'granted' ? pushUnsubscribe : pushSubscribe}
+                    disabled={pushState === 'loading'}
+                    className={cn(
+                      'relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0',
+                      pushState === 'granted' ? 'bg-green' : 'bg-gray-200',
+                      pushState === 'loading' && 'opacity-50 cursor-not-allowed'
+                    )}
+                  >
+                    <span className={cn(
+                      'absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200',
+                      pushState === 'granted' ? 'translate-x-5' : 'translate-x-0'
+                    )} />
+                  </button>
+                </div>
+              )}
+
+              {/* Email + Streak */}
               {[
                 { label: 'Rappels de révision par email', value: notifEmail, set: setNotifEmail },
                 { label: 'Alertes de streak (série de jours)', value: notifStreak, set: setNotifStreak },
