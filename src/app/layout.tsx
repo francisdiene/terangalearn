@@ -8,8 +8,34 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'TerangaLearn — Réussis ton BFEM et ton BAC',
-  description: 'La plateforme éducative de référence pour les élèves sénégalais',
+  description: 'La plateforme éducative de référence pour les élèves sénégalais. Cours, exercices, coach IA et classement pour préparer le BFEM et le BAC.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
+  openGraph: {
+    title: 'TerangaLearn — Réussis ton BFEM et ton BAC',
+    description: 'La plateforme éducative de référence pour les élèves sénégalais. Cours, exercices, coach IA et classement.',
+    url: 'https://terangalearn.vercel.app',
+    siteName: 'TerangaLearn',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1254,
+        height: 1254,
+        alt: 'TerangaLearn',
+      },
+    ],
+    locale: 'fr_SN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'TerangaLearn — Réussis ton BFEM et ton BAC',
+    description: 'Cours, exercices, coach IA et classement pour préparer le BFEM et le BAC.',
+    images: ['/og-image.png'],
+  },
 }
 
 export const viewport = {
