@@ -358,9 +358,7 @@ export default function DuelClient({ userId, profile }: Props) {
                     </div>
                   </div>
                   <button
-                    onClick={() => {
-                      setPhase('creation')
-                    }}
+                    onClick={() => creerDuel(eleve.user_id)}
                     className="flex items-center gap-1 bg-green/10 text-green px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-green hover:text-white transition"
                   >
                     <Swords className="w-3.5 h-3.5" />
