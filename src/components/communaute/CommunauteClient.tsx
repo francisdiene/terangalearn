@@ -84,15 +84,13 @@ function avatarColor(name: string = ''): string {
 
 // ─── Composant PostCard ───────────────────────────────────────────────────────
 
-function PostCard({ post, onLike }: { post: Post; onLike: (id: string) => void }) {
-  const [liked, setLiked] = useState(false)
+function PostCard({ post, onLike, alreadyLiked }: { post: Post; onLike: (id: string) => void; alreadyLiked: boolean }) {
+  const [liked, setLiked] = useState(alreadyLiked)
   const mi = matInfo(post.matiere)
 
   const handleLike = () => {
-    if (!liked) {
-      setLiked(true)
-      onLike(post.id)
-    }
+    setLiked(l => !l)
+    onLike(post.id)
   }
 
   return (
@@ -247,9 +245,17 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
   const [newPost, setNewPost] = useState({ titre: '', contenu: '', matiere: '' })
   const [newGroupe, setNewGroupe] = useState({ nom: '', description: '', matiere: '' })
   const [loading, setLoading] = useState(false)
+  const [mesLikes, setMesLikes] = useState<Set<string>>(new Set())
 
   const supabase = createClient()
   const prenom = profile?.full_name?.split(' ')[0] ?? 'Toi'
+
+  // Charger les likes de l'utilisateur
+  useEffect(() => {
+    supabase.from('post_likes').select('post_id').eq('user_id', userId).then(({ data }) => {
+      if (data) setMesLikes(new Set(data.map(l => l.post_id)))
+    })
+  }, [userId])
 
   // Actions
   const handleCreatePost = async () => {
@@ -265,7 +271,15 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
   }
 
   const handleLike = async (postId: string) => {
-    await supabase.from('posts').update({ likes: posts.find(p => p.id === postId)!.likes + 1 }).eq('id', postId)
+    const { error } = await supabase.from('post_likes').insert({ post_id: postId, user_id: userId })
+    if (!error) {
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p))
+    }
+    // Si error = doublon (déjà liké), on unlike
+    if (error?.code === '23505') {
+      await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', userId)
+      setPosts(prev => prev.map(p => p.id === postId ? { ...p, likes: Math.max(p.likes - 1, 0) } : p))
+    }
   }
 
   const handleJoin = async (id: string) => {
@@ -425,7 +439,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
             ) : (
               <div className="space-y-3">
                 {postsFiltres.map(post => (
-                  <PostCard key={post.id} post={post} onLike={handleLike} />
+                  <PostCard key={post.id} post={post} onLike={handleLike} alreadyLiked={mesLikes.has(post.id)} />
                 ))}
               </div>
             )}
