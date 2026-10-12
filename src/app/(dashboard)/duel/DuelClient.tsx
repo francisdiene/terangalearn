@@ -140,19 +140,26 @@ export default function DuelClient({ userId, profile }: Props) {
   // Rejoindre un duel
   const rejoindreDuel = async () => {
     setLoading(true)
-    const { data: duelData } = await supabase
+    const { data: duelData, error } = await supabase
       .from('duels')
       .select('*')
       .eq('code', codeInput.toUpperCase())
+      .in('statut', ['attente', 'invite'])
       .single()
 
-    if (!duelData) {
-      alert('Code invalide')
+    if (error || !duelData) {
+      alert('Code invalide ou duel déjà commencé')
       setLoading(false)
       return
     }
 
-    await supabase
+    if (duelData.createur_id === userId) {
+      alert('Tu ne peux pas rejoindre ton propre duel')
+      setLoading(false)
+      return
+    }
+
+    const { error: updateError } = await supabase
       .from('duels')
       .update({
         adversaire_id: userId,
@@ -161,7 +168,13 @@ export default function DuelClient({ userId, profile }: Props) {
       })
       .eq('id', duelData.id)
 
-    setDuel(duelData)
+    if (updateError) {
+      alert('Erreur lors du rejoindre')
+      setLoading(false)
+      return
+    }
+
+    setDuel({ ...duelData, statut: 'en_cours' })
     setQuestions(duelData.questions ?? [])
     ecouterDuel(duelData.id)
     setPhase('duel')
@@ -182,9 +195,14 @@ export default function DuelClient({ userId, profile }: Props) {
         const updated = payload.new
         setDuel(updated)
 
-        if (updated.statut === 'en_cours' && phase === 'attente') {
-          setPhase('duel')
-          demarrerTimer()
+        if (updated.statut === 'en_cours') {
+          setPhase(prev => {
+            if (prev === 'attente') {
+              demarrerTimer()
+              return 'duel'
+            }
+            return prev
+          })
         }
 
         if (updated.statut === 'termine') {
