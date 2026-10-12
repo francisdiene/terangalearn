@@ -138,7 +138,7 @@ serve(async (req) => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: 'TerangaLearn <rappels@terangalearn.sn>',
+              from: 'TerangaLearn <onboarding@resend.dev>',
               to: [user.email],
               subject: `${prenom}, tu n'as pas encore révisé aujourd'hui 📚`,
               html: emailHtml,
