@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   MessageSquare, Users, Plus, Send, X, BookOpen,
-  Heart, ChevronRight, Search, Flame, Hash
+  Heart, ChevronRight, Search, Flame, Hash, Flag, AlertTriangle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
@@ -84,9 +84,37 @@ function avatarColor(name: string = ''): string {
 
 // ─── Composant PostCard ───────────────────────────────────────────────────────
 
-function PostCard({ post, onLike, alreadyLiked }: { post: Post; onLike: (id: string) => void; alreadyLiked: boolean }) {
+const RAISONS_SIGNALEMENT = [
+  { value: 'spam', label: '🚫 Spam' },
+  { value: 'harcelement', label: '😡 Harcèlement' },
+  { value: 'hors_sujet', label: '📌 Hors-sujet' },
+  { value: 'triche', label: '📋 Triche' },
+  { value: 'contenu_sexuel', label: '🔞 Contenu inapproprié' },
+  { value: 'autre', label: '❓ Autre' },
+]
+
+function PostCard({ post, onLike, alreadyLiked, userId, supabase }: {
+  post: Post; onLike: (id: string) => void; alreadyLiked: boolean
+  userId: string; supabase: ReturnType<typeof createClient>
+}) {
   const [liked, setLiked] = useState(alreadyLiked)
+  const [showSignalement, setShowSignalement] = useState(false)
+  const [raisonSignalement, setRaisonSignalement] = useState('')
+  const [signalementEnvoye, setSignalementEnvoye] = useState(false)
   const mi = matInfo(post.matiere)
+
+  const handleSignaler = async () => {
+    if (!raisonSignalement) return
+    const { error } = await supabase.from('signalements').insert({
+      post_id: post.id,
+      signale_par: userId,
+      raison: raisonSignalement,
+    })
+    if (!error || error.code === '23505') {
+      setSignalementEnvoye(true)
+      setTimeout(() => setShowSignalement(false), 2000)
+    }
+  }
 
   const handleLike = () => {
     setLiked(l => !l)
@@ -129,13 +157,69 @@ function PostCard({ post, onLike, alreadyLiked }: { post: Post; onLike: (id: str
           )}
         >
           <Heart className={cn('w-4 h-4 transition-all', liked && 'fill-red-500')} />
-          {(post.likes ?? 0) + (liked ? 1 : 0)}
+          {post.likes ?? 0}
         </button>
         <button className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
           <MessageSquare className="w-4 h-4" />
           Répondre
         </button>
+        <button
+          onClick={() => setShowSignalement(true)}
+          className="ml-auto flex items-center gap-1 text-xs text-gray-300 hover:text-orange-400 transition"
+        >
+          <Flag className="w-3.5 h-3.5" />
+        </button>
       </div>
+
+      {/* Modal signalement */}
+      {showSignalement && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4" onClick={() => setShowSignalement(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+            {signalementEnvoye ? (
+              <div className="text-center py-4">
+                <div className="text-3xl mb-2">✅</div>
+                <p className="font-bold text-gray-900 dark:text-white text-sm">Signalement envoyé</p>
+                <p className="text-xs text-gray-400 mt-1">Notre équipe va examiner ce contenu</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-5 h-5 text-orange-500" />
+                  <h3 className="font-bold text-gray-900 dark:text-white text-sm">Signaler ce post</h3>
+                </div>
+                <div className="space-y-2 mb-4">
+                  {RAISONS_SIGNALEMENT.map(r => (
+                    <button
+                      key={r.value}
+                      onClick={() => setRaisonSignalement(r.value)}
+                      className={cn(
+                        'w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition border-2',
+                        raisonSignalement === r.value
+                          ? 'border-orange-400 bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300'
+                          : 'border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300'
+                      )}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowSignalement(false)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-500 font-medium">
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleSignaler}
+                    disabled={!raisonSignalement}
+                    className="flex-1 py-2.5 rounded-xl bg-orange-500 text-white text-sm font-bold disabled:opacity-40"
+                  >
+                    Signaler
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -439,7 +523,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
             ) : (
               <div className="space-y-3">
                 {postsFiltres.map(post => (
-                  <PostCard key={post.id} post={post} onLike={handleLike} alreadyLiked={mesLikes.has(post.id)} />
+                  <PostCard key={post.id} post={post} onLike={handleLike} alreadyLiked={mesLikes.has(post.id)} userId={userId} supabase={supabase} />
                 ))}
               </div>
             )}
