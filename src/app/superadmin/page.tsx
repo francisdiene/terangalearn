@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { redirect, notFound } from 'next/navigation'
 import SuperAdminClient from './SuperAdminClient'
 
 const SECRET = process.env.SUPERADMIN_SECRET
@@ -11,7 +11,8 @@ export default async function SuperAdminPage({
 }) {
   const params = await searchParams
   if (!SECRET || params.key !== SECRET) {
-    redirect('/')
+    // 404 plutôt que redirect pour ne pas révéler l'existence de la route
+    notFound()
   }
 
   const supabase = await createClient()
