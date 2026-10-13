@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Shield, Users, FileText, Flag, AlertTriangle,
-  Clock, CheckCircle2, XCircle, Eye, Ban, RefreshCw
+  CheckCircle2, Ban
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -21,7 +21,6 @@ interface Profile {
 }
 
 export default function SuperAdminClient({
-  secretKey,
   stats,
   recentUsers,
   recentSignalements,
@@ -29,7 +28,6 @@ export default function SuperAdminClient({
   auditLog,
   recentPosts,
 }: {
-  secretKey: string
   stats: { totalUsers: number; totalPosts: number; signalements: number; sanctionsActives: number }
   recentUsers: Profile[]
   recentSignalements: any[]

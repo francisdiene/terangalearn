@@ -1,6 +1,8 @@
+import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { redirect, notFound } from 'next/navigation'
 import SuperAdminClient from './SuperAdminClient'
+
+export const dynamic = 'force-dynamic'
 
 const SECRET = process.env.SUPERADMIN_SECRET
 
@@ -10,14 +12,13 @@ export default async function SuperAdminPage({
   searchParams: Promise<{ key?: string }>
 }) {
   const params = await searchParams
+
   if (!SECRET || params.key !== SECRET) {
-    // 404 plutôt que redirect pour ne pas révéler l'existence de la route
     notFound()
   }
 
   const supabase = await createClient()
 
-  // Stats globales
   const [
     { count: totalUsers },
     { count: totalPosts },
@@ -27,22 +28,21 @@ export default async function SuperAdminPage({
     { data: recentSignalements },
     { data: sanctions },
     { data: auditLog },
-    { data: topPosters },
+    { data: recentPosts },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('posts').select('*', { count: 'exact', head: true }),
     supabase.from('signalements').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente'),
-    supabase.from('sanctions').select('*', { count: 'exact', head: true }).or('expire_le.is.null,expire_le.gt.' + new Date().toISOString()),
+    supabase.from('sanctions').select('*', { count: 'exact', head: true }),
     supabase.from('profiles').select('id, full_name, email, role, created_at, banni, nb_avertissements').order('created_at', { ascending: false }).limit(20),
-    supabase.from('signalements').select('*, posts(titre, user_id), profiles!signalements_signale_par_fkey(full_name)').order('created_at', { ascending: false }).limit(10),
-    supabase.from('sanctions').select('*, profiles!sanctions_user_id_fkey(full_name, email), profiles!sanctions_applique_par_fkey(full_name)').order('created_at', { ascending: false }).limit(20),
-    supabase.from('audit_moderation').select('*, profiles(full_name)').order('created_at', { ascending: false }).limit(30),
-    supabase.from('posts').select('user_id, profiles(full_name), titre').order('created_at', { ascending: false }).limit(10),
+    supabase.from('signalements').select('id, raison, statut, priorite, created_at, post_id').order('created_at', { ascending: false }).limit(10),
+    supabase.from('sanctions').select('id, type_sanction, raison, created_at, expire_le, user_id').order('created_at', { ascending: false }).limit(20),
+    supabase.from('audit_moderation').select('id, action, cible_type, created_at, moderateur_id').order('created_at', { ascending: false }).limit(30),
+    supabase.from('posts').select('id, titre, user_id, created_at').order('created_at', { ascending: false }).limit(10),
   ])
 
   return (
     <SuperAdminClient
-      secretKey={params.key!}
       stats={{
         totalUsers: totalUsers ?? 0,
         totalPosts: totalPosts ?? 0,
@@ -53,7 +53,7 @@ export default async function SuperAdminPage({
       recentSignalements={recentSignalements ?? []}
       sanctions={sanctions ?? []}
       auditLog={auditLog ?? []}
-      recentPosts={topPosters ?? []}
+      recentPosts={recentPosts ?? []}
     />
   )
 }
