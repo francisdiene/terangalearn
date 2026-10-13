@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Shield, Users, FileText, Flag, AlertTriangle, CheckCircle2, Ban } from 'lucide-react'
+import { Shield, Users, FileText, Flag, AlertTriangle, CheckCircle2, Ban, ChevronDown, ChevronRight, Megaphone, Package, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type Tab = 'overview' | 'users' | 'signalements' | 'sanctions' | 'audit'
+type Tab = 'overview' | 'users' | 'signalements' | 'sanctions' | 'audit' | 'contenu'
 
 interface Profile {
   id: string
@@ -15,6 +15,38 @@ interface Profile {
   created_at: string
   banni: boolean
   nb_avertissements: number
+}
+
+interface PostWithAuthor {
+  id: string
+  titre: string
+  user_id: string
+  created_at: string
+  nb_signalements?: number
+  profiles?: { full_name: string } | null
+}
+
+interface Matiere {
+  id: string
+  nom: string
+  code: string
+  icone: string
+  couleur: string
+  classe: string
+}
+
+interface Chapitre {
+  id: string
+  matiere_id: string
+  titre: string
+  ordre: number
+}
+
+interface Annonce {
+  id: string
+  message: string
+  created_at: string
+  created_by: string
 }
 
 const ROLE_COLORS: Record<string, string> = {
@@ -40,12 +72,24 @@ export default function SuperDashboardClient({
   recentSignalements: any[]
   sanctions: any[]
   auditLog: any[]
-  recentPosts: any[]
+  recentPosts: PostWithAuthor[]
 }) {
   const [tab, setTab] = useState<Tab>('overview')
   const [users, setUsers] = useState(recentUsers)
   const [loading, setLoading] = useState<string | null>(null)
   const supabase = createClient()
+
+  // Contenu state
+  const [posts, setPosts] = useState<PostWithAuthor[]>(recentPosts)
+  const [matieres, setMatieres] = useState<Matiere[]>([])
+  const [chapitres, setChapitres] = useState<Chapitre[]>([])
+  const [matieresFetched, setMatieresFetched] = useState(false)
+  const [expandedMatiere, setExpandedMatiere] = useState<string | null>(null)
+  const [annonceMessage, setAnnonceMessage] = useState('')
+  const [annonces, setAnnonces] = useState<Annonce[]>([])
+  const [annoncesFetched, setAnnoncesFetched] = useState(false)
+  const [annonceError, setAnnonceError] = useState<string | null>(null)
+  const [annonceSaving, setAnnonceSaving] = useState(false)
 
   const changerRole = async (userId: string, newRole: string) => {
     if (userId === currentUserId && newRole !== 'super_admin') {
@@ -65,12 +109,87 @@ export default function SuperDashboardClient({
     setLoading(null)
   }
 
+  const supprimerPost = async (postId: string) => {
+    if (!confirm('Supprimer définitivement ce post ? Cette action est irréversible.')) return
+    setLoading(`post-${postId}`)
+    const { error } = await supabase.from('posts').delete().eq('id', postId)
+    if (!error) {
+      setPosts(prev => prev.filter(p => p.id !== postId))
+    }
+    setLoading(null)
+  }
+
+  const fetchMatieres = async () => {
+    if (matieresFetched) return
+    const { data: matiereData } = await supabase
+      .from('matieres')
+      .select('id, nom, code, icone, couleur, classe')
+      .order('nom')
+    const { data: chapitreData } = await supabase
+      .from('chapitres')
+      .select('id, matiere_id, titre, ordre')
+      .order('ordre')
+    setMatieres(matiereData ?? [])
+    setChapitres(chapitreData ?? [])
+    setMatieresFetched(true)
+  }
+
+  const fetchAnnonces = async () => {
+    if (annoncesFetched) return
+    try {
+      const { data, error } = await supabase
+        .from('annonces')
+        .select('id, message, created_at, created_by')
+        .order('created_at', { ascending: false })
+        .limit(5)
+      if (error) {
+        setAnnonceError('Table annonces non créée (exécuter le SQL)')
+      } else {
+        setAnnonces(data ?? [])
+      }
+    } catch {
+      setAnnonceError('Table annonces non créée (exécuter le SQL)')
+    }
+    setAnnoncesFetched(true)
+  }
+
+  const handleTabChange = (newTab: Tab) => {
+    setTab(newTab)
+    if (newTab === 'contenu') {
+      fetchMatieres()
+      fetchAnnonces()
+    }
+  }
+
+  const publierAnnonce = async () => {
+    if (!annonceMessage.trim()) return
+    setAnnonceSaving(true)
+    setAnnonceError(null)
+    try {
+      const { data, error } = await supabase
+        .from('annonces')
+        .insert({ message: annonceMessage.trim(), created_by: 'super_admin' })
+        .select('id, message, created_at, created_by')
+        .single()
+      if (error) {
+        setAnnonceError('Table annonces non créée (exécuter le SQL)')
+      } else if (data) {
+        setAnnonces(prev => [data as Annonce, ...prev].slice(0, 5))
+        setAnnonceMessage('')
+      }
+    } catch {
+      setAnnonceError('Table annonces non créée (exécuter le SQL)')
+    }
+    setAnnonceSaving(false)
+  }
+
   const tabs = [
     { key: 'overview', label: '📊 Vue d\'ensemble' },
     { key: 'users', label: `👥 Users (${stats.totalUsers})` },
     { key: 'signalements', label: `🚩 Signalements (${stats.signalements})` },
     { key: 'sanctions', label: `⚖️ Sanctions (${stats.sanctionsActives})` },
     { key: 'audit', label: '📋 Audit' },
+    { key: 'contenu', label: '📦 Contenu' },
   ]
 
   return (
@@ -91,7 +210,7 @@ export default function SuperDashboardClient({
         {tabs.map(t => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key as Tab)}
+            onClick={() => handleTabChange(t.key as Tab)}
             className={cn(
               'px-3 py-2 rounded-xl text-xs font-semibold transition',
               tab === t.key
@@ -125,7 +244,7 @@ export default function SuperDashboardClient({
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
             <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">📝 Dernières publications</h2>
             <div className="space-y-2">
-              {recentPosts.slice(0, 8).map((p: any, i: number) => (
+              {recentPosts.slice(0, 8).map((p, i) => (
                 <div key={p.id} className="flex items-center gap-3 py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
                   <span className="text-xs text-gray-400 w-5 font-mono">{i + 1}</span>
                   <p className="text-sm text-gray-800 dark:text-gray-200 truncate flex-1">{p.titre}</p>
@@ -238,7 +357,7 @@ export default function SuperDashboardClient({
       {tab === 'audit' && (
         <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
           {auditLog.length === 0 ? (
-            <p className="text-center py-12 text-gray-400 text-sm">Aucune entrée d'audit</p>
+            <p className="text-center py-12 text-gray-400 text-sm">Aucune entrée d&apos;audit</p>
           ) : (
             <div className="divide-y divide-gray-50 dark:divide-gray-800">
               {auditLog.map(a => (
@@ -252,6 +371,165 @@ export default function SuperDashboardClient({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Contenu */}
+      {tab === 'contenu' && (
+        <div className="space-y-5">
+
+          {/* Posts problématiques */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-red-500" />
+              <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">Posts problématiques</h2>
+              <span className="ml-auto text-xs text-gray-400">{posts.length} posts</span>
+            </div>
+            {posts.length === 0 ? (
+              <p className="text-center py-10 text-gray-400 text-sm">Aucun post</p>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                {posts.map(p => {
+                  const authorName = p.profiles
+                    ? (p.profiles as { full_name: string }).full_name
+                    : p.user_id.slice(0, 8) + '…'
+                  return (
+                    <div key={p.id} className="p-4 flex items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{p.titre}</p>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <span className="text-xs text-gray-400">{authorName}</span>
+                          <span className="text-xs text-gray-300 dark:text-gray-600">·</span>
+                          <span className="text-xs text-gray-400">{new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
+                          {(p.nb_signalements ?? 0) > 0 && (
+                            <>
+                              <span className="text-xs text-gray-300 dark:text-gray-600">·</span>
+                              <span className="text-xs bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 px-1.5 py-0.5 rounded-full font-semibold">
+                                {p.nb_signalements} signalement{(p.nb_signalements ?? 0) > 1 ? 's' : ''}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => supprimerPost(p.id)}
+                        disabled={loading === `post-${p.id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 transition disabled:opacity-50 flex-shrink-0"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        Supprimer
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Matières & Chapitres */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+              <Package className="w-4 h-4 text-blue-500" />
+              <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">Matières &amp; Chapitres</h2>
+              <span className="ml-auto text-xs text-gray-400">{matieres.length} matières</span>
+            </div>
+            {!matieresFetched ? (
+              <p className="text-center py-10 text-gray-400 text-sm">Chargement…</p>
+            ) : matieres.length === 0 ? (
+              <p className="text-center py-10 text-gray-400 text-sm">Aucune matière trouvée</p>
+            ) : (
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                {matieres.map(m => {
+                  const matiereChapitres = chapitres.filter(c => c.matiere_id === m.id)
+                  const isExpanded = expandedMatiere === m.id
+                  return (
+                    <div key={m.id}>
+                      <button
+                        onClick={() => setExpandedMatiere(isExpanded ? null : m.id)}
+                        className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition text-left"
+                      >
+                        <span className="text-xl w-8 text-center">{m.icone}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-white">{m.nom}</p>
+                          <p className="text-xs text-gray-400">{m.code} · {m.classe} · {matiereChapitres.length} chapitre{matiereChapitres.length !== 1 ? 's' : ''}</p>
+                        </div>
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: m.couleur }}
+                        />
+                        {isExpanded
+                          ? <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          : <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        }
+                      </button>
+                      {isExpanded && (
+                        <div className="bg-gray-50 dark:bg-gray-800/30 border-t border-gray-100 dark:border-gray-800">
+                          {matiereChapitres.length === 0 ? (
+                            <p className="px-6 py-3 text-xs text-gray-400">Aucun chapitre</p>
+                          ) : (
+                            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                              {matiereChapitres
+                                .sort((a, b) => a.ordre - b.ordre)
+                                .map(c => (
+                                  <div key={c.id} className="px-6 py-2.5 flex items-center gap-3">
+                                    <span className="text-xs text-gray-400 font-mono w-5 text-right">{c.ordre}</span>
+                                    <p className="text-sm text-gray-700 dark:text-gray-300">{c.titre}</p>
+                                  </div>
+                                ))
+                              }
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Annonce globale */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+            <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+              <Megaphone className="w-4 h-4 text-purple-500" />
+              <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">Annonce globale</h2>
+            </div>
+            <div className="p-4 space-y-3">
+              <textarea
+                value={annonceMessage}
+                onChange={e => setAnnonceMessage(e.target.value)}
+                placeholder="Écris ton annonce ici… (visible par tous les utilisateurs)"
+                rows={3}
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+              />
+              {annonceError && (
+                <p className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg">{annonceError}</p>
+              )}
+              <button
+                onClick={publierAnnonce}
+                disabled={!annonceMessage.trim() || annonceSaving}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {annonceSaving ? 'Publication…' : 'Publier l\'annonce'}
+              </button>
+
+              {/* Dernières annonces */}
+              {annonces.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Dernières annonces</p>
+                  <div className="space-y-2">
+                    {annonces.map(a => (
+                      <div key={a.id} className="bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
+                        <p className="text-sm text-gray-800 dark:text-gray-200">{a.message}</p>
+                        <p className="text-xs text-gray-400 mt-1">{new Date(a.created_at).toLocaleString('fr-FR')} · par {a.created_by}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       )}
     </div>
