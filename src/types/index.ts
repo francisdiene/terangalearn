@@ -13,6 +13,11 @@ export interface Profile {
   streak: number
   last_activity: string | null
   created_at: string
+  // Modération
+  role?: string
+  banni?: boolean
+  nb_avertissements?: number
+  sanctionne_jusqu_au?: string | null
 }
 
 export interface Matiere {
