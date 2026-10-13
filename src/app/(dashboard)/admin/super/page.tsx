@@ -1,21 +1,23 @@
-import { notFound } from 'next/navigation'
-import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import SuperAdminClient from '../SuperAdminClient'
+import { redirect } from 'next/navigation'
+import SuperDashboardClient from './SuperDashboardClient'
 
 export const dynamic = 'force-dynamic'
 
-const SECRET = process.env.SUPERADMIN_SECRET
-
-export default async function SuperAdminDashboard() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('sa_token')?.value
-
-  if (!SECRET || token !== SECRET) {
-    notFound()
-  }
-
+export default async function SuperAdminPage() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
+    redirect('/dashboard')
+  }
 
   const [
     { count: totalUsers },
@@ -32,15 +34,16 @@ export default async function SuperAdminDashboard() {
     supabase.from('posts').select('*', { count: 'exact', head: true }),
     supabase.from('signalements').select('*', { count: 'exact', head: true }).eq('statut', 'en_attente'),
     supabase.from('sanctions').select('*', { count: 'exact', head: true }),
-    supabase.from('profiles').select('id, full_name, email, role, created_at, banni, nb_avertissements').order('created_at', { ascending: false }).limit(20),
-    supabase.from('signalements').select('id, raison, statut, priorite, created_at, post_id').order('created_at', { ascending: false }).limit(10),
+    supabase.from('profiles').select('id, full_name, email, role, created_at, banni, nb_avertissements').order('created_at', { ascending: false }).limit(30),
+    supabase.from('signalements').select('id, raison, statut, priorite, created_at, post_id').order('created_at', { ascending: false }).limit(15),
     supabase.from('sanctions').select('id, type_sanction, raison, created_at, expire_le, user_id').order('created_at', { ascending: false }).limit(20),
     supabase.from('audit_moderation').select('id, action, cible_type, created_at, moderateur_id').order('created_at', { ascending: false }).limit(30),
     supabase.from('posts').select('id, titre, user_id, created_at').order('created_at', { ascending: false }).limit(10),
   ])
 
   return (
-    <SuperAdminClient
+    <SuperDashboardClient
+      currentUserId={user.id}
       stats={{
         totalUsers: totalUsers ?? 0,
         totalPosts: totalPosts ?? 0,
