@@ -1,23 +1,20 @@
-import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import SuperDashboardClient from './SuperDashboardClient'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SuperAdminPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  const cookieStore = await cookies()
+  const sa = cookieStore.get('sa')?.value
+  const secret = process.env.SUPERADMIN_SECRET
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-    redirect('/dashboard')
+  if (!secret || sa !== secret) {
+    redirect('/admin/super/login')
   }
+
+  const supabase = await createClient()
 
   const [
     { count: totalUsers },
@@ -43,7 +40,7 @@ export default async function SuperAdminPage() {
 
   return (
     <SuperDashboardClient
-      currentUserId={user.id}
+      currentUserId=""
       stats={{
         totalUsers: totalUsers ?? 0,
         totalPosts: totalPosts ?? 0,
