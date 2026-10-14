@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     ]
   }
 
-  const model = isImage ? 'llama-3.2-11b-vision-preview' : 'openai/gpt-oss-120b'
+  const model = isImage ? 'qwen/qwen3.8-27b' : 'openai/gpt-oss-120b'
 
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
@@ -92,7 +92,8 @@ export async function POST(req: NextRequest) {
       messages,
       temperature: 0.3,
       max_tokens: 2000,
-      response_format: { type: 'json_object' }
+      response_format: { type: 'json_object' },
+      ...(isImage ? { thinking: { type: 'disabled' } } : {})
     })
   })
 
