@@ -92,8 +92,7 @@ export async function POST(req: NextRequest) {
       messages,
       temperature: 0.3,
       max_tokens: 2000,
-      response_format: { type: 'json_object' },
-      ...(isImage ? { thinking: { type: 'disabled' } } : {})
+      response_format: { type: 'json_object' }
     })
   })
 
