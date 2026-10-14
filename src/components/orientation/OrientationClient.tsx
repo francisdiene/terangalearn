@@ -816,9 +816,13 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
                       <h3 className="font-bold text-gray-900">{ecole.nom}</h3>
                       <p className="text-xs text-gray-400 mt-0.5">📍 {ecole.localisation} • {ecole.niveau_requis}</p>
                     </div>
-                    <p className="text-xs text-green font-bold flex-shrink-0">
-                      {(ecole.frais_min / 1000).toFixed(0)}k — {(ecole.frais_max / 1000).toFixed(0)}k FCFA/an
-                    </p>
+                    {ecole.frais_min && ecole.frais_max ? (
+                      <p className="text-xs text-green font-bold flex-shrink-0">
+                        {(ecole.frais_min / 1000).toFixed(0)}k — {(ecole.frais_max / 1000).toFixed(0)}k FCFA/an
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-400 flex-shrink-0">Nous contacter</p>
+                    )}
                   </div>
                   <p className="text-sm text-gray-600 mb-3">{ecole.description}</p>
                   <div className="mb-3">
