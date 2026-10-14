@@ -5,8 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import {
   TrendingUp, TrendingDown, Plus, X, Star,
   BookOpen, GraduationCap, Building, Target,
-  ChevronRight, Trash2, Lock, Info
+  ChevronRight, Trash2, Lock, Info, ScanLine
 } from 'lucide-react'
+import BulletinAnalyse from './BulletinAnalyse'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
 import {
@@ -187,13 +188,14 @@ function isS2Complet(notes: Note[], serie: string): boolean {
 
 const ONGLETS = [
   { key: 'notes', label: 'Mes Notes', icon: BookOpen },
+  { key: 'bulletin', label: 'Bulletin IA', icon: ScanLine },
   { key: 'analyse', label: 'Analyse', icon: TrendingUp },
   { key: 'orientation', label: 'Orientation', icon: Target },
   { key: 'ecoles', label: 'Écoles', icon: Building },
 ]
 
 export default function OrientationClient({ userId, profile, notesInitiales, ecoles }: Props) {
-  const [onglet, setOnglet] = useState<'notes' | 'analyse' | 'orientation' | 'ecoles'>('notes')
+  const [onglet, setOnglet] = useState<'notes' | 'bulletin' | 'analyse' | 'orientation' | 'ecoles'>('notes')
   const [notes, setNotes] = useState<Note[]>(notesInitiales)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -390,6 +392,20 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
           </button>
         ))}
       </div>
+
+      {/* ===== ONGLET BULLETIN IA ===== */}
+      {onglet === 'bulletin' && (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 rounded-2xl p-4 flex items-start gap-3">
+            <ScanLine className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-orange-700 dark:text-orange-300">
+              <p className="font-bold mb-1">Analyse IA de ton bulletin</p>
+              <p className="text-orange-600 dark:text-orange-400">Uploade ton bulletin scolaire (PDF ou photo) et l'IA analyse tes notes, identifie tes points forts et te recommande une orientation.</p>
+            </div>
+          </div>
+          <BulletinAnalyse />
+        </div>
+      )}
 
       {/* ===== ONGLET NOTES ===== */}
       {onglet === 'notes' && (
