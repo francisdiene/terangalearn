@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
     ]
   }
 
-  const model = isImage ? 'meta-llama/llama-4-scout-17b-16e-instruct' : 'openai/gpt-oss-120b'
+  const model = isImage ? 'llama-3.2-11b-vision-preview' : 'openai/gpt-oss-120b'
 
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
@@ -99,16 +99,26 @@ export async function POST(req: NextRequest) {
   if (!response.ok) {
     const err = await response.text()
     console.error('Groq error:', err)
-    return NextResponse.json({ error: 'Erreur lors de l\'analyse IA' }, { status: 500 })
+    let errMsg = 'Erreur lors de l\'analyse IA'
+    try {
+      const parsed = JSON.parse(err)
+      errMsg = parsed?.error?.message ?? errMsg
+    } catch {}
+    return NextResponse.json({ error: errMsg }, { status: 500 })
   }
 
   const result = await response.json()
   const content = result.choices?.[0]?.message?.content
 
+  if (!content) {
+    return NextResponse.json({ error: 'Réponse vide de l\'IA' }, { status: 500 })
+  }
+
   try {
     const analyse = JSON.parse(content)
     return NextResponse.json({ success: true, analyse })
   } catch {
+    console.error('Parse error, raw content:', content?.slice(0, 200))
     return NextResponse.json({ error: 'Erreur de parsing de la réponse IA' }, { status: 500 })
   }
 }
