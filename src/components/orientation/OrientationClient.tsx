@@ -330,14 +330,19 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
   const ecolesRecommandees = useMemo(() => {
     if (orientationsRecommandees.length === 0) return ecoles
     const domainesRecommandes = orientationsRecommandees.flatMap(o => o?.domaine ? [o.domaine] : [])
-    return ecoles.filter(e =>
+    const matched = ecoles.filter(e =>
       e.domaines.some(d =>
-        domainesRecommandes.some(dr =>
-          dr.toLowerCase().includes(d.toLowerCase()) ||
-          d.toLowerCase().includes(dr.toLowerCase())
-        )
+        domainesRecommandes.some(dr => {
+          const dL = d.toLowerCase()
+          const drL = dr.toLowerCase()
+          // Match si un mot du domaine recommandé est dans le domaine de l'école
+          return drL.includes(dL) || dL.includes(drL) ||
+            drL.split(/[\s&,]+/).some(mot => mot.length > 3 && dL.includes(mot)) ||
+            dL.split(/[\s&,]+/).some(mot => mot.length > 3 && drL.includes(mot))
+        })
       )
     )
+    return matched.length > 0 ? matched : ecoles
   }, [orientationsRecommandees, ecoles])
 
   const ecolesAffichees = filtreEcole
