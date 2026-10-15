@@ -222,9 +222,10 @@ export default function DuelClient({ userId, profile }: Props) {
         setDuel(updated)
 
         if (updated.statut === 'en_cours') {
+          setQuestions(updated.questions ?? [])
           setPhase(prev => {
             if (prev === 'attente') {
-              demarrerTimer()
+              setTimeout(() => demarrerTimer(), 100)
               return 'duel'
             }
             return prev
