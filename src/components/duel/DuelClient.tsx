@@ -140,6 +140,26 @@ export default function DuelClient({ userId, profile }: Props) {
   // Rejoindre un duel
   const rejoindreDuel = async () => {
     setLoading(true)
+
+    // D'abord chercher le duel sans filtre statut pour diagnostiquer
+    const { data: duelCheck } = await supabase
+      .from('duels')
+      .select('id, code, statut, createur_id, adversaire_id')
+      .eq('code', codeInput.toUpperCase())
+      .maybeSingle()
+
+    if (!duelCheck) {
+      alert(`Code "${codeInput.toUpperCase()}" introuvable en base`)
+      setLoading(false)
+      return
+    }
+
+    if (duelCheck.statut !== 'attente' && duelCheck.statut !== 'invite') {
+      alert(`Duel trouvé mais statut = "${duelCheck.statut}" (attendu: attente ou invite)`)
+      setLoading(false)
+      return
+    }
+
     const { data: duelData, error } = await supabase
       .from('duels')
       .select('*')
@@ -148,7 +168,7 @@ export default function DuelClient({ userId, profile }: Props) {
       .single()
 
     if (error || !duelData) {
-      alert('Code invalide ou duel déjà commencé')
+      alert(`Erreur Supabase: ${error?.message ?? 'inconnue'}`)
       setLoading(false)
       return
     }
