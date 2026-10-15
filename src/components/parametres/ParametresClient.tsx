@@ -6,7 +6,7 @@ import { Profile } from '@/types'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  User, Lock, Bell, ChevronRight,
+  User, Lock, Bell,
   Loader2, CheckCircle2, Eye, EyeOff, LogOut,
   BellRing, BellOff, Smartphone
 } from 'lucide-react'
@@ -92,8 +92,6 @@ export default function ParametresClient({ userId, email, profile }: Props) {
       .from('profiles')
       .update({
         full_name: nom,
-        classe,
-        serie: classe === 'terminale' ? serie : null,
         pays,
       })
       .eq('id', userId)
@@ -239,34 +237,45 @@ export default function ParametresClient({ userId, email, profile }: Props) {
             </select>
           </div>
 
-          {/* Classe */}
+          {/* Classe — lecture seule */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Classe</label>
-            <select
-              value={classe}
-              onChange={e => setClasse(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm bg-white"
-            >
-              {CLASSES.map(c => (
-                <option key={c.value} value={c.value}>{c.label}</option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Classe
+            </label>
+            <div className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-between">
+              <span className="text-sm text-gray-500">
+                {CLASSES.find(c => c.value === classe)?.label ?? classe}
+              </span>
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Lock className="w-3.5 h-3.5" />
+                <span>Non modifiable</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              La classe est définie à l'inscription.{' '}
+              <a href="mailto:support@terangalearn.sn" className="text-green underline underline-offset-2">
+                Contacter le support
+              </a>{' '}
+              pour demander un changement.
+            </p>
           </div>
 
-          {/* Série (Terminale) */}
-          {classe === 'terminale' && (
+          {/* Série — lecture seule */}
+          {serie && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Série</label>
-              <select
-                value={serie}
-                onChange={e => setSerie(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm bg-white"
-              >
-                <option value="">Sélectionner</option>
-                {SERIES.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Série
+              </label>
+              <div className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 flex items-center justify-between">
+                <span className="text-sm text-gray-500">Série {serie}</span>
+                <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Non modifiable</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">
+                La série est liée à toutes tes progressions et ne peut pas être changée.
+              </p>
             </div>
           )}
 
