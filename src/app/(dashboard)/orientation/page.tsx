@@ -22,6 +22,7 @@ export default async function OrientationPage() {
   const { data: ecoles, error: ecolesError } = await supabase
     .from('ecoles')
     .select('*')
+    .eq('actif', true)
     .order('nom')
 
   if (ecolesError) console.error('[orientation] ecoles error:', ecolesError.message)

@@ -217,7 +217,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
   // Recharger les écoles côté client si le serveur n'en a pas retourné
   useEffect(() => {
     if (ecoles.length === 0) {
-      supabase.from('ecoles').select('*').order('nom').then(({ data }) => {
+      supabase.from('ecoles').select('*').eq('actif', true).order('nom').then(({ data }) => {
         if (data && data.length > 0) setEcoles(data)
       })
     }
