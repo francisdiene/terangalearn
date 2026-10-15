@@ -14,6 +14,12 @@ export default async function MatiereCoursPage({
 
   const code = params.code.toUpperCase()
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('classe')
+    .eq('id', user.id)
+    .single()
+
   const { data: matiere } = await supabase
     .from('matieres')
     .select('*')
@@ -21,6 +27,9 @@ export default async function MatiereCoursPage({
     .single()
 
   if (!matiere) notFound()
+
+  // Vérifier que la matière correspond à la classe de l'élève
+  if (matiere.classe !== 'both' && matiere.classe !== profile?.classe) notFound()
 
   const { data: chapitres } = await supabase
     .from('chapitres')

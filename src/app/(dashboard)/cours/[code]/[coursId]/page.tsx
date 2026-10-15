@@ -40,13 +40,23 @@ export default async function CoursDetailPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('classe')
+    .eq('id', user.id)
+    .single()
+
   const { data: cours } = await supabase
     .from('cours')
-    .select(`*, chapitres(titre, matiere_id, matieres(nom, icone, couleur, code))`)
+    .select(`*, chapitres(titre, matiere_id, matieres(nom, icone, couleur, code, classe))`)
     .eq('id', params.coursId)
     .single()
 
   if (!cours) notFound()
+
+  // Vérifier que la matière correspond à la classe de l'élève
+  const matiereClasse = (cours.chapitres as any)?.matieres?.classe
+  if (matiereClasse && matiereClasse !== 'both' && matiereClasse !== profile?.classe) notFound()
 
   const { data: progression } = await supabase
     .from('progression_cours')
