@@ -212,25 +212,24 @@ export default function DuelClient({ userId, profile }: Props) {
   const ecouterDuel = (duelId: string) => {
     // Polling toutes les 2 secondes comme fallback fiable
     const pollInterval = setInterval(async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('duels')
         .select('*')
         .eq('id', duelId)
         .single()
+
+      console.log('[POLL] duelId:', duelId, '| data:', data?.statut, '| error:', error?.message)
+
       if (!data) return
 
       setDuel(data)
 
       if (data.statut === 'en_cours') {
+        console.log('[POLL] → en_cours détecté, passage duel')
         setQuestions(data.questions ?? [])
-        setPhase(prev => {
-          if (prev === 'attente') {
-            clearInterval(pollInterval)
-            setTimeout(() => demarrerTimer(), 100)
-            return 'duel'
-          }
-          return prev
-        })
+        clearInterval(pollInterval)
+        setPhase('duel')
+        setTimeout(() => demarrerTimer(), 100)
       }
 
       if (data.statut === 'termine') {
