@@ -40,6 +40,7 @@ interface Ecole {
   contact: string
   site_web: string
   domaines: string[]
+  logo_url?: string
 }
 
 interface Props {
@@ -826,18 +827,28 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
             <div className="space-y-4">
               {ecolesAffichees.map(ecole => (
                 <div key={ecole.id} className="bg-white rounded-2xl p-5 card-shadow">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div>
-                      <h3 className="font-bold text-gray-900">{ecole.nom}</h3>
+                  <div className="flex items-start gap-3 mb-3">
+                    {/* Logo */}
+                    {ecole.logo_url ? (
+                      <img src={ecole.logo_url} alt={ecole.nom} className="w-12 h-12 rounded-xl object-contain border border-gray-100 flex-shrink-0 bg-white p-1" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-green-light flex items-center justify-center flex-shrink-0">
+                        <Building className="w-6 h-6 text-green" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-bold text-gray-900 leading-tight">{ecole.nom}</h3>
+                        {ecole.frais_min && ecole.frais_max ? (
+                          <p className="text-xs text-green font-bold flex-shrink-0">
+                            {(ecole.frais_min / 1000).toFixed(0)}k — {(ecole.frais_max / 1000).toFixed(0)}k FCFA/an
+                          </p>
+                        ) : (
+                          <p className="text-xs text-gray-400 flex-shrink-0">Nous contacter</p>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-400 mt-0.5">📍 {ecole.localisation} • {ecole.niveau_requis}</p>
                     </div>
-                    {ecole.frais_min && ecole.frais_max ? (
-                      <p className="text-xs text-green font-bold flex-shrink-0">
-                        {(ecole.frais_min / 1000).toFixed(0)}k — {(ecole.frais_max / 1000).toFixed(0)}k FCFA/an
-                      </p>
-                    ) : (
-                      <p className="text-xs text-gray-400 flex-shrink-0">Nous contacter</p>
-                    )}
                   </div>
                   <p className="text-sm text-gray-600 mb-3">{ecole.description}</p>
                   <div className="mb-3">
@@ -853,14 +864,16 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                     <span className="text-xs text-gray-400">{ecole.contact}</span>
-                    
-                      href={`https://${ecole.site_web}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-green font-semibold hover:underline"
-                    <a>
-                      Visiter <ChevronRight className="w-3 h-3" />
-                    </a>
+                    {ecole.site_web && (
+                      <a
+                        href={ecole.site_web.startsWith('http') ? ecole.site_web : `https://${ecole.site_web}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-green font-semibold hover:underline"
+                      >
+                        Visiter <ChevronRight className="w-3 h-3" />
+                      </a>
+                    )}
                   </div>
                 </div>
               ))}
