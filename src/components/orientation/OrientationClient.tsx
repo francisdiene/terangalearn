@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   TrendingUp, TrendingDown, Plus, X, Star,
@@ -194,9 +194,10 @@ const ONGLETS = [
   { key: 'ecoles', label: 'Écoles', icon: Building },
 ]
 
-export default function OrientationClient({ userId, profile, notesInitiales, ecoles }: Props) {
+export default function OrientationClient({ userId, profile, notesInitiales, ecoles: ecolesInitiales }: Props) {
   const [onglet, setOnglet] = useState<'notes' | 'bulletin' | 'analyse' | 'orientation' | 'ecoles'>('notes')
   const [notes, setNotes] = useState<Note[]>(notesInitiales)
+  const [ecoles, setEcoles] = useState<Ecole[]>(ecolesInitiales)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [filtreEcole, setFiltreEcole] = useState('')
@@ -212,6 +213,15 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
 
   const supabase = createClient()
   const serie = profile?.serie ?? 'S1'
+
+  // Recharger les écoles côté client si le serveur n'en a pas retourné
+  useEffect(() => {
+    if (ecoles.length === 0) {
+      supabase.from('ecoles').select('*').order('nom').then(({ data }) => {
+        if (data && data.length > 0) setEcoles(data)
+      })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const matieresDeSerie = MATIERES_PAR_SERIE[serie] ?? MATIERES_PAR_SERIE['S1']
   const coefficients = COEFFICIENTS[serie] ?? COEFFICIENTS['S1']
 

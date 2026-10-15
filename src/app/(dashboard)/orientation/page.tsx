@@ -19,10 +19,12 @@ export default async function OrientationPage() {
     .eq('user_id', user.id)
     .order('date', { ascending: false })
 
-  const { data: ecoles } = await supabase
+  const { data: ecoles, error: ecolesError } = await supabase
     .from('ecoles')
     .select('*')
     .order('nom')
+
+  if (ecolesError) console.error('[orientation] ecoles error:', ecolesError.message)
 
   return (
     <OrientationClient
