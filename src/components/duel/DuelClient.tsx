@@ -116,7 +116,7 @@ export default function DuelClient({ userId, profile }: Props) {
     const data = await res.json()
     const qcms = data.questions?.[matiere]?.qcm ?? []
 
-    const { data: duelData } = await supabase
+    const { data: duelData, error: duelError } = await supabase
       .from('duels')
       .insert({
         code,
@@ -129,6 +129,12 @@ export default function DuelClient({ userId, profile }: Props) {
       })
       .select()
       .single()
+
+    if (duelError || !duelData) {
+      alert(`Erreur création duel: ${duelError?.message ?? 'inconnue'}`)
+      setLoading(false)
+      return
+    }
 
     setDuel(duelData)
     setQuestions(qcms)
