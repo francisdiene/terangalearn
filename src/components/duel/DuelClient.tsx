@@ -208,8 +208,39 @@ export default function DuelClient({ userId, profile }: Props) {
     setLoading(false)
   }
 
-  // Écouter les changements du duel
+  // Écouter les changements du duel (realtime + polling fallback)
   const ecouterDuel = (duelId: string) => {
+    // Polling toutes les 2 secondes comme fallback fiable
+    const pollInterval = setInterval(async () => {
+      const { data } = await supabase
+        .from('duels')
+        .select('*')
+        .eq('id', duelId)
+        .single()
+      if (!data) return
+
+      setDuel(data)
+
+      if (data.statut === 'en_cours') {
+        setQuestions(data.questions ?? [])
+        setPhase(prev => {
+          if (prev === 'attente') {
+            clearInterval(pollInterval)
+            setTimeout(() => demarrerTimer(), 100)
+            return 'duel'
+          }
+          return prev
+        })
+      }
+
+      if (data.statut === 'termine') {
+        clearInterval(pollInterval)
+        setPhase('resultat')
+        clearInterval(timerRef.current!)
+      }
+    }, 2000)
+
+    // Realtime en plus (accélère si ça marche)
     channelRef.current = supabase
       .channel(`duel-${duelId}`)
       .on('postgres_changes', {
@@ -225,6 +256,7 @@ export default function DuelClient({ userId, profile }: Props) {
           setQuestions(updated.questions ?? [])
           setPhase(prev => {
             if (prev === 'attente') {
+              clearInterval(pollInterval)
               setTimeout(() => demarrerTimer(), 100)
               return 'duel'
             }
@@ -233,6 +265,7 @@ export default function DuelClient({ userId, profile }: Props) {
         }
 
         if (updated.statut === 'termine') {
+          clearInterval(pollInterval)
           setPhase('resultat')
           clearInterval(timerRef.current!)
         }
@@ -248,6 +281,9 @@ export default function DuelClient({ userId, profile }: Props) {
         }
       })
       .subscribe()
+
+    // Stocker le poll pour nettoyage
+    ;(channelRef.current as any)._pollInterval = pollInterval
   }
 
   // Timer par question
