@@ -44,6 +44,7 @@ export default function DuelClient({ userId, profile }: Props) {
   const [adversaireRepondu, setAdversaireRepondu] = useState(false)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const channelRef = useRef<any>(null)
+  const pollRef = useRef<NodeJS.Timeout | null>(null)
 
   const prenom = profile?.full_name?.split(' ')[0] ?? 'Élève'
 
@@ -131,7 +132,6 @@ export default function DuelClient({ userId, profile }: Props) {
       .single()
 
     if (duelError || !duelData) {
-      alert(`Erreur création duel: ${duelError?.message ?? 'inconnue'}`)
       setLoading(false)
       return
     }
@@ -147,25 +147,6 @@ export default function DuelClient({ userId, profile }: Props) {
   const rejoindreDuel = async () => {
     setLoading(true)
 
-    // D'abord chercher le duel sans filtre statut pour diagnostiquer
-    const { data: duelCheck } = await supabase
-      .from('duels')
-      .select('id, code, statut, createur_id, adversaire_id')
-      .eq('code', codeInput.toUpperCase())
-      .maybeSingle()
-
-    if (!duelCheck) {
-      alert(`Code "${codeInput.toUpperCase()}" introuvable en base`)
-      setLoading(false)
-      return
-    }
-
-    if (duelCheck.statut !== 'attente' && duelCheck.statut !== 'invite') {
-      alert(`Duel trouvé mais statut = "${duelCheck.statut}" (attendu: attente ou invite)`)
-      setLoading(false)
-      return
-    }
-
     const { data: duelData, error } = await supabase
       .from('duels')
       .select('*')
@@ -174,13 +155,11 @@ export default function DuelClient({ userId, profile }: Props) {
       .single()
 
     if (error || !duelData) {
-      alert(`Erreur Supabase: ${error?.message ?? 'inconnue'}`)
       setLoading(false)
       return
     }
 
     if (duelData.createur_id === userId) {
-      alert('Tu ne peux pas rejoindre ton propre duel')
       setLoading(false)
       return
     }
@@ -195,7 +174,6 @@ export default function DuelClient({ userId, profile }: Props) {
       .eq('id', duelData.id)
 
     if (updateError) {
-      alert('Erreur lors du rejoindre')
       setLoading(false)
       return
     }
@@ -210,32 +188,41 @@ export default function DuelClient({ userId, profile }: Props) {
 
   // Écouter les changements du duel (realtime + polling fallback)
   const ecouterDuel = (duelId: string) => {
+    // Nettoyer tout ancien poll avant d'en créer un nouveau
+    if (pollRef.current) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+    }
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current)
+      channelRef.current = null
+    }
+
     // Polling toutes les 2 secondes comme fallback fiable
-    const pollInterval = setInterval(async () => {
-      const { data, error } = await supabase
+    pollRef.current = setInterval(async () => {
+      const { data } = await supabase
         .from('duels')
         .select('*')
         .eq('id', duelId)
         .single()
-
-      console.log('[POLL] duelId:', duelId, '| data:', data?.statut, '| error:', error?.message)
 
       if (!data) return
 
       setDuel(data)
 
       if (data.statut === 'en_cours') {
-        console.log('[POLL] → en_cours détecté, passage duel')
         setQuestions(data.questions ?? [])
-        clearInterval(pollInterval)
+        if (pollRef.current) clearInterval(pollRef.current)
+        pollRef.current = null
         setPhase('duel')
         setTimeout(() => demarrerTimer(), 100)
       }
 
       if (data.statut === 'termine') {
-        clearInterval(pollInterval)
+        if (pollRef.current) clearInterval(pollRef.current)
+        pollRef.current = null
         setPhase('resultat')
-        clearInterval(timerRef.current!)
+        if (timerRef.current) clearInterval(timerRef.current)
       }
     }, 2000)
 
@@ -255,7 +242,8 @@ export default function DuelClient({ userId, profile }: Props) {
           setQuestions(updated.questions ?? [])
           setPhase(prev => {
             if (prev === 'attente') {
-              clearInterval(pollInterval)
+              if (pollRef.current) clearInterval(pollRef.current)
+              pollRef.current = null
               setTimeout(() => demarrerTimer(), 100)
               return 'duel'
             }
@@ -264,9 +252,10 @@ export default function DuelClient({ userId, profile }: Props) {
         }
 
         if (updated.statut === 'termine') {
-          clearInterval(pollInterval)
+          if (pollRef.current) clearInterval(pollRef.current)
+          pollRef.current = null
           setPhase('resultat')
-          clearInterval(timerRef.current!)
+          if (timerRef.current) clearInterval(timerRef.current)
         }
       })
       .on('postgres_changes', {
@@ -280,9 +269,6 @@ export default function DuelClient({ userId, profile }: Props) {
         }
       })
       .subscribe()
-
-    // Stocker le poll pour nettoyage
-    ;(channelRef.current as any)._pollInterval = pollInterval
   }
 
   // Timer par question
@@ -675,7 +661,8 @@ export default function DuelClient({ userId, profile }: Props) {
             setQuestionIdx(0)
             setScores({ moi: 0, adversaire: 0 })
             setReponseChoisie(null)
-            if (channelRef.current) supabase.removeChannel(channelRef.current)
+            if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
+            if (channelRef.current) { supabase.removeChannel(channelRef.current); channelRef.current = null }
           }}
           className="w-full py-3 bg-green text-white font-bold rounded-2xl hover:opacity-90 transition"
         >
