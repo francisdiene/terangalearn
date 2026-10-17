@@ -515,7 +515,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
 
             {/* Posts */}
             {postsFiltres.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
+              <div className="text-center py-16 pb-32 text-gray-400">
                 <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-20" />
                 <p className="font-semibold text-sm">{search ? 'Aucun résultat' : 'Aucun post pour l\'instant'}</p>
                 <p className="text-xs mt-1">{search ? 'Essaie un autre mot-clé' : 'Sois le premier à poser une question !'}</p>

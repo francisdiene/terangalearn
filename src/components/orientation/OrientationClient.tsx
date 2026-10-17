@@ -372,7 +372,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 px-4 md:px-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Analyse & Orientation 🎯</h1>
         <p className="text-gray-500 mt-1">
@@ -390,8 +390,8 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
       </div>
 
       {/* Onglets */}
-      <div className="-mx-4 px-4 md:mx-0 md:px-0">
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto scrollbar-hide">
+      <div className="-mx-4 md:mx-0">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto scrollbar-hide px-4 md:px-1">
         {ONGLETS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
