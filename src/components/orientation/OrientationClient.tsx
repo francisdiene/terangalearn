@@ -390,13 +390,14 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
       </div>
 
       {/* Onglets */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
+      <div className="-mx-4 px-4 md:mx-0 md:px-0">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto scrollbar-hide">
         {ONGLETS.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setOnglet(key as any)}
             className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-xs font-medium transition whitespace-nowrap',
+              'flex-shrink-0 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg text-xs font-medium transition whitespace-nowrap',
               onglet === key ? 'bg-white text-green shadow-sm' : 'text-gray-500'
             )}
           >
@@ -407,6 +408,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
             )}
           </button>
         ))}
+      </div>
       </div>
 
       {/* ===== ONGLET BULLETIN IA ===== */}

@@ -137,7 +137,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
   ].slice(0, 4)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
 
       {/* ══ DESKTOP ════════════════════════════════════════════════════════════ */}
       <div className="hidden md:block max-w-5xl mx-auto px-6 py-8 space-y-6">
