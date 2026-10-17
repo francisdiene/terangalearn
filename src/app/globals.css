@@ -263,6 +263,16 @@ html, body {
   }
 }
 
+/* Padding bottom pour compenser la bottom nav fixe sur mobile */
+.main-content-mobile {
+  padding-bottom: 5.5rem;
+}
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .main-content-mobile {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 /* ===== DARK MODE ===== */
 .dark {
   --bg-primary: #0F1117;

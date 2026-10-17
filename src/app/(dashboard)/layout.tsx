@@ -27,7 +27,7 @@ export default async function DashboardLayout({
       <Sidebar profile={profile} />
       <div className="flex-1 flex flex-col min-h-screen md:ml-64">
         <MobileNav profile={profile} />
-        <main className="flex-1 pb-32 md:pb-8 w-full min-w-0">
+        <main className="flex-1 main-content-mobile md:pb-8 w-full min-w-0">
           <PageTransition>
             {children}
           </PageTransition>
