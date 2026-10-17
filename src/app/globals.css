@@ -172,10 +172,10 @@ a, button {
 
 /* ===== RESPONSIVE MOBILE COMPLET ===== */
 
-/* Empêcher overflow horizontal */
-html, body {
+/* Empêcher overflow horizontal — sur html seulement, pas body
+   (body avec overflow-x:hidden bloque les scroll horizontal internes) */
+html {
   overflow-x: hidden;
-  max-width: 100vw;
 }
 
 /* Inputs — éviter zoom iOS */
