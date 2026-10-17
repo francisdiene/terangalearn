@@ -331,7 +331,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
       </div>
 
       {/* ══ MOBILE ═════════════════════════════════════════════════════════════ */}
-      <div className="md:hidden pb-6">
+      <div className="md:hidden" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
 
         {/* Hero */}
         <div className="bg-white px-4 pt-3 pb-5">

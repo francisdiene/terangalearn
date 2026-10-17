@@ -399,7 +399,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
   const autresGroupes = groupesMembres.filter(g => !g.groupe_membres.some(m => m.user_id === userId))
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-950 min-h-screen pb-4">
+    <div className="bg-gray-50 dark:bg-gray-950 min-h-screen" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
 
       {/* ══ HEADER MOBILE ═══════════════════════════════════════════════════ */}
       <div className="md:hidden bg-white dark:bg-gray-900 px-4 pt-2 pb-3 border-b border-gray-100 dark:border-gray-800">
