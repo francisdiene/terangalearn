@@ -38,7 +38,7 @@ export default async function ExercicesPage() {
   const tauxReussite = totalFaits > 0 ? Math.round(totalCorrects / totalFaits * 100) : 0
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Exercices </h1>
         <p className="text-gray-500 mt-1">QCM interactifs et exercices PDF par chapitre</p>

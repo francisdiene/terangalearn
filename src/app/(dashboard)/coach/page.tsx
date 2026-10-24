@@ -21,7 +21,7 @@ export default async function CoachPage() {
     .order('updated_at', { ascending: false })
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-80px)]">
+    <div className="max-w-7xl mx-auto flex flex-col h-[calc(100vh-130px)] md:h-[calc(100vh-80px)]">
       <div className="mb-3 flex-shrink-0">
         <h1 className="text-xl md:text-2xl font-bold text-gray-900">Coach IA</h1>
         <p className="text-gray-500 text-sm mt-0.5">

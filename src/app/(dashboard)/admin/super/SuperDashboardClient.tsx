@@ -193,7 +193,7 @@ export default function SuperDashboardClient({
   ]
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5 pb-10">
+    <div className="max-w-7xl mx-auto space-y-5 pb-10">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-xl flex items-center justify-center">

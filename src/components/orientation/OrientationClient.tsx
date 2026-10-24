@@ -372,7 +372,7 @@ export default function OrientationClient({ userId, profile, notesInitiales, eco
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-4 md:px-6" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
+    <div className="max-w-7xl mx-auto space-y-6 px-4 md:px-6" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Analyse & Orientation 🎯</h1>
         <p className="text-gray-500 mt-1">

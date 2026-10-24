@@ -447,7 +447,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
 
       {/* ══ HEADER DESKTOP ══════════════════════════════════════════════════ */}
       <div className="hidden md:block px-6 py-5 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h1 className="text-xl font-black text-gray-900 dark:text-white">Communauté</h1>
             <p className="text-sm text-gray-400">Échange avec tes camarades et révise ensemble</p>
@@ -461,7 +461,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
       </div>
 
       {/* ══ CONTENU ═════════════════════════════════════════════════════════ */}
-      <div className="max-w-3xl mx-auto px-4 py-4 space-y-3 pb-24 md:pb-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 space-y-3 pb-24 md:pb-8">
 
         {/* Tabs desktop */}
         <div className="hidden md:flex gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
