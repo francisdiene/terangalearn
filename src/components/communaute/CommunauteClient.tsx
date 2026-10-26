@@ -4,10 +4,22 @@ import { useState, useRef, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   MessageSquare, Users, Plus, Send, X, BookOpen,
-  Heart, ChevronRight, Search, Flame, Hash, Flag, AlertTriangle
+  Heart, ChevronRight, Search, Flame, Hash, Flag, AlertTriangle,
+  ArrowLeft, ChevronLeft
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface GroupeMessage {
+  id: string
+  groupe_id: string
+  user_id: string
+  contenu: string
+  created_at: string
+  profiles: { full_name: string; niveau: number } | null
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -224,11 +236,165 @@ function PostCard({ post, onLike, alreadyLiked, userId, supabase }: {
   )
 }
 
+// ─── Composant GroupeChat ─────────────────────────────────────────────────────
+
+function GroupeChat({ groupe, userId, profile, onClose, supabase }: {
+  groupe: Groupe; userId: string; profile: Profile | null
+  onClose: () => void; supabase: ReturnType<typeof createClient>
+}) {
+  const [messages, setMessages] = useState<GroupeMessage[]>([])
+  const [texte, setTexte] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [sending, setSending] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
+  const mi = matInfo(groupe.matiere)
+
+  // Charger les messages initiaux
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from('groupe_messages')
+        .select('*, profiles(full_name, niveau)')
+        .eq('groupe_id', groupe.id)
+        .order('created_at', { ascending: true })
+        .limit(100)
+      if (data) setMessages(data)
+      setLoading(false)
+    }
+    load()
+  }, [groupe.id])
+
+  // Temps réel — subscribe aux nouveaux messages
+  useEffect(() => {
+    const channel = supabase
+      .channel(`groupe-${groupe.id}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'groupe_messages',
+        filter: `groupe_id=eq.${groupe.id}`,
+      }, async (payload) => {
+        // Récupérer le profil de l'auteur du message
+        const { data: msg } = await supabase
+          .from('groupe_messages')
+          .select('*, profiles(full_name, niveau)')
+          .eq('id', payload.new.id)
+          .single()
+        if (msg) setMessages(prev => [...prev, msg])
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [groupe.id])
+
+  // Auto-scroll vers le bas
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleSend = async () => {
+    if (!texte.trim() || sending) return
+    setSending(true)
+    const { error } = await supabase.from('groupe_messages').insert({
+      groupe_id: groupe.id,
+      user_id: userId,
+      contenu: texte.trim(),
+    })
+    if (!error) setTexte('')
+    setSending(false)
+  }
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-gray-50 dark:bg-gray-950 md:relative md:inset-auto md:rounded-2xl md:border md:border-gray-100 md:dark:border-gray-800 md:overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+        <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 active:scale-95 transition-transform">
+          <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+        </button>
+        <div className={`w-9 h-9 ${mi ? mi.bg : 'bg-green-50'} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>
+          {mi ? mi.icon : '📚'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{groupe.nom}</p>
+          <p className="text-[10px] text-gray-400">{groupe.groupe_membres.length} membres</p>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {loading ? (
+          <div className="flex items-center justify-center h-full text-gray-400 text-sm">Chargement...</div>
+        ) : messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 text-center">
+            <MessageSquare className="w-10 h-10 mb-2 opacity-20" />
+            <p className="text-sm font-semibold">Aucun message</p>
+            <p className="text-xs mt-1">Sois le premier à écrire dans ce groupe !</p>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const isMe = msg.user_id === userId
+            return (
+              <div key={msg.id} className={cn('flex gap-2', isMe ? 'flex-row-reverse' : 'flex-row')}>
+                {!isMe && (
+                  <div className={`w-7 h-7 ${avatarColor(msg.profiles?.full_name)} rounded-lg flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5`}>
+                    {initials(msg.profiles?.full_name)}
+                  </div>
+                )}
+                <div className={cn('max-w-[75%] space-y-0.5', isMe ? 'items-end' : 'items-start', 'flex flex-col')}>
+                  {!isMe && (
+                    <p className="text-[10px] text-gray-400 px-1">{msg.profiles?.full_name ?? 'Utilisateur'}</p>
+                  )}
+                  <div className={cn(
+                    'px-3 py-2 rounded-2xl text-sm leading-relaxed',
+                    isMe
+                      ? 'bg-green-500 text-white rounded-tr-sm'
+                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-100 dark:border-gray-700 rounded-tl-sm'
+                  )}>
+                    {msg.contenu}
+                  </div>
+                  <p className={cn('text-[10px] text-gray-400 px-1', isMe ? 'text-right' : 'text-left')}>
+                    {relTime(msg.created_at)}
+                  </p>
+                </div>
+              </div>
+            )
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="flex items-end gap-2 px-4 py-3 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 flex-shrink-0" style={{ paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' }}>
+        <textarea
+          value={texte}
+          onChange={e => setTexte(e.target.value)}
+          onKeyDown={handleKey}
+          placeholder="Écrire un message..."
+          rows={1}
+          className="flex-1 px-4 py-2.5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900 dark:text-white max-h-24"
+          style={{ minHeight: '40px' }}
+        />
+        <button
+          onClick={handleSend}
+          disabled={!texte.trim() || sending}
+          className="w-10 h-10 bg-green-500 rounded-2xl flex items-center justify-center flex-shrink-0 disabled:opacity-40 active:scale-95 transition-transform shadow-sm shadow-green-200"
+        >
+          <Send className="w-4 h-4 text-white" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Composant GroupeCard ─────────────────────────────────────────────────────
 
-function GroupeCard({ groupe, userId, onJoin, onLeave }: {
+function GroupeCard({ groupe, userId, onJoin, onLeave, onOpenChat }: {
   groupe: Groupe; userId: string
   onJoin: (id: string) => void; onLeave: (id: string) => void
+  onOpenChat: (groupe: Groupe) => void
 }) {
   const isMembre = groupe.groupe_membres.some(m => m.user_id === userId)
   const nb = groupe.groupe_membres.length
@@ -272,7 +438,10 @@ function GroupeCard({ groupe, userId, onJoin, onLeave }: {
         </button>
       </div>
       {isMembre && (
-        <button className="mt-3 w-full flex items-center justify-center gap-1.5 border border-green-200 dark:border-green-800 text-green-600 text-xs font-semibold py-2 rounded-xl active:scale-[0.98] transition-transform">
+        <button
+          onClick={() => onOpenChat(groupe)}
+          className="mt-3 w-full flex items-center justify-center gap-1.5 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 text-xs font-semibold py-2.5 rounded-xl active:scale-[0.98] transition-transform"
+        >
           <MessageSquare className="w-3.5 h-3.5" />
           Ouvrir le chat du groupe
         </button>
@@ -330,6 +499,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
   const [newGroupe, setNewGroupe] = useState({ nom: '', description: '', matiere: '' })
   const [loading, setLoading] = useState(false)
   const [mesLikes, setMesLikes] = useState<Set<string>>(new Set())
+  const [groupeChat, setGroupeChat] = useState<Groupe | null>(null)
 
   const supabase = createClient()
   const prenom = profile?.full_name?.split(' ')[0] ?? 'Toi'
@@ -397,6 +567,19 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
 
   const mesGroupes = groupesMembres.filter(g => g.groupe_membres.some(m => m.user_id === userId))
   const autresGroupes = groupesMembres.filter(g => !g.groupe_membres.some(m => m.user_id === userId))
+
+  // ── Chat ouvert ──────────────────────────────────────────────────────────────
+  if (groupeChat) {
+    return (
+      <GroupeChat
+        groupe={groupeChat}
+        userId={userId}
+        profile={profile}
+        onClose={() => setGroupeChat(null)}
+        supabase={supabase}
+      />
+    )
+  }
 
   return (
     <div className="bg-gray-50 dark:bg-gray-950 min-h-screen" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 16px))' }}>
@@ -542,7 +725,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
                 </div>
                 <div className="space-y-3">
                   {mesGroupes.map(g => (
-                    <GroupeCard key={g.id} groupe={g} userId={userId} onJoin={handleJoin} onLeave={handleLeave} />
+                    <GroupeCard key={g.id} groupe={g} userId={userId} onJoin={handleJoin} onLeave={handleLeave} onOpenChat={setGroupeChat} />
                   ))}
                 </div>
               </div>
@@ -557,7 +740,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
                 </div>
                 <div className="space-y-3">
                   {autresGroupes.map(g => (
-                    <GroupeCard key={g.id} groupe={g} userId={userId} onJoin={handleJoin} onLeave={handleLeave} />
+                    <GroupeCard key={g.id} groupe={g} userId={userId} onJoin={handleJoin} onLeave={handleLeave} onOpenChat={setGroupeChat} />
                   ))}
                 </div>
               </div>
