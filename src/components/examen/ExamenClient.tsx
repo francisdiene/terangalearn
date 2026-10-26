@@ -11,10 +11,10 @@ import {
 } from 'lucide-react'
 
 const MATIERES_PAR_SERIE: Record<string, string[]> = {
-  S1: ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO'],
-  S2: ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO'],
-  L:  ['FR', 'PHILO', 'HG', 'EN', 'MATH', 'PC'],
-  G:  ['MATH', 'ECO', 'FR', 'HG', 'EN', 'PHILO'],
+  S1:   ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO'],
+  S2:   ['MATH', 'PC', 'SVT', 'FR', 'HG', 'EN', 'PHILO'],
+  L:    ['FR', 'PHILO', 'HG', 'EN', 'MATH', 'PC'],
+  G:    ['MATH', 'ECO', 'FR', 'HG', 'EN', 'PHILO'],
   STEG: ['MATH', 'ECO', 'FR', 'HG', 'EN', 'PHILO'],
 }
 
@@ -30,6 +30,37 @@ interface Props {
 }
 
 type Etape = 'config' | 'examen' | 'correction'
+
+// ─── Chrono hh:mm:ss visible et grand ────────────────────────────────────────
+function Chrono({ secondes }: { secondes: number }) {
+  const h   = Math.floor(secondes / 3600)
+  const m   = Math.floor((secondes % 3600) / 60)
+  const sec = secondes % 60
+
+  const urgent = secondes < 300  // rouge sous 5 min
+  const warning = secondes < 900 // orange sous 15 min
+
+  const couleur = urgent
+    ? 'text-red-500'
+    : warning
+    ? 'text-amber-500'
+    : 'text-green'
+
+  return (
+    <div className={cn(
+      'flex items-center gap-1.5 px-4 py-2 rounded-xl font-mono font-bold',
+      urgent ? 'bg-red-50' : warning ? 'bg-amber-50' : 'bg-green-light'
+    )}>
+      <Clock className={cn('w-4 h-4 flex-shrink-0', couleur)} />
+      <span className={cn('text-xl tracking-widest', couleur)}>
+        {h > 0 && <>{String(h).padStart(2, '0')}<span className="opacity-50">h</span></>}
+        {String(m).padStart(2, '0')}
+        <span className="opacity-50 text-base">:</span>
+        {String(sec).padStart(2, '0')}
+      </span>
+    </div>
+  )
+}
 
 export default function ExamenClient({ userId, profile }: Props) {
   const supabase = createClient()
@@ -72,7 +103,7 @@ export default function ExamenClient({ userId, profile }: Props) {
     setLoading(false)
   }
 
-  // Timer
+  // Timer — tick chaque seconde
   useEffect(() => {
     if (etape !== 'examen') return
     timerRef.current = setInterval(() => {
@@ -87,15 +118,6 @@ export default function ExamenClient({ userId, profile }: Props) {
     }, 1000)
     return () => clearInterval(timerRef.current!)
   }, [etape])
-
-  const formatTemps = (s: number) => {
-    const h = Math.floor(s / 3600)
-    const m = Math.floor((s % 3600) / 60)
-    const sec = s % 60
-    return h > 0
-      ? `${h}h ${m.toString().padStart(2, '0')}m`
-      : `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-  }
 
   const repondreQCM = (matiere: string, qcmId: number, option: string) => {
     setReponses(prev => ({
@@ -124,7 +146,6 @@ export default function ExamenClient({ userId, profile }: Props) {
     setCorrections(data.corrections)
     setNoteFinale(data.note_finale)
 
-    // Sauvegarder + XP
     await supabase.from('examens_simules').insert({
       user_id: userId,
       serie,
@@ -137,7 +158,6 @@ export default function ExamenClient({ userId, profile }: Props) {
       termine_at: new Date().toISOString()
     })
 
-    // XP selon note
     const xpGagne = data.note_finale >= 16 ? 100
       : data.note_finale >= 14 ? 75
       : data.note_finale >= 10 ? 50 : 25
@@ -160,7 +180,7 @@ export default function ExamenClient({ userId, profile }: Props) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Examen simulé </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Examen simulé</h1>
           <p className="text-gray-500 mt-1">Série {serie} — Généré et corrigé par intelligence artificielle</p>
         </div>
 
@@ -203,9 +223,25 @@ export default function ExamenClient({ userId, profile }: Props) {
                 <p className={cn('font-semibold text-sm', matieresSel.includes(m) ? 'text-green' : 'text-gray-900')}>
                   {MATIERE_NOMS[m]}
                 </p>
+                {matieresSel.includes(m) && (
+                  <p className="text-xs text-green/70 mt-0.5">45 min</p>
+                )}
               </button>
             ))}
           </div>
+
+          {/* Durée totale estimée */}
+          {matieresSel.length >= 2 && (
+            <div className="mt-4 flex items-center gap-2 p-3 bg-gray-50 rounded-xl">
+              <Clock className="w-4 h-4 text-gray-400" />
+              <p className="text-sm text-gray-600">
+                Durée totale estimée :{' '}
+                <span className="font-bold text-gray-900">
+                  {matieresSel.length * 45} min ({matieresSel.length}h{matieresSel.length * 45 % 60 > 0 ? `${matieresSel.length * 45 % 60}min` : ''})
+                </span>
+              </p>
+            </div>
+          )}
 
           <button
             onClick={demarrerExamen}
@@ -229,37 +265,62 @@ export default function ExamenClient({ userId, profile }: Props) {
     const reponsesMatiere = reponses[matiereActive] ?? {}
     const matiereIdx = matieresSel.indexOf(matiereActive)
 
+    // Progression : nb de questions répondues dans la matière active
+    const totalQCM = dataMatiere?.qcm?.length ?? 0
+    const reponsesQCM = Object.keys(reponsesMatiere).filter(k => k.startsWith('qcm_')).length
+    const aQO = !!dataMatiere?.question_ouverte
+    const reponsesTotal = reponsesQCM + (reponsesMatiere['question_ouverte'] ? 1 : 0)
+    const totalQuestions = totalQCM + (aQO ? 1 : 0)
+    const pct = totalQuestions > 0 ? Math.round((reponsesTotal / totalQuestions) * 100) : 0
+
     return (
       <div className="max-w-3xl mx-auto space-y-4">
-        {/* Header */}
-        <div className="bg-white rounded-2xl p-4 card-shadow flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-gray-900">{dataMatiere?.nom}</h2>
-            <p className="text-xs text-gray-400">Coefficient {dataMatiere?.coefficient} — Série {serie}</p>
+
+        {/* Header sticky avec chrono grand et visible */}
+        <div className="bg-white rounded-2xl p-4 card-shadow">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="font-bold text-gray-900 truncate">{dataMatiere?.nom}</h2>
+              <p className="text-xs text-gray-400">
+                Coeff. {dataMatiere?.coefficient} · Série {serie} · {pct}% répondu
+              </p>
+            </div>
+            {/* ← Chrono heure:minute:seconde */}
+            <Chrono secondes={tempsRestant} />
           </div>
-          <div className={cn(
-            'flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm',
-            tempsRestant < 300 ? 'bg-red-50 text-red-600' : 'bg-green-light text-green'
-          )}>
-            <Clock className="w-4 h-4" />
-            {formatTemps(tempsRestant)}
+
+          {/* Barre de progression */}
+          <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full bg-green rounded-full"
+              animate={{ width: `${pct}%` }}
+              transition={{ duration: 0.3 }}
+            />
           </div>
         </div>
 
         {/* Navigation matières */}
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {matieresSel.map((m, i) => (
-            <button
-              key={m}
-              onClick={() => setMatiereActive(m)}
-              className={cn(
-                'px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition flex-shrink-0',
-                matiereActive === m ? 'bg-green text-white' : 'bg-white text-gray-600 card-shadow'
-              )}
-            >
-              {MATIERE_NOMS[m]}
-            </button>
-          ))}
+          {matieresSel.map(m => {
+            const repM = reponses[m] ?? {}
+            const qTotal = (questions[m]?.qcm?.length ?? 0) + (questions[m]?.question_ouverte ? 1 : 0)
+            const qFait  = Object.keys(repM).length
+            const done   = qTotal > 0 && qFait === qTotal
+
+            return (
+              <button
+                key={m}
+                onClick={() => setMatiereActive(m)}
+                className={cn(
+                  'px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition flex-shrink-0 flex items-center gap-1.5',
+                  matiereActive === m ? 'bg-green text-white' : 'bg-white text-gray-600 card-shadow'
+                )}
+              >
+                {done && <CheckCircle2 className="w-3.5 h-3.5 text-green" />}
+                {MATIERE_NOMS[m]}
+              </button>
+            )
+          })}
         </div>
 
         {/* Questions QCM */}
@@ -310,7 +371,7 @@ export default function ExamenClient({ userId, profile }: Props) {
           </div>
         )}
 
-        {/* Bouton soumettre */}
+        {/* Boutons navigation + soumettre */}
         <div className="flex gap-3">
           {matiereIdx < matieresSel.length - 1 && (
             <button
@@ -343,7 +404,7 @@ export default function ExamenClient({ userId, profile }: Props) {
       <div className="gradient-green rounded-2xl p-6 text-white text-center">
         <Trophy className="w-10 h-10 mx-auto mb-2 opacity-80" />
         <p className="text-white/70 text-sm mb-1">Note finale</p>
-        
+        <p className="text-5xl font-bold">{noteFinale.toFixed(2)}</p>
         <p className="text-white/70 text-sm mt-1">/ 20</p>
         <p className="mt-2 font-bold text-lg">{getNiveauNote(noteFinale).label}</p>
         <p className="text-white/60 text-xs mt-1">

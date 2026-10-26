@@ -7,8 +7,6 @@ import { Profile } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
 import PDFViewer from '@/components/ui/PDFViewer'
 
-
-
 interface Epreuve {
   id: string
   titre: string
@@ -18,6 +16,7 @@ interface Epreuve {
   type: 'bac' | 'bfem' | 'exercice' | 'devoir' | 'corrige'
   annee: number | null
   pdf_url: string
+  tour?: 1 | 2  // 1er tour ou 2ème tour
 }
 
 interface Props {
@@ -26,16 +25,42 @@ interface Props {
   epreuves: Epreuve[]
 }
 
+// Ordre officiel des matières au BAC/BFEM sénégalais
+const MATIERES_ORDER: Record<string, number> = {
+  MATH:  1,
+  PC:    2,
+  SVT:   3,
+  FR:    4,
+  PHILO: 5,
+  HG:    6,
+  EN:    7,
+  ECO:   8,
+  AUTRE: 99,
+}
+
 const MATIERES_LABELS: Record<string, string> = {
-  MATH: 'Mathématiques',
-  PC: 'Physique-Chimie',
-  SVT: 'SVT',
-  FR: 'Français',
-  HG: 'Histoire-Géographie',
-  EN: 'Anglais',
+  MATH:  'Mathématiques',
+  PC:    'Physique-Chimie',
+  SVT:   'SVT',
+  FR:    'Français',
+  HG:    'Histoire-Géographie',
+  EN:    'Anglais',
   PHILO: 'Philosophie',
-  ECO: 'Économie',
+  ECO:   'Économie',
   AUTRE: 'Autres matières',
+}
+
+// Couleur badge par matière
+const MATIERES_COLORS: Record<string, string> = {
+  MATH:  'bg-blue-50 text-blue-700',
+  PC:    'bg-purple-50 text-purple-700',
+  SVT:   'bg-green-50 text-green-700',
+  FR:    'bg-orange-50 text-orange-700',
+  PHILO: 'bg-pink-50 text-pink-700',
+  HG:    'bg-amber-50 text-amber-700',
+  EN:    'bg-cyan-50 text-cyan-700',
+  ECO:   'bg-emerald-50 text-emerald-700',
+  AUTRE: 'bg-gray-100 text-gray-600',
 }
 
 function ExamenCountdown({ classe }: { classe: string }) {
@@ -73,40 +98,52 @@ function ExamenCountdown({ classe }: { classe: string }) {
 export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
   const [search, setSearch] = useState('')
   const [filtreType, setFiltreType] = useState<'bac' | 'corrige' | null>(null)
-  const [anneesOuvertes, setAnneesOuvertes] = useState<Record<number, boolean>>({ 2026: true })
+  const [anneesOuvertes, setAnneesOuvertes] = useState<Record<string, boolean>>({ '2026-1': true })
   const [pdfOuvert, setPdfOuvert] = useState<Epreuve | null>(null)
 
   const classe = profile?.classe ?? '3eme'
 
-  // Grouper par année puis par matière
-  const grouped: Record<number, Record<string, { sujet?: Epreuve; corrige?: Epreuve }>> = {}
+  // Grouper par année + tour + matière
+  // clé : `${annee}-${tour}` ex: "2026-1", "2026-2", "2025-1"
+  const grouped: Record<string, Record<string, { sujet?: Epreuve; corrige?: Epreuve }>> = {}
 
   epreuves.forEach(e => {
     const annee = e.annee ?? 0
+    const tour = e.tour ?? 1   // par défaut 1er tour si non renseigné
+    const key = `${annee}-${tour}`
     const matiere = e.matiere ?? 'AUTRE'
 
-    if (!grouped[annee]) grouped[annee] = {}
-    if (!grouped[annee][matiere]) grouped[annee][matiere] = {}
+    if (!grouped[key]) grouped[key] = {}
+    if (!grouped[key][matiere]) grouped[key][matiere] = {}
 
     if (e.type === 'corrige') {
-      grouped[annee][matiere].corrige = e
+      grouped[key][matiere].corrige = e
     } else {
-      grouped[annee][matiere].sujet = e
+      grouped[key][matiere].sujet = e
     }
   })
 
-  const annees = Object.keys(grouped).map(Number).sort((a, b) => b - a)
+  // Trier : années décroissantes, 1er tour avant 2ème tour
+  const groupKeys = Object.keys(grouped).sort((a, b) => {
+    const [anneeA, tourA] = a.split('-').map(Number)
+    const [anneeB, tourB] = b.split('-').map(Number)
+    if (anneeB !== anneeA) return anneeB - anneeA
+    return tourA - tourB
+  })
 
-  const toggleAnnee = (annee: number) => {
-    setAnneesOuvertes(prev => ({ ...prev, [annee]: !prev[annee] }))
+  const toggleGroupe = (key: string) => {
+    setAnneesOuvertes(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  // Filtrage par recherche
   const matiereMatchSearch = (matiere: string) => {
     if (!search) return true
     const label = MATIERES_LABELS[matiere] ?? matiere
     return label.toLowerCase().includes(search.toLowerCase())
   }
+
+  // Trier les matières selon l'ordre officiel
+  const sortMatieres = (matieres: string[]) =>
+    [...matieres].sort((a, b) => (MATIERES_ORDER[a] ?? 99) - (MATIERES_ORDER[b] ?? 99))
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
@@ -155,30 +192,43 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
         ))}
       </div>
 
-      {/* Contenu groupé par année */}
+      {/* Contenu groupé par année + tour */}
       <div className="space-y-4">
-        {annees.map(annee => {
-          const matieresDannee = Object.keys(grouped[annee]).filter(matiereMatchSearch)
-          if (matieresDannee.length === 0) return null
-          const isOpen = anneesOuvertes[annee] ?? false
+        {groupKeys.map(key => {
+          const [annee, tour] = key.split('-').map(Number)
+          const matieresBrutes = Object.keys(grouped[key]).filter(matiereMatchSearch)
+          const matieresDuGroupe = sortMatieres(matieresBrutes)
+          if (matieresDuGroupe.length === 0) return null
+          const isOpen = anneesOuvertes[key] ?? false
+
+          const labelTour = tour === 2 ? '2ème tour' : '1er tour'
+          const colorTour = tour === 2
+            ? 'bg-amber-50 text-amber-700 border border-amber-200'
+            : 'bg-green-light text-green'
 
           return (
-            <div key={annee} className="bg-white rounded-2xl card-shadow overflow-hidden">
+            <div key={key} className="bg-white rounded-2xl card-shadow overflow-hidden">
 
-              {/* Header année */}
+              {/* Header groupe */}
               <button
-                onClick={() => toggleAnnee(annee)}
+                onClick={() => toggleGroupe(key)}
                 className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition"
               >
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-gray-900 text-base">BAC {annee}</span>
-                  <span className="text-xs bg-green-light text-green px-2 py-0.5 rounded-full font-medium">
-                    {matieresDannee.length} matières
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="font-bold text-gray-900 text-base">
+                    {classe === '3eme' ? 'BFEM' : 'BAC'} {annee}
+                  </span>
+                  {/* Badge 1er/2ème tour */}
+                  <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold', colorTour)}>
+                    {labelTour}
+                  </span>
+                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
+                    {matieresDuGroupe.length} matières
                   </span>
                 </div>
                 {isOpen
-                  ? <ChevronUp className="w-5 h-5 text-gray-400" />
-                  : <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ? <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  : <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 }
               </button>
 
@@ -200,9 +250,9 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
                         <span className="text-xs font-semibold text-gray-500 text-center">Corrigé</span>
                       </div>
 
-                      {/* Lignes matières */}
-                      {matieresDannee.map((matiere, i) => {
-                        const { sujet, corrige } = grouped[annee][matiere]
+                      {/* Lignes matières — triées dans l'ordre officiel */}
+                      {matieresDuGroupe.map((matiere, i) => {
+                        const { sujet, corrige } = grouped[key][matiere]
                         const afficherSujet = !filtreType || filtreType === 'bac'
                         const afficherCorrige = !filtreType || filtreType === 'corrige'
 
@@ -215,7 +265,11 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
                               'border-b border-gray-100 last:border-0'
                             )}
                           >
-                            <span className="text-sm font-medium text-gray-800 pr-2">
+                            {/* Badge matière coloré */}
+                            <span className={cn(
+                              'text-xs font-semibold px-2.5 py-1 rounded-lg w-fit',
+                              MATIERES_COLORS[matiere] ?? 'bg-gray-100 text-gray-600'
+                            )}>
                               {MATIERES_LABELS[matiere] ?? matiere}
                             </span>
 
@@ -280,6 +334,7 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
                   <p className="font-bold text-gray-900 text-sm truncate">{pdfOuvert.titre}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {MATIERES_LABELS[pdfOuvert.matiere] ?? pdfOuvert.matiere} — {pdfOuvert.annee}
+                    {pdfOuvert.tour === 2 ? ' · 2ème tour' : ' · 1er tour'}
                   </p>
                 </div>
                 <button
