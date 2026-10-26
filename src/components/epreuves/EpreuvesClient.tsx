@@ -65,57 +65,71 @@ const MATIERES_COLORS: Record<string, string> = {
 
 function ExamenCountdown({ classe }: { classe: string }) {
   const examen = classe === '3eme'
-    ? { nom: 'BFEM 2027', date: '2027-06-10T08:00:00' }
-    : { nom: 'BAC 2027', date: '2027-06-17T08:00:00' }
+    ? { nom: 'BFEM', annee: 2027, date: '2027-06-10T08:00:00' }
+    : { nom: 'BAC',  annee: 2027, date: '2027-06-17T08:00:00' }
 
-  const [secondesRestantes, setSecRestantes] = useState(() =>
+  const [sec, setSec] = useState(() =>
     Math.max(0, Math.floor((new Date(examen.date).getTime() - Date.now()) / 1000))
   )
 
   useEffect(() => {
-    if (secondesRestantes <= 0) return
-    const interval = setInterval(() => {
-      const diff = Math.floor((new Date(examen.date).getTime() - Date.now()) / 1000)
-      setSecRestantes(Math.max(0, diff))
+    if (sec <= 0) return
+    const t = setInterval(() => {
+      setSec(Math.max(0, Math.floor((new Date(examen.date).getTime() - Date.now()) / 1000)))
     }, 1000)
-    return () => clearInterval(interval)
+    return () => clearInterval(t)
   }, [examen.date])
 
-  if (secondesRestantes <= 0) {
+  if (sec <= 0) {
     return (
       <div className="gradient-green rounded-2xl p-5 text-white text-center">
-        <p className="font-bold text-lg">{examen.nom} — Session terminée</p>
+        <p className="font-bold text-lg">{examen.nom} {examen.annee} — Session terminée</p>
         <p className="text-white/70 text-sm mt-1">Retrouvez les sujets et corrigés ci-dessous</p>
       </div>
     )
   }
 
-  const jours   = Math.floor(secondesRestantes / 86400)
-  const heures  = Math.floor((secondesRestantes % 86400) / 3600)
-  const minutes = Math.floor((secondesRestantes % 3600) / 60)
-  const secs    = secondesRestantes % 60
-
+  const jours   = Math.floor(sec / 86400)
+  const mois    = Math.floor(jours / 30)
+  const heures  = Math.floor((sec % 86400) / 3600)
+  const minutes = Math.floor((sec % 3600) / 60)
+  const secs    = sec % 60
   const pad = (n: number) => String(n).padStart(2, '0')
 
   return (
-    <div className="gradient-green rounded-2xl p-5 text-white">
-      <div className="flex items-center justify-between gap-3">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f5c34] to-[#1a7a4a] p-5 text-white shadow-lg">
+      {/* Cercle décoratif fond */}
+      <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/5" />
+      <div className="absolute -right-2 -bottom-8 w-20 h-20 rounded-full bg-white/5" />
+
+      <div className="relative flex items-center justify-between gap-4">
+        {/* Gauche : label */}
         <div>
-          <p className="text-white/70 text-xs uppercase tracking-wider">Compte à rebours</p>
-          <p className="text-base font-bold mt-0.5">{examen.nom}</p>
+          <p className="text-white/60 text-xs uppercase tracking-widest font-medium">
+            Compte à rebours
+          </p>
+          <p className="text-white font-bold text-lg mt-0.5">
+            {examen.nom} <span className="text-white/70">{examen.annee}</span>
+          </p>
+          {/* hh:mm:ss en petit en dessous */}
+          <p className="font-mono text-white/50 text-xs mt-1 tracking-widest">
+            {pad(heures)}:{pad(minutes)}:{pad(secs)}
+          </p>
         </div>
-        {/* Chrono hh:mm:ss en temps réel */}
-        <div className="text-right">
-          <p className="font-mono font-bold text-2xl tracking-widest leading-none">
-            {pad(heures)}
-            <span className="opacity-50 text-lg">:</span>
-            {pad(minutes)}
-            <span className="opacity-50 text-lg">:</span>
-            {pad(secs)}
-          </p>
-          <p className="text-white/60 text-xs mt-1 font-mono">
-            {jours} jour{jours > 1 ? 's' : ''} restant{jours > 1 ? 's' : ''}
-          </p>
+
+        {/* Droite : chiffre principal */}
+        <div className="text-right flex-shrink-0">
+          <div className="flex items-baseline gap-1.5 justify-end">
+            <span className="font-mono font-black text-5xl leading-none tracking-tight">
+              {jours}
+            </span>
+            <span className="text-white/70 font-semibold text-base">J</span>
+          </div>
+          {mois > 0 && (
+            <p className="text-white/50 text-xs font-mono mt-0.5 text-right">
+              ~{mois} mois
+            </p>
+          )}
         </div>
       </div>
     </div>
