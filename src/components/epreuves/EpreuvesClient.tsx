@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, X, Eye, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
@@ -65,32 +65,59 @@ const MATIERES_COLORS: Record<string, string> = {
 
 function ExamenCountdown({ classe }: { classe: string }) {
   const examen = classe === '3eme'
-    ? { nom: 'BFEM 2026', date: '2026-06-10' }
-    : { nom: 'BAC 2026', date: '2026-06-17' }
+    ? { nom: 'BFEM 2027', date: '2027-06-10T08:00:00' }
+    : { nom: 'BAC 2027', date: '2027-06-17T08:00:00' }
 
-  const diff = Math.ceil(
-    (new Date(examen.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
+  const [secondesRestantes, setSecRestantes] = useState(() =>
+    Math.max(0, Math.floor((new Date(examen.date).getTime() - Date.now()) / 1000))
   )
+
+  useEffect(() => {
+    if (secondesRestantes <= 0) return
+    const interval = setInterval(() => {
+      const diff = Math.floor((new Date(examen.date).getTime() - Date.now()) / 1000)
+      setSecRestantes(Math.max(0, diff))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [examen.date])
+
+  if (secondesRestantes <= 0) {
+    return (
+      <div className="gradient-green rounded-2xl p-5 text-white text-center">
+        <p className="font-bold text-lg">{examen.nom} — Session terminée</p>
+        <p className="text-white/70 text-sm mt-1">Retrouvez les sujets et corrigés ci-dessous</p>
+      </div>
+    )
+  }
+
+  const jours   = Math.floor(secondesRestantes / 86400)
+  const heures  = Math.floor((secondesRestantes % 86400) / 3600)
+  const minutes = Math.floor((secondesRestantes % 3600) / 60)
+  const secs    = secondesRestantes % 60
+
+  const pad = (n: number) => String(n).padStart(2, '0')
 
   return (
     <div className="gradient-green rounded-2xl p-5 text-white">
-      {diff < 0 ? (
-        <div className="text-center">
-          <p className="font-bold text-lg">{examen.nom} — Session terminée</p>
-          <p className="text-white/70 text-sm mt-1">Retrouvez les sujets et corrigés ci-dessous</p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-white/70 text-xs uppercase tracking-wider">Compte à rebours</p>
+          <p className="text-base font-bold mt-0.5">{examen.nom}</p>
         </div>
-      ) : (
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-white/70 text-sm">Compte à rebours</p>
-            <p className="text-xl font-bold mt-1">{examen.nom}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-4xl font-bold">{diff}</p>
-            <p className="text-white/70 text-xs">jours restants</p>
-          </div>
+        {/* Chrono hh:mm:ss en temps réel */}
+        <div className="text-right">
+          <p className="font-mono font-bold text-2xl tracking-widest leading-none">
+            {pad(heures)}
+            <span className="opacity-50 text-lg">:</span>
+            {pad(minutes)}
+            <span className="opacity-50 text-lg">:</span>
+            {pad(secs)}
+          </p>
+          <p className="text-white/60 text-xs mt-1 font-mono">
+            {jours} jour{jours > 1 ? 's' : ''} restant{jours > 1 ? 's' : ''}
+          </p>
         </div>
-      )}
+      </div>
     </div>
   )
 }
