@@ -5,7 +5,7 @@ import { useState } from 'react'
 import {
   TrendingUp, Play, Zap, Award, Clock,
   Target, ChevronRight, Flame, BookOpen,
-  BarChart2, ArrowRight
+  BarChart2, ArrowRight, FileText, CheckSquare, Star
 } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -20,12 +20,12 @@ function ProgressBar({ value, color = '#16a34a' }: { value: number; color?: stri
 }
 
 function greetMsg(prenom: string, streak: number, xp: number): string {
-  if (streak >= 7) return `${streak} jours d'affilée 🔥`
+  if (streak >= 7) return `${streak} jours d'affilée`
   if (xp === 0) return `Bienvenue ${prenom} !`
   const h = new Date().getHours()
-  if (h < 12) return `Bonjour ${prenom} 👋`
+  if (h < 12) return `Bonjour ${prenom}`
   if (h < 18) return `Bonne continuation ${prenom} !`
-  return `Bonsoir ${prenom} 🌙`
+  return `Bonsoir ${prenom}`
 }
 
 function relTime(d: string): string {
@@ -40,28 +40,28 @@ function relTime(d: string): string {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const SERIE_CONFIG: Record<string, { label: string; badge: string; color: string; matieres: string[]; targetNote: number }> = {
-  S:  { label: 'Série S',  badge: '🔬', color: '#16a34a', matieres: ['MATH', 'PC', 'SVT', 'FR'],    targetNote: 14 },
-  L:  { label: 'Série L',  badge: '📚', color: '#7c3aed', matieres: ['FR', 'PHILO', 'HG', 'ANG'],   targetNote: 13 },
-  G:  { label: 'Série G',  badge: '📊', color: '#ea580c', matieres: ['ECO', 'MATH', 'HG', 'FR'],    targetNote: 12 },
-  T:  { label: 'Série T',  badge: '🔧', color: '#0891b2', matieres: ['MATH', 'PC', 'ECO', 'FR'],    targetNote: 13 },
-  S1: { label: 'Série S1', badge: '🔬', color: '#16a34a', matieres: ['MATH', 'PC', 'SVT', 'FR'],    targetNote: 14 },
-  S2: { label: 'Série S2', badge: '🧬', color: '#059669', matieres: ['MATH', 'SVT', 'PC', 'FR'],    targetNote: 14 },
+const SERIE_CONFIG: Record<string, { label: string; color: string; matieres: string[]; targetNote: number }> = {
+  S:  { label: 'Série S',  color: '#16a34a', matieres: ['MATH', 'PC', 'SVT', 'FR'],    targetNote: 14 },
+  L:  { label: 'Série L',  color: '#7c3aed', matieres: ['FR', 'PHILO', 'HG', 'ANG'],   targetNote: 13 },
+  G:  { label: 'Série G',  color: '#ea580c', matieres: ['ECO', 'MATH', 'HG', 'FR'],    targetNote: 12 },
+  T:  { label: 'Série T',  color: '#0891b2', matieres: ['MATH', 'PC', 'ECO', 'FR'],    targetNote: 13 },
+  S1: { label: 'Série S1', color: '#16a34a', matieres: ['MATH', 'PC', 'SVT', 'FR'],    targetNote: 14 },
+  S2: { label: 'Série S2', color: '#059669', matieres: ['MATH', 'SVT', 'PC', 'FR'],    targetNote: 14 },
 }
 
-const MATIERE_CFG: Record<string, { icon: string; color: string; nom: string }> = {
-  MATH:  { icon: '📐', color: '#3b82f6', nom: 'Mathématiques' },
-  PC:    { icon: '⚗️', color: '#f97316', nom: 'Physique-Chimie' },
-  SVT:   { icon: '🌿', color: '#16a34a', nom: 'SVT' },
-  FR:    { icon: '📖', color: '#7c3aed', nom: 'Français' },
-  HG:    { icon: '🌍', color: '#ca8a04', nom: 'Hist-Géo' },
-  ANG:   { icon: '🇬🇧', color: '#ec4899', nom: 'Anglais' },
-  PHILO: { icon: '🏛️', color: '#6366f1', nom: 'Philosophie' },
-  ECO:   { icon: '📊', color: '#0891b2', nom: 'Économie' },
+const MATIERE_CFG: Record<string, { color: string; nom: string }> = {
+  MATH:  { color: '#3b82f6', nom: 'Mathématiques' },
+  PC:    { color: '#f97316', nom: 'Physique-Chimie' },
+  SVT:   { color: '#16a34a', nom: 'SVT' },
+  FR:    { color: '#7c3aed', nom: 'Français' },
+  HG:    { color: '#ca8a04', nom: 'Hist-Géo' },
+  ANG:   { color: '#ec4899', nom: 'Anglais' },
+  PHILO: { color: '#6366f1', nom: 'Philosophie' },
+  ECO:   { color: '#0891b2', nom: 'Économie' },
 }
 
 function matStyle(code: string) {
-  return MATIERE_CFG[code?.toUpperCase()] ?? { icon: '📚', color: '#6b7280', nom: 'Matière' }
+  return MATIERE_CFG[code?.toUpperCase()] ?? { color: '#6b7280', nom: 'Matière' }
 }
 
 const CLASSE_LABEL: Record<string, string> = {
@@ -121,14 +121,16 @@ export default function DashboardClient({ profile, matieres, progressions, exame
 
   const activite = [
     ...examens.slice(0, 2).map((e: any) => ({
-      icon: matStyle(e.matiere_code).icon,
+      code: e.matiere_code ?? '',
+      icon: (e.matiere_code ?? 'EX').substring(0, 2).toUpperCase(),
       titre: e.matiere_code ? matStyle(e.matiere_code).nom : 'Examen',
       note: `${(e.note ?? 0).toFixed(1)}/20`,
       time: relTime(e.created_at),
       ok: (e.note ?? 0) >= 10,
     })),
     ...progressions.slice(0, 2).map((p: any) => ({
-      icon: '📚',
+      code: p.cours?.matiere_code ?? '',
+      icon: p.cours?.matiere_code ? (p.cours.matiere_code as string).substring(0, 2).toUpperCase() : 'CO',
       titre: p.cours?.titre ?? 'Cours consulté',
       note: '+30 XP',
       time: relTime(p.updated_at),
@@ -161,20 +163,19 @@ export default function DashboardClient({ profile, matieres, progressions, exame
         </div>
 
         {/* Ligne 1 : 3 stats + XP */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Examens passés', value: examens.length || '—', icon: '📝', color: '#16a34a' },
-            { label: 'Moyenne générale', value: moyenne !== null ? `${moyenne}/20` : '—', icon: '📊', color: moyenne !== null && moyenne >= sc.targetNote ? '#16a34a' : '#3b82f6' },
-            { label: 'Cours terminés', value: coursTermines || '—', icon: '✅', color: '#7c3aed' },
-            { label: 'Niveau', value: `Niv. ${niveau}`, icon: '⚡', color: '#ea580c' },
+            { label: 'Examens passés', value: examens.length || '—', Icon: FileText, color: '#16a34a' },
+            { label: 'Cours terminés', value: coursTermines || '—', Icon: CheckSquare, color: '#7c3aed' },
+            { label: 'Niveau', value: `Niv. ${niveau}`, Icon: Zap, color: '#ea580c' },
           ].map((s, i) => (
             <div key={i} className="bg-white rounded-2xl p-5 border border-gray-100">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm text-gray-400">{s.label}</p>
-                <span className="text-xl">{s.icon}</span>
+                <s.Icon className="w-5 h-5 text-gray-300" />
               </div>
               <p className="text-3xl font-bold" style={{ color: s.color }}>{s.value}</p>
-              {i === 3 && (
+              {i === 2 && (
                 <div className="mt-3">
                   <ProgressBar value={xpPct} color={sc.color} />
                   <p className="text-xs text-gray-400 mt-1">{xp % xpCap} / {xpCap} XP</p>
@@ -221,9 +222,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                 return (
                   <Link key={i} href={`/cours/${m.code?.toLowerCase()}`}
                     className="p-3 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group">
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center text-xl mb-2"
-                      style={{ backgroundColor: ms.color + '18' }}>
-                      {ms.icon}
+                    <div className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold mb-2"
+                      style={{ backgroundColor: ms.color + '18', color: ms.color }}>
+                      {(m.code ?? '').substring(0, 2).toUpperCase()}
                     </div>
                     <p className="text-xs font-semibold text-gray-700 mb-1 truncate">{m.nom ?? ms.nom}</p>
                     <p className="text-xl font-bold mb-1.5" style={{ color: barColor }}>{m.pct}%</p>
@@ -270,9 +271,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
               </span>
             </div>
             <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                style={{ backgroundColor: matStyle(faible?.code).color + '18' }}>
-                {matStyle(faible?.code).icon}
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                style={{ backgroundColor: matStyle(faible?.code).color + '18', color: matStyle(faible?.code).color }}>
+                {(faible?.code ?? '').substring(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900 text-sm">{matStyle(faible?.code).nom}</p>
@@ -296,7 +297,8 @@ export default function DashboardClient({ profile, matieres, progressions, exame
               <div className="space-y-3">
                 {activite.map((a: any, i: number) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={{ backgroundColor: matStyle(a.code).color + '18', color: matStyle(a.code).color }}>
                       {a.icon}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -363,11 +365,10 @@ export default function DashboardClient({ profile, matieres, progressions, exame
         </div>
 
         {/* Stats row */}
-        <div className="px-4 mt-3 grid grid-cols-3 gap-2">
+        <div className="px-4 mt-3 grid grid-cols-2 gap-2">
           {[
             { label: 'Examens', value: examens.length || '—', color: '#16a34a' },
-            { label: 'Moyenne', value: moyenne !== null ? `${moyenne}/20` : '—', color: moyenne !== null && moyenne >= sc.targetNote ? '#16a34a' : '#3b82f6' },
-            { label: 'Cours', value: coursTermines || '—', color: '#7c3aed' },
+            { label: 'Cours terminés', value: coursTermines || '—', color: '#7c3aed' },
           ].map((s, i) => (
             <div key={i} className="bg-white rounded-2xl p-3 text-center border border-gray-100">
               <p className="text-2xl font-bold" style={{ color: s.color }}>{s.value}</p>
@@ -438,9 +439,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                 <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">IA</span>
               </div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                  style={{ backgroundColor: matStyle(faible?.code).color + '18' }}>
-                  {matStyle(faible?.code).icon}
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                  style={{ backgroundColor: matStyle(faible?.code).color + '18', color: matStyle(faible?.code).color }}>
+                  {(faible?.code ?? '').substring(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900 text-sm">{matStyle(faible?.code).nom}</p>
@@ -463,7 +464,10 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                 <div className="space-y-3">
                   {activite.map((a: any, i: number) => (
                     <div key={i} className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-lg">{a.icon}</div>
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold"
+                        style={{ backgroundColor: matStyle(a.code).color + '18', color: matStyle(a.code).color }}>
+                        {a.icon}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-800 truncate">{a.titre}</p>
                         <p className="text-xs text-gray-400">{a.time}</p>
@@ -488,9 +492,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
               return (
                 <Link key={i} href={`/cours/${m.code?.toLowerCase()}`}
                   className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-gray-100">
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-                    style={{ backgroundColor: ms.color + '18' }}>
-                    {ms.icon}
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ backgroundColor: ms.color + '18', color: ms.color }}>
+                    {(m.code ?? '').substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
