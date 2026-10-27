@@ -5,7 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import {
   MessageSquare, Users, Plus, Send, X, BookOpen,
   Heart, ChevronRight, Search, Flame, Hash, Flag, AlertTriangle,
-  ArrowLeft, ChevronLeft
+  ArrowLeft, ChevronLeft, CheckCircle, Ban, Frown, Pin, ClipboardList,
+  ShieldOff, HelpCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
@@ -53,19 +54,19 @@ interface Props {
 
 const MATIERES = ['MATH', 'PC', 'SVT', 'FR', 'HG', 'ANG', 'PHILO', 'ECO']
 
-const MAT: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  MATH:  { label: 'Maths',       icon: '📐', color: 'text-blue-600',   bg: 'bg-blue-50' },
-  PC:    { label: 'Physique',    icon: '⚗️', color: 'text-orange-600', bg: 'bg-orange-50' },
-  SVT:   { label: 'SVT',        icon: '🌿', color: 'text-green-600',  bg: 'bg-green-50' },
-  FR:    { label: 'Français',   icon: '📖', color: 'text-violet-600', bg: 'bg-violet-50' },
-  HG:    { label: 'Hist-Géo',   icon: '🌍', color: 'text-yellow-600', bg: 'bg-yellow-50' },
-  ANG:   { label: 'Anglais',    icon: '🇬🇧', color: 'text-pink-600',   bg: 'bg-pink-50' },
-  PHILO: { label: 'Philo',      icon: '🏛️', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  ECO:   { label: 'Économie',   icon: '📊', color: 'text-teal-600',   bg: 'bg-teal-50' },
+const MAT: Record<string, { label: string; abbr: string; color: string; bg: string; hex: string }> = {
+  MATH:  { label: 'Maths',    abbr: 'MA', color: 'text-blue-600',   bg: 'bg-blue-50',   hex: '#2563eb' },
+  PC:    { label: 'Physique', abbr: 'PC', color: 'text-orange-600', bg: 'bg-orange-50', hex: '#ea580c' },
+  SVT:   { label: 'SVT',     abbr: 'SV', color: 'text-green-600',  bg: 'bg-green-50',  hex: '#16a34a' },
+  FR:    { label: 'Français', abbr: 'FR', color: 'text-violet-600', bg: 'bg-violet-50', hex: '#7c3aed' },
+  HG:    { label: 'Hist-Géo', abbr: 'HG', color: 'text-yellow-600', bg: 'bg-yellow-50', hex: '#ca8a04' },
+  ANG:   { label: 'Anglais',  abbr: 'AN', color: 'text-pink-600',   bg: 'bg-pink-50',   hex: '#db2777' },
+  PHILO: { label: 'Philo',    abbr: 'PH', color: 'text-indigo-600', bg: 'bg-indigo-50', hex: '#4f46e5' },
+  ECO:   { label: 'Économie', abbr: 'EC', color: 'text-teal-600',   bg: 'bg-teal-50',   hex: '#0891b2' },
 }
 
 function matInfo(code: string | null) {
-  return code ? MAT[code] ?? { label: code, icon: '📚', color: 'text-gray-600', bg: 'bg-gray-50' } : null
+  return code ? MAT[code] ?? { label: code, abbr: (code as string).substring(0, 2).toUpperCase(), color: 'text-gray-600', bg: 'bg-gray-50', hex: '#6b7280' } : null
 }
 
 function relTime(d: string): string {
@@ -97,12 +98,12 @@ function avatarColor(name: string = ''): string {
 // ─── Composant PostCard ───────────────────────────────────────────────────────
 
 const RAISONS_SIGNALEMENT = [
-  { value: 'spam', label: '🚫 Spam' },
-  { value: 'harcelement', label: '😡 Harcèlement' },
-  { value: 'hors_sujet', label: '📌 Hors-sujet' },
-  { value: 'triche', label: '📋 Triche' },
-  { value: 'contenu_sexuel', label: '🔞 Contenu inapproprié' },
-  { value: 'autre', label: '❓ Autre' },
+  { value: 'spam', label: 'Spam' },
+  { value: 'harcelement', label: 'Harcèlement' },
+  { value: 'hors_sujet', label: 'Hors-sujet' },
+  { value: 'triche', label: 'Triche' },
+  { value: 'contenu_sexuel', label: 'Contenu inapproprié' },
+  { value: 'autre', label: 'Autre' },
 ]
 
 function PostCard({ post, onLike, alreadyLiked, userId, supabase }: {
@@ -149,8 +150,8 @@ function PostCard({ post, onLike, alreadyLiked, userId, supabase }: {
           </p>
         </div>
         {mi && (
-          <span className={`flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-full flex-shrink-0 ${mi.bg} ${mi.color}`}>
-            <span>{mi.icon}</span>{mi.label}
+          <span className={`text-[10px] font-semibold px-2 py-1 rounded-full flex-shrink-0 ${mi.bg} ${mi.color}`}>
+            {mi.label}
           </span>
         )}
       </div>
@@ -189,7 +190,7 @@ function PostCard({ post, onLike, alreadyLiked, userId, supabase }: {
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
             {signalementEnvoye ? (
               <div className="text-center py-4">
-                <div className="text-3xl mb-2">✅</div>
+                <div className="flex justify-center mb-2"><CheckCircle className="w-10 h-10 text-green-500" /></div>
                 <p className="font-bold text-gray-900 dark:text-white text-sm">Signalement envoyé</p>
                 <p className="text-xs text-gray-400 mt-1">Notre équipe va examiner ce contenu</p>
               </div>
@@ -314,8 +315,8 @@ function GroupeChat({ groupe, userId, profile, onClose, supabase }: {
         <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-800 active:scale-95 transition-transform">
           <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
         </button>
-        <div className={`w-9 h-9 ${mi ? mi.bg : 'bg-green-50'} rounded-xl flex items-center justify-center text-lg flex-shrink-0`}>
-          {mi ? mi.icon : '📚'}
+        <div className={`w-9 h-9 ${mi ? mi.bg : 'bg-green-50'} rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${mi ? mi.color : 'text-green-700'}`}>
+          {mi ? mi.abbr : <BookOpen className="w-4 h-4" />}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{groupe.nom}</p>
@@ -404,8 +405,8 @@ function GroupeCard({ groupe, userId, onJoin, onLeave, onOpenChat }: {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 border border-gray-100 dark:border-gray-800">
       <div className="flex items-start gap-3">
-        <div className={`w-11 h-11 ${mi ? mi.bg : 'bg-green-50'} rounded-xl flex items-center justify-center text-2xl flex-shrink-0`}>
-          {mi ? mi.icon : '📚'}
+        <div className={`w-11 h-11 ${mi ? mi.bg : 'bg-green-50'} rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${mi ? mi.color : 'text-green-700'}`}>
+          {mi ? mi.abbr : <BookOpen className="w-5 h-5" />}
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-bold text-gray-900 dark:text-white leading-snug">{groupe.nom}</h3>
@@ -418,7 +419,7 @@ function GroupeCard({ groupe, userId, onJoin, onLeave, onOpenChat }: {
                 {mi.label}
               </span>
             )}
-            <span className="text-[10px] text-gray-400">👥 {nb}/{groupe.max_membres}</span>
+            <span className="inline-flex items-center gap-1 text-[10px] text-gray-400"><Users className="w-3 h-3" /> {nb}/{groupe.max_membres}</span>
           </div>
           {/* Barre membres */}
           <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1 mt-2">
@@ -678,7 +679,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
                   <button key={m} onClick={() => setFiltreMatiere(filtreMatiere === m ? null : m)}
                     className={cn('flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0 transition',
                       filtreMatiere === m ? 'bg-green-500 text-white shadow-sm' : `${mi.bg} ${mi.color}`)}>
-                    {mi.icon} {mi.label}
+                    {mi.abbr} {mi.label}
                   </button>
                 )
               })}
@@ -800,7 +801,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
                 <button key={m} onClick={() => setNewPost(p => ({ ...p, matiere: m }))}
                   className={cn('flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition',
                     newPost.matiere === m ? 'bg-green-500 text-white' : `${MAT[m].bg} ${MAT[m].color}`)}>
-                  {MAT[m].icon} {MAT[m].label}
+                  {MAT[m].abbr} {MAT[m].label}
                 </button>
               ))}
             </div>
@@ -834,7 +835,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
               <select value={newPost.matiere} onChange={e => setNewPost(p => ({ ...p, matiere: e.target.value }))}
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm">
                 <option value="">Matière (optionnel)</option>
-                {MATIERES.map(m => <option key={m} value={m}>{MAT[m].icon} {MAT[m].label}</option>)}
+                {MATIERES.map(m => <option key={m} value={m}>{MAT[m].abbr} {MAT[m].label}</option>)}
               </select>
               <button onClick={handleCreatePost} disabled={loading || !newPost.titre.trim()}
                 className="w-full py-3 bg-green-500 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-green-600 transition">
@@ -859,7 +860,7 @@ export default function CommunauteClient({ userId, profile, postsInitiaux, group
                 <button key={m} onClick={() => setNewGroupe(g => ({ ...g, matiere: newGroupe.matiere === m ? '' : m }))}
                   className={cn('flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition',
                     newGroupe.matiere === m ? 'bg-green-500 text-white' : `${MAT[m].bg} ${MAT[m].color}`)}>
-                  {MAT[m].icon} {MAT[m].label}
+                  {MAT[m].abbr} {MAT[m].label}
                 </button>
               ))}
             </div>
