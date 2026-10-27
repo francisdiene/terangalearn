@@ -75,7 +75,7 @@ export default function GenerateExercise({ userId, coursTitre, coursContenu }: P
         <h3 className="font-bold text-gray-900">Exercice généré par IA</h3>
         {xpGagne && (
           <span className="ml-auto text-xs bg-green text-white px-2 py-0.5 rounded-full font-medium">
-            +10 XP ✓
+            +10 XP
           </span>
         )}
       </div>
@@ -149,8 +149,10 @@ export default function GenerateExercise({ userId, coursTitre, coursContenu }: P
               'rounded-xl p-4 text-sm leading-relaxed',
               correction === 'correct' ? 'bg-green-light' : 'bg-red-50'
             )}>
-              <p className={cn('font-bold mb-1', correction === 'correct' ? 'text-green' : 'text-red-600')}>
-                {correction === 'correct' ? '✅ Bonne réponse !' : '❌ Mauvaise réponse'}
+              <p className={cn('font-bold mb-1 flex items-center gap-1.5', correction === 'correct' ? 'text-green' : 'text-red-600')}>
+                {correction === 'correct'
+                  ? <><CheckCircle2 className="w-4 h-4" /> Bonne réponse !</>
+                  : <><XCircle className="w-4 h-4" /> Mauvaise réponse</>}
               </p>
               <p className={correction === 'correct' ? 'text-green/80' : 'text-red-700'}>
                 {exercice.explication}
