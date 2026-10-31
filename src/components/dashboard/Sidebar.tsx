@@ -4,14 +4,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { Profile } from '@/types'
 import {
   LayoutDashboard, BookOpen, PenTool, Bot,
   Trophy, User, LogOut, Zap, Users, Calendar,
   GraduationCap, FileText, Library,
-  Settings, Swords, Moon, Sun
+  Settings, Swords
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -36,9 +35,6 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
-  const { theme, setTheme } = useTheme()
-
-  const isDark = theme === 'dark'
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -53,37 +49,21 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
   return (
     <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen w-64 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-700 card-shadow z-40 overflow-y-auto">
 
-      {/* Logo + Mode nuit */}
+      {/* Logo */}
       <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo.png"
-              alt="TerangaLearn"
-              width={48}
-              height={48}
-              className="object-contain"
-              priority
-            />
-            <div>
-              <h1 className="font-bold text-green text-lg leading-none">TerangaLearn</h1>
-              <p className="text-xs text-gray-400 mt-0.5">Réussis ton examen</p>
-            </div>
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="TerangaLearn"
+            width={48}
+            height={48}
+            className="object-contain"
+            priority
+          />
+          <div>
+            <h1 className="font-bold text-green text-lg leading-none">TerangaLearn</h1>
+            <p className="text-xs text-gray-400 mt-0.5">Réussis ton examen</p>
           </div>
-
-          {/* Bouton mode nuit */}
-          <button
-            onClick={() => setTheme(isDark ? 'light' : 'dark')}
-            className={cn(
-              'w-9 h-9 rounded-xl flex items-center justify-center transition flex-shrink-0',
-              isDark
-                ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            )}
-            title={isDark ? 'Mode clair' : 'Mode sombre'}
-          >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
         </div>
       </div>
 
