@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, X, Eye, ChevronDown, ChevronUp } from 'lucide-react'
+import { useState } from 'react'
+import { useEffect } from 'react'
+import { Search, X, Eye, ChevronDown, ChevronUp, BookOpen, CheckSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Profile } from '@/types'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -16,7 +17,8 @@ interface Epreuve {
   type: 'bac' | 'bfem' | 'exercice' | 'devoir' | 'corrige'
   annee: number | null
   pdf_url: string
-  tour?: 1 | 2  // 1er tour ou 2ème tour
+  tour?: 1 | 2
+  serie?: string | null
 }
 
 interface Props {
@@ -43,24 +45,36 @@ const MATIERES_LABELS: Record<string, string> = {
   PC:    'Physique-Chimie',
   SVT:   'SVT',
   FR:    'Français',
-  HG:    'Histoire-Géographie',
+  HG:    'Histoire-Géo',
   EN:    'Anglais',
   PHILO: 'Philosophie',
   ECO:   'Économie',
-  AUTRE: 'Autres matières',
+  AUTRE: 'Autres',
 }
 
-// Couleur badge par matière
-const MATIERES_COLORS: Record<string, string> = {
-  MATH:  'bg-blue-50 text-blue-700',
-  PC:    'bg-purple-50 text-purple-700',
-  SVT:   'bg-green-50 text-green-700',
-  FR:    'bg-orange-50 text-orange-700',
-  PHILO: 'bg-pink-50 text-pink-700',
-  HG:    'bg-amber-50 text-amber-700',
-  EN:    'bg-cyan-50 text-cyan-700',
-  ECO:   'bg-emerald-50 text-emerald-700',
-  AUTRE: 'bg-gray-100 text-gray-600',
+const MATIERES_ABBR: Record<string, string> = {
+  MATH:  'MA',
+  PC:    'PC',
+  SVT:   'SV',
+  FR:    'FR',
+  HG:    'HG',
+  EN:    'EN',
+  PHILO: 'PH',
+  ECO:   'EC',
+  AUTRE: '??',
+}
+
+// Couleurs par matière — fond card + texte abbr + accent
+const MATIERES_CARD: Record<string, { bg: string; badge: string; accent: string }> = {
+  MATH:  { bg: 'bg-blue-50',    badge: 'bg-blue-100 text-blue-700',    accent: 'text-blue-600' },
+  PC:    { bg: 'bg-purple-50',  badge: 'bg-purple-100 text-purple-700',accent: 'text-purple-600' },
+  SVT:   { bg: 'bg-green-50',   badge: 'bg-green-100 text-green-700',  accent: 'text-green-600' },
+  FR:    { bg: 'bg-orange-50',  badge: 'bg-orange-100 text-orange-700',accent: 'text-orange-600' },
+  PHILO: { bg: 'bg-pink-50',    badge: 'bg-pink-100 text-pink-700',    accent: 'text-pink-600' },
+  HG:    { bg: 'bg-amber-50',   badge: 'bg-amber-100 text-amber-700',  accent: 'text-amber-600' },
+  EN:    { bg: 'bg-cyan-50',    badge: 'bg-cyan-100 text-cyan-700',    accent: 'text-cyan-600' },
+  ECO:   { bg: 'bg-emerald-50', badge: 'bg-emerald-100 text-emerald-700', accent: 'text-emerald-600' },
+  AUTRE: { bg: 'bg-gray-50',    badge: 'bg-gray-100 text-gray-600',    accent: 'text-gray-500' },
 }
 
 function ExamenCountdown({ classe }: { classe: string }) {
@@ -98,37 +112,25 @@ function ExamenCountdown({ classe }: { classe: string }) {
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0f5c34] to-[#1a7a4a] p-5 text-white shadow-lg">
-      {/* Cercle décoratif fond */}
       <div className="absolute -right-6 -top-6 w-32 h-32 rounded-full bg-white/5" />
       <div className="absolute -right-2 -bottom-8 w-20 h-20 rounded-full bg-white/5" />
-
       <div className="relative flex items-center justify-between gap-4">
-        {/* Gauche : label */}
         <div>
-          <p className="text-white/60 text-xs uppercase tracking-widest font-medium">
-            Compte à rebours
-          </p>
+          <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Compte à rebours</p>
           <p className="text-white font-bold text-lg mt-0.5">
             {examen.nom} <span className="text-white/70">{examen.annee}</span>
           </p>
-          {/* hh:mm:ss en petit en dessous */}
           <p className="font-mono text-white/50 text-xs mt-1 tracking-widest">
             {pad(heures)}:{pad(minutes)}:{pad(secs)}
           </p>
         </div>
-
-        {/* Droite : chiffre principal */}
         <div className="text-right flex-shrink-0">
           <div className="flex items-baseline gap-1.5 justify-end">
-            <span className="font-mono font-black text-5xl leading-none tracking-tight">
-              {jours}
-            </span>
+            <span className="font-mono font-black text-5xl leading-none tracking-tight">{jours}</span>
             <span className="text-white/70 font-semibold text-base">J</span>
           </div>
           {mois > 0 && (
-            <p className="text-white/50 text-xs font-mono mt-0.5 text-right">
-              ~{mois} mois
-            </p>
+            <p className="text-white/50 text-xs font-mono mt-0.5 text-right">~{mois} mois</p>
           )}
         </div>
       </div>
@@ -136,71 +138,235 @@ function ExamenCountdown({ classe }: { classe: string }) {
   )
 }
 
+// ─── Carte matière ─────────────────────────────────────────────────────────────
+
+interface MatiereCardProps {
+  matiere: string
+  annees: {
+    annee: number
+    tour: number
+    serie: string | null
+    sujet?: Epreuve
+    corrige?: Epreuve
+  }[]
+  onOpen: (e: Epreuve) => void
+  filtreSujet: boolean
+  filtreCorrige: boolean
+}
+
+function MatiereCard({ matiere, annees, onOpen, filtreSujet, filtreCorrige }: MatiereCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const colors = MATIERES_CARD[matiere] ?? MATIERES_CARD.AUTRE
+  const abbr = MATIERES_ABBR[matiere] ?? '??'
+  const label = MATIERES_LABELS[matiere] ?? matiere
+
+  const hasSujet  = annees.some(a => a.sujet)
+  const hasCorrige = annees.some(a => a.corrige)
+
+  // Trier les années décroissantes, puis par tour
+  const sortedAnnees = [...annees].sort((a, b) => {
+    if (b.annee !== a.annee) return b.annee - a.annee
+    return a.tour - b.tour
+  })
+
+  return (
+    <div className={cn('rounded-2xl overflow-hidden card-shadow transition-all', colors.bg)}>
+      {/* En-tête card */}
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="w-full p-4 flex flex-col gap-3 hover:brightness-95 transition"
+      >
+        {/* Badge abbr + label */}
+        <div className="flex items-center gap-3">
+          <span className={cn('w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0', colors.badge)}>
+            {abbr}
+          </span>
+          <span className="font-bold text-gray-900 text-sm leading-tight text-left">{label}</span>
+        </div>
+
+        {/* Boutons Sujet / Corrigé */}
+        <div className="flex gap-2">
+          <span className={cn(
+            'flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium flex-1 justify-center',
+            hasSujet ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
+          )}>
+            <BookOpen className="w-3 h-3" />
+            Sujet
+          </span>
+          <span className={cn(
+            'flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium flex-1 justify-center',
+            hasCorrige ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
+          )}>
+            <CheckSquare className="w-3 h-3" />
+            Corrigé
+          </span>
+        </div>
+
+        {/* Expand indicator */}
+        <div className={cn('flex items-center justify-center gap-1 text-xs font-medium', colors.accent)}>
+          {expanded
+            ? <><ChevronUp className="w-3.5 h-3.5" /> Masquer</>
+            : <><ChevronDown className="w-3.5 h-3.5" /> Voir par année</>
+          }
+        </div>
+      </button>
+
+      {/* Liste années */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-white/60">
+              {sortedAnnees.map((a, i) => {
+                const tourLabel = a.tour === 2 ? ' · 2ème' : ''
+                const serieLabel = a.serie ? ` · ${a.serie}` : ''
+                const showSujet   = (!filtreSujet && !filtreCorrige) || filtreSujet
+                const showCorrige = (!filtreSujet && !filtreCorrige) || filtreCorrige
+
+                return (
+                  <div
+                    key={`${a.annee}-${a.tour}-${a.serie ?? ''}`}
+                    className={cn(
+                      'flex items-center justify-between px-4 py-2.5 gap-2',
+                      i % 2 === 0 ? 'bg-white/40' : 'bg-white/20',
+                      'border-b border-white/30 last:border-0'
+                    )}
+                  >
+                    <span className="text-xs font-semibold text-gray-700 shrink-0">
+                      {a.annee}{tourLabel}{serieLabel}
+                    </span>
+                    <div className="flex gap-1.5">
+                      {showSujet && (
+                        a.sujet ? (
+                          <button
+                            onClick={() => onOpen(a.sujet!)}
+                            className="text-xs bg-green-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-green-700 transition"
+                          >
+                            Sujet
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-300 px-2.5 py-1">—</span>
+                        )
+                      )}
+                      {showCorrige && (
+                        a.corrige ? (
+                          <button
+                            onClick={() => onOpen(a.corrige!)}
+                            className="text-xs bg-blue-600 text-white px-2.5 py-1 rounded-lg font-medium hover:bg-blue-700 transition"
+                          >
+                            Corrigé
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-300 px-2.5 py-1">—</span>
+                        )
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─── Composant principal ───────────────────────────────────────────────────────
+
 export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
-  const [search, setSearch] = useState('')
-  const [filtreType, setFiltreType] = useState<'bac' | 'corrige' | null>(null)
-  const [anneesOuvertes, setAnneesOuvertes] = useState<Record<string, boolean>>({ '2026-1': true })
+  const [search, setSearch]       = useState('')
+  const [filtreAnnee, setFiltreAnnee] = useState<number | null>(null)
+  const [filtreSerie, setFiltreSerie] = useState<string | null>(null)
+  const [filtreSujet, setFiltreSujet]   = useState(false)
+  const [filtreCorrige, setFiltreCorrige] = useState(false)
   const [pdfOuvert, setPdfOuvert] = useState<Epreuve | null>(null)
 
-  const classe = profile?.classe ?? '3eme'
+  const classe = profile?.classe ?? 'terminale'
 
-  // Grouper par année + tour + matière
-  // clé : `${annee}-${tour}` ex: "2026-1", "2026-2", "2025-1"
-  const grouped: Record<string, Record<string, { sujet?: Epreuve; corrige?: Epreuve }>> = {}
+  // ── Construire index : matiere → list d'entrées (annee, tour, serie, sujet, corrige)
+  // Clé unique par (matiere, annee, tour, serie)
+  type Entry = { annee: number; tour: number; serie: string | null; sujet?: Epreuve; corrige?: Epreuve }
+  const matiereMap: Record<string, Record<string, Entry>> = {}
 
   epreuves.forEach(e => {
-    const annee = e.annee ?? 0
-    const tour = e.tour ?? 1   // par défaut 1er tour si non renseigné
-    const key = `${annee}-${tour}`
     const matiere = e.matiere ?? 'AUTRE'
+    const annee   = e.annee ?? 0
+    const tour    = e.tour ?? 1
+    const serie   = e.serie ?? null
+    const entryKey = `${annee}-${tour}-${serie ?? ''}`
 
-    if (!grouped[key]) grouped[key] = {}
-    if (!grouped[key][matiere]) grouped[key][matiere] = {}
+    if (!matiereMap[matiere]) matiereMap[matiere] = {}
+    if (!matiereMap[matiere][entryKey]) matiereMap[matiere][entryKey] = { annee, tour, serie }
 
     if (e.type === 'corrige') {
-      grouped[key][matiere].corrige = e
+      matiereMap[matiere][entryKey].corrige = e
     } else {
-      grouped[key][matiere].sujet = e
+      matiereMap[matiere][entryKey].sujet = e
     }
   })
 
-  // Trier : années décroissantes, 1er tour avant 2ème tour
-  const groupKeys = Object.keys(grouped).sort((a, b) => {
-    const [anneeA, tourA] = a.split('-').map(Number)
-    const [anneeB, tourB] = b.split('-').map(Number)
-    if (anneeB !== anneeA) return anneeB - anneeA
-    return tourA - tourB
-  })
+  // ── Listes de filtres disponibles
+  const anneesDispos = Array.from(
+    new Set(epreuves.map(e => e.annee).filter(Boolean) as number[])
+  ).sort((a, b) => b - a)
 
-  const toggleGroupe = (key: string) => {
-    setAnneesOuvertes(prev => ({ ...prev, [key]: !prev[key] }))
+  const seriesDispos = Array.from(
+    new Set(epreuves.map(e => e.serie).filter(Boolean) as string[])
+  ).sort()
+
+  // ── Filtrer les matières
+  const matieresFiltrees = Object.keys(matiereMap)
+    .filter(m => {
+      // Filtre recherche
+      if (search) {
+        const label = MATIERES_LABELS[m] ?? m
+        if (!label.toLowerCase().includes(search.toLowerCase())) return false
+      }
+      // Filtre année
+      if (filtreAnnee !== null) {
+        const entries = Object.values(matiereMap[m])
+        if (!entries.some(e => e.annee === filtreAnnee)) return false
+      }
+      // Filtre série
+      if (filtreSerie !== null) {
+        const entries = Object.values(matiereMap[m])
+        if (!entries.some(e => e.serie === filtreSerie)) return false
+      }
+      return true
+    })
+    .sort((a, b) => (MATIERES_ORDER[a] ?? 99) - (MATIERES_ORDER[b] ?? 99))
+
+  // Pour chaque matière, filtrer les entrées selon les filtres actifs
+  const getEntriesPourMatiere = (matiere: string): Entry[] => {
+    return Object.values(matiereMap[matiere]).filter(entry => {
+      if (filtreAnnee !== null && entry.annee !== filtreAnnee) return false
+      if (filtreSerie !== null && entry.serie !== filtreSerie) return false
+      return true
+    })
   }
-
-  const matiereMatchSearch = (matiere: string) => {
-    if (!search) return true
-    const label = MATIERES_LABELS[matiere] ?? matiere
-    return label.toLowerCase().includes(search.toLowerCase())
-  }
-
-  // Trier les matières selon l'ordre officiel
-  const sortMatieres = (matieres: string[]) =>
-    [...matieres].sort((a, b) => (MATIERES_ORDER[a] ?? 99) - (MATIERES_ORDER[b] ?? 99))
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
 
+      {/* Titre */}
       <div>
         <h1 className="text-xl font-bold text-gray-900">
           Sujets {classe === '3eme' ? 'BFEM' : 'BAC'} — Années précédentes
         </h1>
         <p className="text-gray-500 text-sm mt-0.5">
-          {epreuves.length} documents disponibles avec corrigés
+          {epreuves.length} documents disponibles
         </p>
       </div>
 
       <ExamenCountdown classe={classe} />
 
-      {/* Recherche */}
+      {/* Barre de recherche */}
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
         <input
@@ -217,141 +383,102 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
         )}
       </div>
 
-      {/* Filtres type */}
-      <div className="flex gap-2">
-        {([null, 'bac', 'corrige'] as const).map(t => (
+      {/* Filtres */}
+      <div className="space-y-2">
+        {/* Filtre Année */}
+        {anneesDispos.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setFiltreAnnee(null)}
+              className={cn('px-3 py-1 rounded-full text-xs font-medium transition',
+                filtreAnnee === null ? 'bg-green text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              )}
+            >
+              Toutes années
+            </button>
+            {anneesDispos.map(a => (
+              <button
+                key={a}
+                onClick={() => setFiltreAnnee(filtreAnnee === a ? null : a)}
+                className={cn('px-3 py-1 rounded-full text-xs font-medium transition',
+                  filtreAnnee === a ? 'bg-green text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                )}
+              >
+                {a}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Filtre Série */}
+        {seriesDispos.length > 0 && (
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setFiltreSerie(null)}
+              className={cn('px-3 py-1 rounded-full text-xs font-medium transition',
+                filtreSerie === null ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              )}
+            >
+              Toutes séries
+            </button>
+            {seriesDispos.map(s => (
+              <button
+                key={s}
+                onClick={() => setFiltreSerie(filtreSerie === s ? null : s)}
+                className={cn('px-3 py-1 rounded-full text-xs font-medium transition',
+                  filtreSerie === s ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Filtre Sujet / Corrigé */}
+        <div className="flex gap-2">
           <button
-            key={t ?? 'tous'}
-            onClick={() => setFiltreType(t)}
-            className={cn(
-              'px-4 py-1.5 rounded-full text-xs font-medium transition',
-              filtreType === t ? 'bg-green text-white' : 'bg-gray-100 text-gray-600'
+            onClick={() => setFiltreSujet(v => !v)}
+            className={cn('flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition',
+              filtreSujet ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             )}
           >
-            {t === null ? 'Tout' : t === 'bac' ? 'Sujets' : 'Corrigés'}
+            <BookOpen className="w-3 h-3" />
+            Sujets
           </button>
-        ))}
+          <button
+            onClick={() => setFiltreCorrige(v => !v)}
+            className={cn('flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition',
+              filtreCorrige ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            )}
+          >
+            <CheckSquare className="w-3 h-3" />
+            Corrigés
+          </button>
+        </div>
       </div>
 
-      {/* Contenu groupé par année + tour */}
-      <div className="space-y-4">
-        {groupKeys.map(key => {
-          const [annee, tour] = key.split('-').map(Number)
-          const matieresBrutes = Object.keys(grouped[key]).filter(matiereMatchSearch)
-          const matieresDuGroupe = sortMatieres(matieresBrutes)
-          if (matieresDuGroupe.length === 0) return null
-          const isOpen = anneesOuvertes[key] ?? false
-
-          const labelTour = tour === 2 ? '2ème tour' : '1er tour'
-          const colorTour = tour === 2
-            ? 'bg-amber-50 text-amber-700 border border-amber-200'
-            : 'bg-green-light text-green'
-
-          return (
-            <div key={key} className="bg-white rounded-2xl card-shadow overflow-hidden">
-
-              {/* Header groupe */}
-              <button
-                onClick={() => toggleGroupe(key)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition"
-              >
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="font-bold text-gray-900 text-base">
-                    {classe === '3eme' ? 'BFEM' : 'BAC'} {annee}
-                  </span>
-                  {/* Badge 1er/2ème tour */}
-                  <span className={cn('text-xs px-2.5 py-0.5 rounded-full font-semibold', colorTour)}>
-                    {labelTour}
-                  </span>
-                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
-                    {matieresDuGroupe.length} matières
-                  </span>
-                </div>
-                {isOpen
-                  ? <ChevronUp className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  : <ChevronDown className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                }
-              </button>
-
-              {/* Table des matières */}
-              <AnimatePresence>
-                {isOpen && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="border-t border-gray-100">
-                      {/* En-têtes colonnes */}
-                      <div className="grid grid-cols-3 px-5 py-2 bg-gray-50 border-b border-gray-100">
-                        <span className="text-xs font-semibold text-gray-500">Matière</span>
-                        <span className="text-xs font-semibold text-gray-500 text-center">Sujet</span>
-                        <span className="text-xs font-semibold text-gray-500 text-center">Corrigé</span>
-                      </div>
-
-                      {/* Lignes matières — triées dans l'ordre officiel */}
-                      {matieresDuGroupe.map((matiere, i) => {
-                        const { sujet, corrige } = grouped[key][matiere]
-                        const afficherSujet = !filtreType || filtreType === 'bac'
-                        const afficherCorrige = !filtreType || filtreType === 'corrige'
-
-                        return (
-                          <div
-                            key={matiere}
-                            className={cn(
-                              'grid grid-cols-3 px-5 py-3 items-center',
-                              i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50',
-                              'border-b border-gray-100 last:border-0'
-                            )}
-                          >
-                            {/* Badge matière coloré */}
-                            <span className={cn(
-                              'text-xs font-semibold px-2.5 py-1 rounded-lg w-fit',
-                              MATIERES_COLORS[matiere] ?? 'bg-gray-100 text-gray-600'
-                            )}>
-                              {MATIERES_LABELS[matiere] ?? matiere}
-                            </span>
-
-                            <div className="flex justify-center">
-                              {sujet && afficherSujet ? (
-                                <button
-                                  onClick={() => setPdfOuvert(sujet)}
-                                  className="flex items-center gap-1 text-xs bg-green-light text-green px-3 py-1.5 rounded-lg font-medium hover:bg-green hover:text-white transition"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  Voir
-                                </button>
-                              ) : (
-                                <span className="text-xs text-gray-300">—</span>
-                              )}
-                            </div>
-
-                            <div className="flex justify-center">
-                              {corrige && afficherCorrige ? (
-                                <button
-                                  onClick={() => setPdfOuvert(corrige)}
-                                  className="flex items-center gap-1 text-xs bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg font-medium hover:bg-blue-600 hover:text-white transition"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  Corrigé
-                                </button>
-                              ) : (
-                                <span className="text-xs text-gray-300">—</span>
-                              )}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )
-        })}
-      </div>
+      {/* Grille matières */}
+      {matieresFiltrees.length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <p className="text-4xl mb-3">📚</p>
+          <p className="font-medium">Aucune matière trouvée</p>
+          <p className="text-sm mt-1">Essaie d'autres filtres</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {matieresFiltrees.map(matiere => (
+            <MatiereCard
+              key={matiere}
+              matiere={matiere}
+              annees={getEntriesPourMatiere(matiere)}
+              onOpen={setPdfOuvert}
+              filtreSujet={filtreSujet}
+              filtreCorrige={filtreCorrige}
+            />
+          ))}
+        </div>
+      )}
 
       {/* PDF Viewer */}
       <AnimatePresence>
@@ -375,7 +502,8 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
                   <p className="font-bold text-gray-900 text-sm truncate">{pdfOuvert.titre}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
                     {MATIERES_LABELS[pdfOuvert.matiere] ?? pdfOuvert.matiere} — {pdfOuvert.annee}
-                    {pdfOuvert.tour === 2 ? ' · 2ème tour' : ' · 1er tour'}
+                    {pdfOuvert.tour === 2 ? ' · 2ème tour' : ''}
+                    {pdfOuvert.serie ? ` · ${pdfOuvert.serie}` : ''}
                   </p>
                 </div>
                 <button
