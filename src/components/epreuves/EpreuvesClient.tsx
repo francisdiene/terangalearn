@@ -174,27 +174,27 @@ function MatiereCard({ matiere, annees, onOpen, filtreSujet, filtreCorrige }: Ma
       {/* En-tête card */}
       <button
         onClick={() => setExpanded(v => !v)}
-        className="w-full p-4 flex flex-col gap-3 hover:brightness-95 transition"
+        className="w-full p-3 flex flex-col gap-2 hover:brightness-95 transition"
       >
         {/* Badge abbr + label */}
-        <div className="flex items-center gap-3">
-          <span className={cn('w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0', colors.badge)}>
+        <div className="flex items-center gap-2">
+          <span className={cn('w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0', colors.badge)}>
             {abbr}
           </span>
           <span className="font-bold text-gray-900 text-sm leading-tight text-left">{label}</span>
         </div>
 
         {/* Boutons Sujet / Corrigé */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <span className={cn(
-            'flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium flex-1 justify-center',
+            'flex items-center gap-1 text-xs px-2 py-1 rounded-md font-medium flex-1 justify-center',
             hasSujet ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'
           )}>
             <BookOpen className="w-3 h-3" />
             Sujet
           </span>
           <span className={cn(
-            'flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium flex-1 justify-center',
+            'flex items-center gap-1 text-xs px-2 py-1 rounded-md font-medium flex-1 justify-center',
             hasCorrige ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
           )}>
             <CheckSquare className="w-3 h-3" />
@@ -205,8 +205,8 @@ function MatiereCard({ matiere, annees, onOpen, filtreSujet, filtreCorrige }: Ma
         {/* Expand indicator */}
         <div className={cn('flex items-center justify-center gap-1 text-xs font-medium', colors.accent)}>
           {expanded
-            ? <><ChevronUp className="w-3.5 h-3.5" /> Masquer</>
-            : <><ChevronDown className="w-3.5 h-3.5" /> Voir par année</>
+            ? <><ChevronUp className="w-3 h-3" /> Masquer</>
+            : <><ChevronDown className="w-3 h-3" /> Voir par année</>
           }
         </div>
       </button>
@@ -352,7 +352,7 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
+    <div className="max-w-3xl mx-auto space-y-3">
 
       {/* Titre */}
       <div>
@@ -374,7 +374,7 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
           placeholder="Rechercher une matière..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full pl-11 pr-10 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm"
+          className="w-full pl-11 pr-10 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm"
         />
         {search && (
           <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -384,7 +384,7 @@ export default function EpreuvesClient({ userId, profile, epreuves }: Props) {
       </div>
 
       {/* Filtres */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {/* Filtre Année */}
         {anneesDispos.length > 0 && (
           <div className="flex gap-2 flex-wrap">
