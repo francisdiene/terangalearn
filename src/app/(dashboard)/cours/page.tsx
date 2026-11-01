@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen } from 'lucide-react'
+import MatiereIcon from '@/components/ui/MatiereIcon'
 
 export const revalidate = 60 // Cache 60 secondes
 
@@ -39,10 +39,10 @@ export default async function CoursPage() {
             className="bg-white rounded-2xl p-5 card-shadow hover:scale-102 transition-all flex items-center gap-4 group"
           >
             <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-              style={{ backgroundColor: matiere.couleur + '20' }}
+              className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: (matiere.couleur || '#10B981') + '20' }}
             >
-              {matiere.icone}
+              <MatiereIcon code={matiere.code} couleur={matiere.couleur || '#10B981'} size={28} />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-bold text-gray-900 group-hover:text-green transition-colors">
