@@ -97,8 +97,15 @@ Aucune balise.
         })
       })
 
+      if (!response.ok) {
+        const errBody = await response.text()
+        console.error(`Groq error ${response.status} for ${matiere}:`, errBody)
+        questionsParMatiere[matiere] = { matiere, nom: MATIERE_NOMS[matiere], coefficient: coeff, qcm: [], question_ouverte: null }
+        continue
+      }
+
       const data = await response.json()
-      const text = data.choices[0]?.message?.content ?? '{}'
+      const text = data.choices?.[0]?.message?.content ?? '{}'
       const clean = text.replace(/```json|```/g, '').trim()
 
       try {
