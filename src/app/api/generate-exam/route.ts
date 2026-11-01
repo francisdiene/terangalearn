@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODELS = ['llama3-70b-8192', 'llama3-8b-8192', 'gemma2-9b-it', 'mixtral-8x7b-32768']
 
 const COEFFICIENTS: Record<string, Record<string, number>> = {
   S1: { MATH: 5, PC: 4, SVT: 4, FR: 2, HG: 2, EN: 2, PHILO: 2 },
@@ -83,36 +84,43 @@ Aucun bloc Markdown.
 Aucune balise.
 `;
 
-      const response = await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama3-70b-8192',
-          max_tokens: 2048,
-          temperature: 0.7,
-          messages: [{ role: 'user', content: prompt }]
+      let parsed = null
+      for (const model of GROQ_MODELS) {
+        const response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 2048,
+            temperature: 0.7,
+            messages: [{ role: 'user', content: prompt }]
+          })
         })
-      })
 
-      if (!response.ok) {
-        const errBody = await response.text()
-        console.error(`Groq error ${response.status} for ${matiere}:`, errBody)
-        questionsParMatiere[matiere] = { matiere, nom: MATIERE_NOMS[matiere], coefficient: coeff, qcm: [], question_ouverte: null }
-        continue
+        if (!response.ok) {
+          const errBody = await response.text()
+          console.error(`Groq error ${response.status} model=${model} matiere=${matiere}:`, errBody)
+          continue // essaie le modèle suivant
+        }
+
+        const data = await response.json()
+        const text = data.choices?.[0]?.message?.content ?? '{}'
+        const clean = text.replace(/```json|```/g, '').trim()
+
+        try {
+          parsed = JSON.parse(clean)
+          console.log(`OK model=${model} matiere=${matiere}`)
+          break // succès, on arrête
+        } catch {
+          console.error(`JSON parse error model=${model} matiere=${matiere}`)
+          continue
+        }
       }
 
-      const data = await response.json()
-      const text = data.choices?.[0]?.message?.content ?? '{}'
-      const clean = text.replace(/```json|```/g, '').trim()
-
-      try {
-        questionsParMatiere[matiere] = JSON.parse(clean)
-      } catch {
-        questionsParMatiere[matiere] = { matiere, nom: MATIERE_NOMS[matiere], coefficient: coeff, qcm: [], question_ouverte: null }
-      }
+      questionsParMatiere[matiere] = parsed ?? { matiere, nom: MATIERE_NOMS[matiere], coefficient: coeff, qcm: [], question_ouverte: null }
     }
 
     return NextResponse.json({ questions: questionsParMatiere })
