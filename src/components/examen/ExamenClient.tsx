@@ -143,8 +143,13 @@ export default function ExamenClient({ userId, profile }: Props) {
       body: JSON.stringify({ questions, reponses })
     })
     const data = await res.json()
+    if (data.error || !data.corrections) {
+      alert('Erreur lors de la correction. Réessaie.')
+      setLoading(false)
+      return
+    }
     setCorrections(data.corrections)
-    setNoteFinale(data.note_finale)
+    setNoteFinale(data.note_finale ?? 0)
 
     await supabase.from('examens_simules').insert({
       user_id: userId,

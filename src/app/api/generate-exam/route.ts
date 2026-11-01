@@ -90,7 +90,7 @@ Aucune balise.
           'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 2048,
           temperature: 0.7,
           messages: [{ role: 'user', content: prompt }]
