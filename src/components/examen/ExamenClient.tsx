@@ -96,6 +96,11 @@ export default function ExamenClient({ userId, profile }: Props) {
       body: JSON.stringify({ serie, matieres: matieresSel })
     })
     const data = await res.json()
+    if (!res.ok || data.error || !data.questions) {
+      alert('Erreur lors de la génération de l\'examen. Vérifie ta connexion et réessaie.')
+      setLoading(false)
+      return
+    }
     setQuestions(data.questions)
     setMatiereActive(matieresSel[0])
     setTempsRestant(matieresSel.length * 45 * 60)
@@ -266,7 +271,7 @@ export default function ExamenClient({ userId, profile }: Props) {
 
   // ===== EXAMEN =====
   if (etape === 'examen') {
-    const dataMatiere = questions[matiereActive]
+    const dataMatiere = questions[matiereActive] ?? { nom: '...', coefficient: 1, qcm: [], question_ouverte: null }
     const reponsesMatiere = reponses[matiereActive] ?? {}
     const matiereIdx = matieresSel.indexOf(matiereActive)
 
