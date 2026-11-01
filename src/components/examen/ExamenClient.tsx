@@ -74,6 +74,7 @@ export default function ExamenClient({ userId, profile }: Props) {
   const [corrections, setCorrections] = useState<any>({})
   const [noteFinale, setNoteFinale] = useState<number>(0)
   const [loading, setLoading] = useState(false)
+  const [erreur, setErreur] = useState<string | null>(null)
   const [matiereActive, setMatiereActive] = useState<string>('')
   const [tempsRestant, setTempsRestant] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -90,6 +91,7 @@ export default function ExamenClient({ userId, profile }: Props) {
     if (matieresSel.length < 2) return
     setLoading(true)
 
+    setErreur(null)
     const res = await fetch('/api/generate-exam', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -97,7 +99,15 @@ export default function ExamenClient({ userId, profile }: Props) {
     })
     const data = await res.json()
     if (!res.ok || data.error || !data.questions) {
-      alert('Erreur lors de la génération de l\'examen. Vérifie ta connexion et réessaie.')
+      setErreur(`Erreur ${res.status} : ${data.error ?? 'Réponse invalide de l\'API'}`)
+      setLoading(false)
+      return
+    }
+
+    // Vérifier que les questions ont bien des QCM
+    const questionsVides = matieresSel.every(m => !data.questions[m]?.qcm?.length)
+    if (questionsVides) {
+      setErreur('L\'IA n\'a pas pu générer les questions. Vérifie que GROQ_API_KEY est configurée dans Vercel.')
       setLoading(false)
       return
     }
@@ -250,6 +260,15 @@ export default function ExamenClient({ userId, profile }: Props) {
                   {matieresSel.length * 45} min ({matieresSel.length}h{matieresSel.length * 45 % 60 > 0 ? `${matieresSel.length * 45 % 60}min` : ''})
                 </span>
               </p>
+            </div>
+          )}
+
+          {erreur && (
+            <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-600">{erreur}</p>
+              </div>
             </div>
           )}
 
