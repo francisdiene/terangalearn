@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TerangaLearn</string>
+    <string name="title_activity_main">TerangaLearn</string>
+    <string name="package_name">sn.terangalearn.app</string>
+    <string name="custom_url_scheme">sn.terangalearn.app</string>
+</resources>

@@ -4,6 +4,7 @@ import './globals.css'
 import type {  Viewport } from 'next'
 import { ThemeProvider } from 'next-themes'
 import ServiceWorkerRegister from '@/components/ui/ServiceWorkerRegister'
+import CapacitorInit from '@/components/ui/CapacitorInit'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -55,6 +56,7 @@ export default function RootLayout({
       <body className={inter.className}>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
     <ServiceWorkerRegister />
+    <CapacitorInit />
     {children}
   </ThemeProvider>
 </body>
