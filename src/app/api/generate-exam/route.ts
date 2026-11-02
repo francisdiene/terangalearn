@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODELS = ['llama3-70b-8192', 'llama3-8b-8192', 'gemma2-9b-it', 'mixtral-8x7b-32768']
+const GROQ_MODELS = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile']
 
 const COEFFICIENTS: Record<string, Record<string, number>> = {
   S1: { MATH: 5, PC: 4, SVT: 4, FR: 2, HG: 2, EN: 2, PHILO: 2 },
