@@ -107,15 +107,28 @@ Aucune balise.
         }
 
         const data = await response.json()
-        const text = data.choices?.[0]?.message?.content ?? '{}'
-        const clean = text.replace(/```json|```/g, '').trim()
+        const text = data.choices?.[0]?.message?.content ?? ''
+        console.log(`RAW model=${model} matiere=${matiere}:`, text.slice(0, 300))
+
+        if (!text) {
+          console.error(`Empty response model=${model} matiere=${matiere}`)
+          continue
+        }
+
+        // Extraction JSON robuste : cherche le premier { ... } de niveau racine
+        const jsonMatch = text.match(/\{[\s\S]*\}/)
+        const clean = jsonMatch ? jsonMatch[0] : text.replace(/```json|```/g, '').trim()
 
         try {
           parsed = JSON.parse(clean)
-          console.log(`OK model=${model} matiere=${matiere}`)
-          break // succès, on arrête
-        } catch {
-          console.error(`JSON parse error model=${model} matiere=${matiere}`)
+          if (!Array.isArray(parsed.qcm) || parsed.qcm.length === 0) {
+            console.error(`Empty qcm model=${model} matiere=${matiere}`)
+            continue
+          }
+          console.log(`OK model=${model} matiere=${matiere} qcm=${parsed.qcm.length}`)
+          break
+        } catch (e: any) {
+          console.error(`JSON parse error model=${model} matiere=${matiere}:`, e.message, clean.slice(0, 200))
           continue
         }
       }
