@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const API_URL = process.env.OPENROUTER_API_KEY
+  ? 'https://openrouter.ai/api/v1/chat/completions'
+  : 'https://api.groq.com/openai/v1/chat/completions'
+
+const MODEL = process.env.OPENROUTER_API_KEY
+  ? 'meta-llama/llama-3.1-8b-instruct:free'
+  : 'llama-3.1-8b-instant'
+
+const API_KEY = () => process.env.OPENROUTER_API_KEY ?? process.env.GROQ_API_KEY ?? ''
 
 export async function POST(req: NextRequest) {
   try {
@@ -85,14 +93,15 @@ RÈGLES :
 - Aucun Markdown.
 - Aucun texte avant ou après le JSON.
 `;
-        const response = await fetch(GROQ_API_URL, {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            'Authorization': `Bearer ${API_KEY()}`,
+            ...(process.env.OPENROUTER_API_KEY ? { 'HTTP-Referer': 'https://terangalearn-sandy.vercel.app' } : {})
           },
           body: JSON.stringify({
-            model: 'llama-3.1-8b-instant',
+            model: MODEL,
             max_tokens: 512,
             temperature: 0.3,
             messages: [{ role: 'user', content: prompt }]

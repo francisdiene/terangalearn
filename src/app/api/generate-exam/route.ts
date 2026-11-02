@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
-const GROQ_MODELS = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile']
+const API_URL = process.env.OPENROUTER_API_KEY
+  ? 'https://openrouter.ai/api/v1/chat/completions'
+  : 'https://api.groq.com/openai/v1/chat/completions'
+
+const MODELS = process.env.OPENROUTER_API_KEY
+  ? ['meta-llama/llama-3.1-8b-instruct:free', 'meta-llama/llama-3.3-70b-instruct:free']
+  : ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile']
+
+const API_KEY = () => process.env.OPENROUTER_API_KEY ?? process.env.GROQ_API_KEY ?? ''
 
 const COEFFICIENTS: Record<string, Record<string, number>> = {
   S1: { MATH: 5, PC: 4, SVT: 4, FR: 2, HG: 2, EN: 2, PHILO: 2 },
@@ -85,12 +92,13 @@ Aucune balise.
 `;
 
       let parsed = null
-      for (const model of GROQ_MODELS) {
-        const response = await fetch(GROQ_API_URL, {
+      for (const model of MODELS) {
+        const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+            'Authorization': `Bearer ${API_KEY()}`,
+            ...(process.env.OPENROUTER_API_KEY ? { 'HTTP-Referer': 'https://terangalearn-sandy.vercel.app' } : {})
           },
           body: JSON.stringify({
             model,
