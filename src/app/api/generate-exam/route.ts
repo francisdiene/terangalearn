@@ -6,7 +6,7 @@ const API_URL = process.env.OPENROUTER_API_KEY
 
 const MODELS = process.env.OPENROUTER_API_KEY
   ? ['meta-llama/llama-3.1-8b-instruct:free', 'meta-llama/llama-3.3-70b-instruct:free']
-  : ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile']
+  : ['openai/gpt-oss-120b']
 
 const API_KEY = () => process.env.OPENROUTER_API_KEY ?? process.env.GROQ_API_KEY ?? ''
 
