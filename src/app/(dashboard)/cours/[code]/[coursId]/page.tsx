@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, Clock, Zap, BookOpen } from 'lucide-react'
+import { ChevronLeft, Clock, Zap } from 'lucide-react'
 import MarkCoursDone from '@/components/cours/MarkCoursDone'
 import GenerateExercise from '@/components/cours/GenerateExercise'
+import ResumeRapide from '@/components/cours/ResumeRapide'
 
 function formatContenu(contenu: string) {
   const lignes = contenu.split('\n')
@@ -115,15 +116,7 @@ export default async function CoursDetailPage({
       </div>
 
       {/* Résumé */}
-      {cours.resume && (
-        <div className="bg-green-light border-l-4 border-green rounded-r-2xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <BookOpen className="w-4 h-4 text-green" />
-            <p className="text-sm font-bold text-green">Résumé rapide</p>
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">{cours.resume}</p>
-        </div>
-      )}
+      <ResumeRapide coursId={cours.id} resumeInitial={cours.resume ?? null} />
 
       {/* Exercice généré par IA */}
       <GenerateExercise
