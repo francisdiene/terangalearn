@@ -106,11 +106,14 @@ export default function DashboardClient({ profile, matieres, progressions, exame
     const examsM = examens.filter((e: any) => e.matiere_code === code)
     const pct = examsM.length > 0
       ? Math.round((examsM.reduce((a: number, e: any) => a + (e.note ?? 0), 0) / examsM.length / 20) * 100)
-      : [72, 58, 81, 65][i] ?? 68
-    return { ...m, pct }
+      : 0
+    return { ...m, pct, hasData: examsM.length > 0 }
   })
 
-  const faible = [...matCards].sort((a, b) => a.pct - b.pct)[0]
+  const matCardsAvecData = matCards.filter((m: any) => m.hasData)
+  const faible = matCardsAvecData.length > 0
+    ? [...matCardsAvecData].sort((a, b) => a.pct - b.pct)[0]
+    : null
 
   const objectifs = [
     { label: 'Faire 3 exercices',        done: objectifsJour.cours >= 3, xp: 50, href: '/exercices' },
@@ -227,8 +230,10 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                       {(m.code ?? '').substring(0, 2).toUpperCase()}
                     </div>
                     <p className="text-xs font-semibold text-gray-700 mb-1 truncate">{m.nom ?? ms.nom}</p>
-                    <p className="text-xl font-bold mb-1.5" style={{ color: barColor }}>{m.pct}%</p>
-                    <ProgressBar value={m.pct} color={barColor} />
+                    <p className="text-xl font-bold mb-1.5" style={{ color: m.hasData ? barColor : '#d1d5db' }}>
+                      {m.hasData ? `${m.pct}%` : '—'}
+                    </p>
+                    <ProgressBar value={m.pct} color={m.hasData ? barColor : '#e5e7eb'} />
                   </Link>
                 )
               })}
@@ -270,21 +275,37 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                 <Zap className="w-3 h-3" /> IA
               </span>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
-                style={{ backgroundColor: matStyle(faible?.code).color + '18', color: matStyle(faible?.code).color }}>
-                {(faible?.code ?? '').substring(0, 2).toUpperCase()}
+            {faible ? (
+              <>
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ backgroundColor: matStyle(faible.code).color + '18', color: matStyle(faible.code).color }}>
+                    {(faible.code ?? '').substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm">{matStyle(faible.code).nom}</p>
+                    <p className="text-xs text-gray-400 mb-1.5">{faible.pct < 70 ? 'À renforcer' : 'À approfondir'} · {faible.pct}%</p>
+                    <ProgressBar value={faible.pct} color={faible.pct < 70 ? '#f97316' : '#16a34a'} />
+                  </div>
+                </div>
+                <Link href="/exercices"
+                  className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
+                  S'entraîner →
+                </Link>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-4 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
+                  <Star className="w-6 h-6 text-blue-400" />
+                </div>
+                <p className="text-sm font-semibold text-gray-700 mb-1">Commence par un examen !</p>
+                <p className="text-xs text-gray-400 mb-4">Le Coach analysera tes résultats et te guidera.</p>
+                <Link href="/examen"
+                  className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
+                  Faire un examen →
+                </Link>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 text-sm">{matStyle(faible?.code).nom}</p>
-                <p className="text-xs text-gray-400 mb-1.5">{faible?.pct < 70 ? 'À renforcer' : 'À approfondir'} · {faible?.pct}%</p>
-                <ProgressBar value={faible?.pct ?? 65} color={faible?.pct < 70 ? '#f97316' : '#16a34a'} />
-              </div>
-            </div>
-            <Link href="/exercices"
-              className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors">
-              S'entraîner →
-            </Link>
+            )}
           </div>
 
           {/* Activité récente */}
@@ -438,20 +459,32 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                 <span className="font-semibold text-gray-900 text-sm">Coach IA recommande</span>
                 <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">IA</span>
               </div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
-                  style={{ backgroundColor: matStyle(faible?.code).color + '18', color: matStyle(faible?.code).color }}>
-                  {(faible?.code ?? '').substring(0, 2).toUpperCase()}
+              {faible ? (
+                <>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                      style={{ backgroundColor: matStyle(faible.code).color + '18', color: matStyle(faible.code).color }}>
+                      {(faible.code ?? '').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-gray-900 text-sm">{matStyle(faible.code).nom}</p>
+                      <p className="text-xs text-gray-400">{faible.pct}% · {faible.pct < 70 ? 'À renforcer' : 'Bon niveau'}</p>
+                    </div>
+                  </div>
+                  <Link href="/exercices"
+                    className="flex items-center justify-center gap-2 w-full bg-green-500 text-white text-sm font-semibold py-2.5 rounded-xl">
+                    S'entraîner →
+                  </Link>
+                </>
+              ) : (
+                <div className="text-center py-2">
+                  <p className="text-sm text-gray-500 mb-3">Fais ton premier examen pour que le Coach t'aide !</p>
+                  <Link href="/examen"
+                    className="flex items-center justify-center gap-2 w-full bg-green-500 text-white text-sm font-semibold py-2.5 rounded-xl">
+                    Faire un examen →
+                  </Link>
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900 text-sm">{matStyle(faible?.code).nom}</p>
-                  <p className="text-xs text-gray-400">{faible?.pct}% · {faible?.pct < 70 ? 'À renforcer' : 'Bon niveau'}</p>
-                </div>
-              </div>
-              <Link href="/exercices"
-                className="flex items-center justify-center gap-2 w-full bg-green-500 text-white text-sm font-semibold py-2.5 rounded-xl">
-                S'entraîner →
-              </Link>
+              )}
             </div>
 
             {/* Activité */}
@@ -487,8 +520,8 @@ export default function DashboardClient({ profile, matieres, progressions, exame
           <div className="px-4 mt-3 space-y-2 pb-4">
             {matCards.map((m: any, i: number) => {
               const ms = matStyle(m.code)
-              const barColor = m.pct >= 80 ? '#16a34a' : m.pct >= 50 ? '#f97316' : '#ef4444'
-              const status = m.pct >= 80 ? 'Très bon' : m.pct >= 50 ? 'À améliorer' : 'En difficulté'
+              const barColor = !m.hasData ? '#e5e7eb' : m.pct >= 80 ? '#16a34a' : m.pct >= 50 ? '#f97316' : '#ef4444'
+              const status = !m.hasData ? 'Pas encore démarré' : m.pct >= 80 ? 'Très bon' : m.pct >= 50 ? 'À améliorer' : 'En difficulté'
               return (
                 <Link key={i} href={`/cours/${m.code?.toLowerCase()}`}
                   className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-gray-100">
@@ -499,7 +532,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-semibold text-gray-800">{m.nom ?? ms.nom}</p>
-                      <p className="text-base font-bold" style={{ color: barColor }}>{m.pct}%</p>
+                      <p className="text-base font-bold" style={{ color: m.hasData ? barColor : '#d1d5db' }}>
+                        {m.hasData ? `${m.pct}%` : '—'}
+                      </p>
                     </div>
                     <ProgressBar value={m.pct} color={barColor} />
                     <p className="text-xs text-gray-400 mt-1">{status}</p>
