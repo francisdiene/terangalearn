@@ -26,6 +26,16 @@ export default async function SuperAdminPage() {
     { data: sanctions },
     { data: auditLog },
     { data: recentPosts },
+    // Stats plateforme apprentissage
+    { count: totalEleves },
+    { count: nouveaux7j },
+    { count: totalCours },
+    { count: coursAvecResume },
+    { count: totalEpreuves },
+    { count: totalExamens },
+    { count: actifs7j },
+    { data: topEleves },
+    { data: recentExamens },
   ] = await Promise.all([
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('posts').select('*', { count: 'exact', head: true }),
@@ -40,6 +50,16 @@ export default async function SuperAdminPage() {
       .select('id, titre, user_id, created_at, profiles(full_name)')
       .order('created_at', { ascending: false })
       .limit(20),
+    // Plateforme
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).neq('role', 'admin').neq('role', 'super_admin').neq('role', 'moderateur'),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    supabase.from('cours').select('*', { count: 'exact', head: true }),
+    supabase.from('cours').select('*', { count: 'exact', head: true }).not('resume', 'is', null).gt('resume', ''),
+    supabase.from('epreuves').select('*', { count: 'exact', head: true }),
+    supabase.from('examens_simules').select('*', { count: 'exact', head: true }),
+    supabase.from('examens_simules').select('user_id', { count: 'exact', head: true }).gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+    supabase.from('profiles').select('id, full_name, created_at').order('created_at', { ascending: false }).limit(10),
+    supabase.from('examens_simules').select('id, user_id, score, created_at, profiles(full_name)').order('created_at', { ascending: false }).limit(15),
   ])
 
   // Count signalements per post
@@ -78,6 +98,17 @@ export default async function SuperAdminPage() {
       sanctions={sanctions ?? []}
       auditLog={auditLog ?? []}
       recentPosts={postsWithCounts}
+      plateformeStats={{
+        totalEleves: totalEleves ?? 0,
+        nouveaux7j: nouveaux7j ?? 0,
+        totalCours: totalCours ?? 0,
+        coursAvecResume: coursAvecResume ?? 0,
+        totalEpreuves: totalEpreuves ?? 0,
+        totalExamens: totalExamens ?? 0,
+        actifs7j: actifs7j ?? 0,
+      }}
+      topEleves={topEleves ?? []}
+      recentExamens={recentExamens ?? []}
     />
   )
 }

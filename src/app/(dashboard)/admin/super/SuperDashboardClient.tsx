@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Shield, Users, FileText, Flag, AlertTriangle, CheckCircle2, Ban, ChevronDown, ChevronRight, Megaphone, Package, Trash2 } from 'lucide-react'
+import { Shield, Users, FileText, Flag, AlertTriangle, CheckCircle2, Ban, ChevronDown, ChevronRight, Megaphone, Package, Trash2, BookOpen, GraduationCap, FileCheck, Activity, TrendingUp, Sparkles, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-type Tab = 'overview' | 'users' | 'signalements' | 'sanctions' | 'audit' | 'contenu'
+type Tab = 'overview' | 'users' | 'signalements' | 'sanctions' | 'audit' | 'contenu' | 'plateforme'
 
 interface Profile {
   id: string
@@ -57,6 +57,16 @@ const ROLE_COLORS: Record<string, string> = {
   super_admin: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 font-bold',
 }
 
+interface PlateformeStats {
+  totalEleves: number
+  nouveaux7j: number
+  totalCours: number
+  coursAvecResume: number
+  totalEpreuves: number
+  totalExamens: number
+  actifs7j: number
+}
+
 export default function SuperDashboardClient({
   currentUserId,
   stats,
@@ -65,6 +75,9 @@ export default function SuperDashboardClient({
   sanctions,
   auditLog,
   recentPosts,
+  plateformeStats,
+  topEleves,
+  recentExamens,
 }: {
   currentUserId: string
   stats: { totalUsers: number; totalPosts: number; signalements: number; sanctionsActives: number }
@@ -73,10 +86,15 @@ export default function SuperDashboardClient({
   sanctions: any[]
   auditLog: any[]
   recentPosts: PostWithAuthor[]
+  plateformeStats: PlateformeStats
+  topEleves: any[]
+  recentExamens: any[]
 }) {
-  const [tab, setTab] = useState<Tab>('overview')
+  const [tab, setTab] = useState<Tab>('plateforme')
   const [users, setUsers] = useState(recentUsers)
   const [loading, setLoading] = useState<string | null>(null)
+  const [bulkResumeLoading, setBulkResumeLoading] = useState(false)
+  const [bulkResumeResult, setBulkResumeResult] = useState<string | null>(null)
   const supabase = createClient()
 
   // Contenu state
@@ -183,8 +201,46 @@ export default function SuperDashboardClient({
     setAnnonceSaving(false)
   }
 
+  const bulkGenerateResumes = async () => {
+    setBulkResumeLoading(true)
+    setBulkResumeResult(null)
+    try {
+      // Récupère tous les cours sans résumé propre
+      const { data: coursSanResume } = await supabase
+        .from('cours')
+        .select('id')
+        .or('resume.is.null,resume.lt.30')
+        .limit(50)
+
+      if (!coursSanResume || coursSanResume.length === 0) {
+        setBulkResumeResult('Tous les cours ont déjà un résumé ✅')
+        setBulkResumeLoading(false)
+        return
+      }
+
+      let count = 0
+      for (const cours of coursSanResume) {
+        try {
+          const r = await fetch('/api/generate-resume', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ coursId: cours.id }),
+          })
+          if (r.ok) count++
+          // Petite pause pour pas spam l'API
+          await new Promise(res => setTimeout(res, 500))
+        } catch {}
+      }
+      setBulkResumeResult(`${count}/${coursSanResume.length} résumés générés ✅`)
+    } catch {
+      setBulkResumeResult('Erreur lors de la génération')
+    }
+    setBulkResumeLoading(false)
+  }
+
   const tabs = [
-    { key: 'overview', label: '📊 Vue d\'ensemble' },
+    { key: 'plateforme', label: '📚 Plateforme' },
+    { key: 'overview', label: '📊 Forum' },
     { key: 'users', label: `👥 Users (${stats.totalUsers})` },
     { key: 'signalements', label: `🚩 Signalements (${stats.signalements})` },
     { key: 'sanctions', label: `⚖️ Sanctions (${stats.sanctionsActives})` },
@@ -222,6 +278,127 @@ export default function SuperDashboardClient({
           </button>
         ))}
       </div>
+
+      {/* Plateforme apprentissage */}
+      {tab === 'plateforme' && (
+        <div className="space-y-5">
+
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: 'Élèves inscrits', value: plateformeStats.totalEleves, icon: GraduationCap, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-950/40' },
+              { label: 'Nouveaux (7j)', value: plateformeStats.nouveaux7j, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/40' },
+              { label: 'Actifs (7j)', value: plateformeStats.actifs7j, icon: Activity, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-950/40' },
+              { label: 'Examens passés', value: plateformeStats.totalExamens, icon: FileCheck, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-950/40' },
+            ].map(s => (
+              <div key={s.label} className={`${s.bg} rounded-2xl p-4`}>
+                <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
+                <p className={`text-3xl font-black ${s.color}`}>{s.value.toLocaleString('fr-FR')}</p>
+                <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Contenu éducatif */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {[
+              { label: 'Cours total', value: plateformeStats.totalCours, icon: BookOpen, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/40' },
+              { label: 'Cours avec résumé IA', value: plateformeStats.coursAvecResume, icon: Sparkles, color: 'text-yellow-600', bg: 'bg-yellow-50 dark:bg-yellow-950/40', sub: `${plateformeStats.totalCours > 0 ? Math.round(plateformeStats.coursAvecResume / plateformeStats.totalCours * 100) : 0}%` },
+              { label: 'Épreuves disponibles', value: plateformeStats.totalEpreuves, icon: FileText, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-950/40' },
+            ].map(s => (
+              <div key={s.label} className={`${s.bg} rounded-2xl p-4`}>
+                <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
+                <div className="flex items-baseline gap-1.5">
+                  <p className={`text-3xl font-black ${s.color}`}>{s.value.toLocaleString('fr-FR')}</p>
+                  {'sub' in s && s.sub && <span className={`text-sm font-semibold ${s.color} opacity-70`}>{s.sub}</span>}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Génération résumés en masse */}
+          <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-9 h-9 bg-yellow-50 dark:bg-yellow-950/40 rounded-xl flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-yellow-600" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-gray-800 dark:text-gray-200">Génération résumés IA</h2>
+                <p className="text-xs text-gray-400">{plateformeStats.totalCours - plateformeStats.coursAvecResume} cours sans résumé</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={bulkGenerateResumes}
+                disabled={bulkResumeLoading || plateformeStats.totalCours === plateformeStats.coursAvecResume}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition"
+              >
+                <RefreshCw className={cn('w-3.5 h-3.5', bulkResumeLoading && 'animate-spin')} />
+                {bulkResumeLoading ? 'Génération en cours…' : 'Générer tous les résumés manquants'}
+              </button>
+              {bulkResumeResult && (
+                <span className="text-xs text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg">{bulkResumeResult}</span>
+              )}
+            </div>
+          </div>
+
+          {/* Derniers examens passés */}
+          {recentExamens.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+                <FileCheck className="w-4 h-4 text-orange-500" />
+                <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">Derniers examens simulés</h2>
+              </div>
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                {recentExamens.map((e: any) => {
+                  const name = e.profiles?.full_name ?? e.user_id?.slice(0, 8) + '…'
+                  const score = e.score != null ? `${Math.round(e.score)}/20` : '—'
+                  const scoreColor = e.score >= 10 ? 'text-green-600' : 'text-red-500'
+                  return (
+                    <div key={e.id} className="px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-bold text-gray-500">
+                          {name.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{name}</p>
+                        <p className="text-xs text-gray-400">{new Date(e.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+                      </div>
+                      <span className={`text-sm font-black ${scoreColor}`}>{score}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Derniers inscrits */}
+          {topEleves.length > 0 && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-4 pt-4 pb-3 border-b border-gray-100 dark:border-gray-800 flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-500" />
+                <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300">Derniers inscrits</h2>
+              </div>
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                {topEleves.map((u: any, i: number) => (
+                  <div key={u.id} className="px-4 py-3 flex items-center gap-3">
+                    <span className="text-xs text-gray-300 dark:text-gray-600 w-5 font-mono">{i + 1}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">{u.full_name ?? 'Sans nom'}</p>
+                    </div>
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {new Date(u.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+        </div>
+      )}
 
       {/* Overview */}
       {tab === 'overview' && (
