@@ -22,6 +22,29 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
+  // --- Mise à jour du streak ---
+  if (profile) {
+    const today = new Date().toISOString().split('T')[0] // "2026-11-09"
+    const lastSeen = profile.last_seen_date ?? null
+
+    if (lastSeen !== today) {
+      // Vérifie si hier = lastSeen (streak continu)
+      const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+      const newStreak = lastSeen === yesterday
+        ? (profile.streak ?? 0) + 1  // continuité
+        : 1                           // rupture ou première fois
+
+      await supabase
+        .from('profiles')
+        .update({ streak: newStreak, last_seen_date: today })
+        .eq('id', user.id)
+
+      // Mettre à jour l'objet local pour que l'UI reflète la valeur fraîche
+      profile.streak = newStreak
+      profile.last_seen_date = today
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar profile={profile} />
