@@ -103,7 +103,10 @@ export default function DashboardClient({ profile, matieres, progressions, exame
 
   const matCards = sc.matieres.map((code, i) => {
     const m = matieres.find((x: any) => x.code?.toUpperCase() === code) ?? { code, nom: matStyle(code).nom }
-    const examsM = examens.filter((e: any) => e.matiere_code === code)
+    const examsM = examens.filter((e: any) =>
+      e.matiere_code === code ||
+      (Array.isArray(e.matieres) && e.matieres.some((m: string) => m?.toUpperCase() === code))
+    )
     const pct = examsM.length > 0
       ? Math.round((examsM.reduce((a: number, e: any) => a + (e.note_finale ?? e.note ?? 0), 0) / examsM.length / 20) * 100)
       : 0
@@ -123,14 +126,20 @@ export default function DashboardClient({ profile, matieres, progressions, exame
   const objectifsDone = objectifs.filter(o => o.done).length
 
   const activite = [
-    ...examens.slice(0, 2).map((e: any) => ({
-      code: e.matiere_code ?? '',
-      icon: (e.matiere_code ?? 'EX').substring(0, 2).toUpperCase(),
-      titre: e.matiere_code ? matStyle(e.matiere_code).nom : 'Examen',
+    ...examens.slice(0, 2).map((e: any) => {
+      // matiere_code ou premier élément de matieres[]
+      const mCode = e.matiere_code ?? (Array.isArray(e.matieres) ? e.matieres[0] : null)
+      const matiereLabel = Array.isArray(e.matieres) && e.matieres.length > 1
+        ? `Examen (${e.matieres.length} matières)`
+        : mCode ? matStyle(mCode).nom : 'Examen simulé'
+      return ({
+      code: mCode ?? '',
+      icon: mCode ? (mCode as string).substring(0, 2).toUpperCase() : 'EX',
+      titre: matiereLabel,
       note: `${(e.note_finale ?? e.note ?? 0).toFixed(1)}/20`,
       time: relTime(e.created_at),
       ok: (e.note_finale ?? e.note ?? 0) >= 10,
-    })),
+    })}),
     ...progressions.slice(0, 2).map((p: any) => ({
       code: p.cours?.matiere_code ?? '',
       icon: p.cours?.matiere_code ? (p.cours.matiere_code as string).substring(0, 2).toUpperCase() : 'CO',
