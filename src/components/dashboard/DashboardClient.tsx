@@ -94,7 +94,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
   const xpPct  = Math.min(Math.round((xp % xpCap) / xpCap * 100), 100)
 
   const moyenne = examens.length > 0
-    ? Math.round((examens.reduce((a: number, e: any) => a + (e.note ?? 0), 0) / examens.length) * 10) / 10
+    ? Math.round((examens.reduce((a: number, e: any) => a + (e.note_finale ?? e.note ?? 0), 0) / examens.length) * 10) / 10
     : null
 
   const coursTermines = progressions.filter((p: any) => p.termine).length
@@ -105,7 +105,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
     const m = matieres.find((x: any) => x.code?.toUpperCase() === code) ?? { code, nom: matStyle(code).nom }
     const examsM = examens.filter((e: any) => e.matiere_code === code)
     const pct = examsM.length > 0
-      ? Math.round((examsM.reduce((a: number, e: any) => a + (e.note ?? 0), 0) / examsM.length / 20) * 100)
+      ? Math.round((examsM.reduce((a: number, e: any) => a + (e.note_finale ?? e.note ?? 0), 0) / examsM.length / 20) * 100)
       : 0
     return { ...m, pct, hasData: examsM.length > 0 }
   })
@@ -127,9 +127,9 @@ export default function DashboardClient({ profile, matieres, progressions, exame
       code: e.matiere_code ?? '',
       icon: (e.matiere_code ?? 'EX').substring(0, 2).toUpperCase(),
       titre: e.matiere_code ? matStyle(e.matiere_code).nom : 'Examen',
-      note: `${(e.note ?? 0).toFixed(1)}/20`,
+      note: `${(e.note_finale ?? e.note ?? 0).toFixed(1)}/20`,
       time: relTime(e.created_at),
-      ok: (e.note ?? 0) >= 10,
+      ok: (e.note_finale ?? e.note ?? 0) >= 10,
     })),
     ...progressions.slice(0, 2).map((p: any) => ({
       code: p.cours?.matiere_code ?? '',
