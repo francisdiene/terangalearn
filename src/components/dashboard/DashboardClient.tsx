@@ -74,11 +74,12 @@ interface Props {
   profile: any; matieres: any[]; progressions: any[]
   examens: any[]; badges: any[]
   objectifsJour: { examens: number; cours: number }
+  coursTerminesCount?: number
 }
 
 // ─── Composant ────────────────────────────────────────────────────────────────
 
-export default function DashboardClient({ profile, matieres, progressions, examens, badges, objectifsJour }: Props) {
+export default function DashboardClient({ profile, matieres, progressions, examens, badges, objectifsJour, coursTerminesCount }: Props) {
   const [tab, setTab] = useState<'today' | 'matieres'>('today')
 
   const prenom  = profile?.full_name?.split(' ')[0] ?? 'Élève'
@@ -97,7 +98,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
     ? Math.round((examens.reduce((a: number, e: any) => a + (e.note_finale ?? e.note ?? 0), 0) / examens.length) * 10) / 10
     : null
 
-  const coursTermines = progressions.filter((p: any) => p.termine).length
+  const coursTermines = coursTerminesCount ?? progressions.filter((p: any) => p.termine === true).length
   const enCours = progressions.find((p: any) => !p.termine)
   const titreCours = enCours?.cours?.titre ?? 'Commence ton premier cours'
 

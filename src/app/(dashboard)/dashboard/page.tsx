@@ -33,6 +33,13 @@ export default async function DashboardPage() {
     .order('updated_at', { ascending: false })
     .limit(20)
 
+  // Compte séparé pour les cours vraiment terminés (termine = true)
+  const { count: coursTerminesCount } = await supabase
+    .from('progression_cours')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('termine', true)
+
   // Examens récents (les 10 derniers pour calculer la moyenne réelle)
   const { data: examens } = await supabase
     .from('examens_simules')
@@ -78,6 +85,7 @@ export default async function DashboardPage() {
       examens={examens ?? []}
       badges={badges ?? []}
       objectifsJour={objectifsJour}
+      coursTerminesCount={coursTerminesCount ?? 0}
     />
   )
 }
