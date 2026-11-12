@@ -127,6 +127,20 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
       })
 
       const data = await response.json()
+
+      // Quota dépassé → afficher message inline au lieu d'un faux assistant
+      if (response.status === 429 || data.error === 'quota_exceeded') {
+        const quotaMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          contenu: `⚠️ **Limite atteinte** — ${data.message ?? 'Tu as atteint ta limite de messages Coach IA aujourd\'hui.'}\n\n[Passer à Premium →](/premium)`,
+          created_at: new Date().toISOString(),
+        }
+        setMessages(m => [...m, quotaMsg])
+        setLoading(false)
+        return
+      }
+
       const reponse = data.reponse ?? "Désolé, je n'ai pas pu répondre."
 
       const msgId = crypto.randomUUID()

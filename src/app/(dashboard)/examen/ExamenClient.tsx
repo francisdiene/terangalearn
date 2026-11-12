@@ -86,9 +86,12 @@ export default function ExamenClient({ userId, profile }: Props) {
     )
   }
 
+  const [quotaError, setQuotaError] = useState<string | null>(null)
+
   const demarrerExamen = async () => {
     if (matieresSel.length < 2) return
     setLoading(true)
+    setQuotaError(null)
 
     const res = await fetch('/api/generate-exam', {
       method: 'POST',
@@ -96,6 +99,13 @@ export default function ExamenClient({ userId, profile }: Props) {
       body: JSON.stringify({ serie, matieres: matieresSel })
     })
     const data = await res.json()
+
+    if (res.status === 429 || data.error === 'quota_exceeded') {
+      setQuotaError(data.message ?? 'Limite d\'examens atteinte cette semaine.')
+      setLoading(false)
+      return
+    }
+
     setQuestions(data.questions)
     setMatiereActive(matieresSel[0])
     setTempsRestant(matieresSel.length * 45 * 60)
@@ -240,6 +250,16 @@ export default function ExamenClient({ userId, profile }: Props) {
                   {matieresSel.length * 45} min ({matieresSel.length}h{matieresSel.length * 45 % 60 > 0 ? `${matieresSel.length * 45 % 60}min` : ''})
                 </span>
               </p>
+            </div>
+          )}
+
+          {quotaError && (
+            <div className="mt-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 text-sm text-amber-800 dark:text-amber-300">
+              <p className="font-semibold mb-1">⚠️ Limite atteinte</p>
+              <p className="text-xs">{quotaError}</p>
+              <a href="/premium" className="inline-block mt-2 text-xs font-bold text-green-700 dark:text-green-400 underline">
+                Passer à Premium →
+              </a>
             </div>
           )}
 

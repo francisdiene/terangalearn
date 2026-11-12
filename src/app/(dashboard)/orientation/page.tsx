@@ -1,11 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getUserPlan } from '@/lib/plan'
 import OrientationClient from '@/components/orientation/OrientationClient'
 
 export default async function OrientationPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // 🔒 Réservé Premium — vérification côté serveur
+  const planInfo = await getUserPlan(user.id)
+  if (!planInfo.canOrientation) redirect('/premium')
 
   const { data: profile } = await supabase
     .from('profiles')

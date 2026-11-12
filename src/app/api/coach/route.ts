@@ -329,6 +329,40 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient()
 
+    // ── Vérification quota Coach IA (côté serveur) ──────────────────────────
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan, plan_expires_at')
+      .eq('id', user.id)
+      .single()
+
+    const plan = profile?.plan ?? 'free'
+    const expiresAt = profile?.plan_expires_at ? new Date(profile.plan_expires_at) : null
+    const isActivePremium = (plan === 'premium' || plan === 'school') && (expiresAt ? expiresAt > new Date() : false)
+
+    if (!isActivePremium) {
+      // Vérifier le quota journalier (3 messages/jour pour free)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const { count: usageToday } = await supabase
+        .from('messages_coach')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('role', 'user')
+        .gte('created_at', today.toISOString())
+
+      if ((usageToday ?? 0) >= 3) {
+        return NextResponse.json(
+          { error: 'quota_exceeded', message: 'Tu as atteint ta limite de 3 messages Coach IA par jour. Passe à Premium pour un accès illimité.' },
+          { status: 429 }
+        )
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
     // Chercher un cours pertinent (contexte optionnel)
     const mots = message.toLowerCase().split(' ').filter((m: string) => m.length > 4)
     let contenuCours = ''

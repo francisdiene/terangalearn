@@ -1,11 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getUserPlan } from '@/lib/plan'
 import PlanificationClient from '@/components/planification/PlanificationClient'
 
 export default async function PlanificationPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // 🔒 Planification intelligente — réservé Premium
+  const planInfo = await getUserPlan(user.id)
+  if (!planInfo.canPlanifSmart) redirect('/premium')
 
   const { data: profile } = await supabase
     .from('profiles')

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 const API_URL = process.env.OPENROUTER_API_KEY
   ? 'https://openrouter.ai/api/v1/chat/completions'
@@ -27,6 +28,42 @@ const MATIERE_NOMS: Record<string, string> = {
 export async function POST(req: NextRequest) {
   try {
     const { serie, matieres } = await req.json()
+
+    // ── Vérification quota Examens simulés (côté serveur) ───────────────────
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan, plan_expires_at')
+      .eq('id', user.id)
+      .single()
+
+    const plan = profile?.plan ?? 'free'
+    const expiresAt = profile?.plan_expires_at ? new Date(profile.plan_expires_at) : null
+    const isActivePremium = (plan === 'premium' || plan === 'school') && (expiresAt ? expiresAt > new Date() : false)
+
+    if (!isActivePremium) {
+      // Vérifier le quota hebdomadaire (2 examens/semaine pour free)
+      const monday = new Date()
+      monday.setDate(monday.getDate() - monday.getDay() + 1)
+      monday.setHours(0, 0, 0, 0)
+
+      const { count: examsThisWeek } = await supabase
+        .from('examens_simules')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', monday.toISOString())
+
+      if ((examsThisWeek ?? 0) >= 2) {
+        return NextResponse.json(
+          { error: 'quota_exceeded', message: 'Tu as atteint ta limite de 2 examens simulés par semaine. Passe à Premium pour des examens illimités.' },
+          { status: 429 }
+        )
+      }
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     const questionsParMatiere: Record<string, any> = {}
 
