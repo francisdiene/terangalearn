@@ -19,14 +19,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
+    console.log('Admin check — profile:', profile, 'error:', profileError)
+
     if (!profile || !['admin', 'super_admin'].includes(profile.role)) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
+      return NextResponse.json({ error: 'Accès refusé', role: profile?.role ?? 'null' }, { status: 403 })
     }
 
     const { titre, message, type = 'info', cible = 'tous', url = '/dashboard' } = await req.json()
@@ -49,8 +51,8 @@ export async function POST(req: Request) {
       .single()
 
     if (notifError) {
-      console.error('Erreur insert notification:', notifError)
-      return NextResponse.json({ error: 'Erreur DB notification' }, { status: 500 })
+      console.error('Erreur insert notification:', JSON.stringify(notifError))
+      return NextResponse.json({ error: 'Erreur DB notification', detail: notifError.message, code: notifError.code }, { status: 500 })
     }
 
     // 2. Envoyer les push web si les clés VAPID sont configurées
