@@ -13,6 +13,7 @@ import {
   Settings, Swords
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -116,16 +117,23 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
         })}
       </nav>
 
-      {/* Streak + Logout */}
-      <div className="p-4 border-t border-gray-100 dark:border-gray-700">
+      {/* Streak + Thème + Logout */}
+      <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
         {(profile?.streak ?? 0) > 0 && (
-          <div className="flex items-center gap-2 bg-orange-50 text-orange-600 rounded-xl px-4 py-2.5 mb-3 text-sm font-medium">
-            Streak : {profile?.streak} jour{profile!.streak > 1 ? 's' : ''}
+          <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 rounded-xl px-4 py-2.5 text-sm font-medium">
+            🔥 Streak : {profile?.streak} jour{(profile?.streak ?? 0) > 1 ? 's' : ''}
           </div>
         )}
+
+        {/* Bouton thème clair / sombre */}
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800">
+          <span className="text-sm text-gray-500 dark:text-gray-400">Thème</span>
+          <ThemeToggle />
+        </div>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-500 transition-all"
         >
           <LogOut className="w-5 h-5" />
           Déconnexion
