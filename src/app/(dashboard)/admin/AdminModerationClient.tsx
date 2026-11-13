@@ -28,14 +28,14 @@ interface Signalement {
 const RAISON_LABELS: Record<string, string> = {
   spam: '🚫 Spam',
   harcelement: '😡 Harcèlement',
-  hors_sujet: '📌 Hors-sujet',
+  hors_sujet: 'Hors-sujet',
   triche: '📋 Triche',
   contenu_sexuel: '🔞 Contenu inapproprié',
   autre: '❓ Autre',
 }
 
 const SANCTIONS = [
-  { value: 'avertissement', label: '⚠️ Avertissement', color: 'text-yellow-600 bg-yellow-50' },
+  { value: 'avertissement', label: 'Avertissement', color: 'text-yellow-600 bg-yellow-50' },
   { value: 'suspension_7j', label: '⏸️ Suspension 7 jours', color: 'text-orange-600 bg-orange-50' },
   { value: 'suspension_30j', label: '⏹️ Suspension 30 jours', color: 'text-red-600 bg-red-100' },
   { value: 'bannissement', label: '🚫 Bannissement définitif', color: 'text-red-700 bg-red-200' },
@@ -165,7 +165,7 @@ export default function AdminModerationClient({ userId, role, signalements: init
         <div className="text-center py-16 text-gray-400">
           <CheckCircle2 className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p className="font-semibold text-sm">Aucun signalement en attente</p>
-          <p className="text-xs mt-1">La communauté est calme 🎉</p>
+          <p className="text-xs mt-1">La communauté est calme.</p>
         </div>
       ) : (
         <div className="space-y-3">

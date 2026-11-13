@@ -133,7 +133,7 @@ export default function CoachChat({ userId, profile, conversationsInitiales }: P
         const quotaMsg: Message = {
           id: crypto.randomUUID(),
           role: 'assistant',
-          contenu: `⚠️ **Limite atteinte** — ${data.message ?? 'Tu as atteint ta limite de messages Coach IA aujourd\'hui.'}\n\n[Passer à Premium →](/premium)`,
+          contenu: `**Limite atteinte** — ${data.message ?? 'Tu as atteint ta limite de messages Coach IA aujourd\'hui.'}\n\n[Passer à Premium →](/premium)`,
           created_at: new Date().toISOString(),
         }
         setMessages(m => [...m, quotaMsg])

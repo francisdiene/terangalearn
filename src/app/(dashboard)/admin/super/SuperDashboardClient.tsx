@@ -212,7 +212,7 @@ export default function SuperDashboardClient({
     setBulkResumeResult(null)
     try {
       const { data: coursSanResume } = await supabase.from('cours').select('id').or('resume.is.null,resume.lt.30').limit(50)
-      if (!coursSanResume || coursSanResume.length === 0) { setBulkResumeResult('Tous les cours ont déjà un résumé ✅'); setBulkResumeLoading(false); return }
+      if (!coursSanResume || coursSanResume.length === 0) { setBulkResumeResult('Tous les cours ont déjà un résumé.'); setBulkResumeLoading(false); return }
       let count = 0
       for (const cours of coursSanResume) {
         try {
@@ -221,7 +221,7 @@ export default function SuperDashboardClient({
           await new Promise(res => setTimeout(res, 500))
         } catch {}
       }
-      setBulkResumeResult(`${count}/${coursSanResume.length} résumés générés ✅`)
+      setBulkResumeResult(`${count}/${coursSanResume.length} résumés générés`)
     } catch { setBulkResumeResult('Erreur lors de la génération') }
     setBulkResumeLoading(false)
   }
@@ -350,7 +350,7 @@ export default function SuperDashboardClient({
                   { label: 'Élèves inscrits', value: plateformeStats.totalEleves, sub: `+${plateformeStats.nouveaux7j} cette semaine`, icon: Users, color: 'text-blue-400', glow: 'shadow-blue-500/10' },
                   { label: 'Actifs (7 jours)', value: plateformeStats.actifs7j, sub: `${plateformeStats.totalEleves > 0 ? Math.round(plateformeStats.actifs7j / plateformeStats.totalEleves * 100) : 0}% de rétention`, icon: Activity, color: 'text-green-400', glow: 'shadow-green-500/10' },
                   { label: 'Examens simulés', value: plateformeStats.totalExamens, sub: 'total depuis lancement', icon: FileCheck, color: 'text-orange-400', glow: 'shadow-orange-500/10' },
-                  { label: 'Signalements', value: stats.signalements, sub: stats.signalements > 0 ? '⚠️ En attente de modération' : '✅ Aucun en attente', icon: Flag, color: stats.signalements > 0 ? 'text-red-400' : 'text-zinc-500', glow: 'shadow-red-500/10' },
+                  { label: 'Signalements', value: stats.signalements, sub: stats.signalements > 0 ? 'En attente de modération' : 'Aucun en attente', icon: Flag, color: stats.signalements > 0 ? 'text-red-400' : 'text-zinc-500', glow: 'shadow-red-500/10' },
                 ].map(s => (
                   <div key={s.label} className={cn('bg-[#0E1118] border border-white/[0.06] rounded-2xl p-5 shadow-xl', s.glow)}>
                     <div className="flex items-center justify-between mb-3">
@@ -670,7 +670,7 @@ export default function SuperDashboardClient({
                           <span className={cn('text-xs px-2 py-0.5 rounded-full', s.statut === 'en_attente' ? 'bg-orange-500/10 text-orange-400' : s.statut === 'resolu' ? 'bg-green-500/10 text-green-400' : 'bg-zinc-800 text-zinc-500')}>
                             {s.statut}
                           </span>
-                          {s.priorite === 'urgente' && <span className="text-[10px] font-black text-red-400">⚡ URGENT</span>}
+                          {s.priorite === 'urgente' && <span className="text-[10px] font-black text-red-400 uppercase tracking-wider">Urgent</span>}
                         </div>
                         <p className="text-xs text-zinc-600">{new Date(s.created_at).toLocaleString('fr-FR')}</p>
                       </div>

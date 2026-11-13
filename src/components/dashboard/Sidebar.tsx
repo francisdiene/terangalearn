@@ -10,7 +10,7 @@ import {
   LayoutDashboard, BookOpen, PenTool, Bot,
   Trophy, User, LogOut, Zap, Users, Calendar,
   GraduationCap, FileText, Library,
-  Settings, Swords
+  Settings, Swords, Flame
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -121,7 +121,8 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
       <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
         {(profile?.streak ?? 0) > 0 && (
           <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 rounded-xl px-4 py-2.5 text-sm font-medium">
-            🔥 Streak : {profile?.streak} jour{(profile?.streak ?? 0) > 1 ? 's' : ''}
+            <Flame className="w-4 h-4 flex-shrink-0" />
+            Streak : {profile?.streak} jour{(profile?.streak ?? 0) > 1 ? 's' : ''}
           </div>
         )}
 

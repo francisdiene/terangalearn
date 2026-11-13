@@ -255,7 +255,7 @@ export default function ExamenClient({ userId, profile }: Props) {
 
           {quotaError && (
             <div className="mt-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 text-sm text-amber-800 dark:text-amber-300">
-              <p className="font-semibold mb-1">⚠️ Limite atteinte</p>
+              <p className="font-semibold mb-1">Limite atteinte</p>
               <p className="text-xs">{quotaError}</p>
               <a href="/premium" className="inline-block mt-2 text-xs font-bold text-green-700 dark:text-green-400 underline">
                 Passer à Premium →

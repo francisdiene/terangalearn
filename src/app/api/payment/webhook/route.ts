@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       })
       .eq('id', sub.user_id)
 
-    console.log(`✅ Premium activé pour user ${sub.user_id} jusqu'au ${sub.expires_at}`)
+    console.log(`Premium activé pour user ${sub.user_id} jusqu'au ${sub.expires_at}`)
 
     return NextResponse.json({ success: true })
 
