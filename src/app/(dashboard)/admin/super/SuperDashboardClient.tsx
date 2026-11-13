@@ -195,15 +195,44 @@ export default function SuperDashboardClient({
     if (newTab === 'premium') fetchPremiumUsers()
   }
 
+  const [annonceTitre, setAnnonceTitre] = useState('')
+  const [annonceType, setAnnonceType] = useState<'info' | 'success' | 'warning' | 'alert'>('info')
+  const [annoncePushResult, setAnnoncePushResult] = useState<string | null>(null)
+
   const publierAnnonce = async () => {
     if (!annonceMessage.trim()) return
     setAnnonceSaving(true)
     setAnnonceError(null)
+    setAnnoncePushResult(null)
     try {
-      const { data, error } = await supabase.from('annonces').insert({ message: annonceMessage.trim(), created_by: 'super_admin' }).select('id, message, created_at, created_by').single()
-      if (error) setAnnonceError('Table annonces non créée')
-      else if (data) { setAnnonces(prev => [data as Annonce, ...prev].slice(0, 5)); setAnnonceMessage('') }
-    } catch { setAnnonceError('Table annonces non créée') }
+      const res = await fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          titre: annonceTitre.trim() || 'Annonce TerangaLearn',
+          message: annonceMessage.trim(),
+          type: annonceType,
+          url: '/dashboard',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setAnnonceError(data.error ?? 'Erreur lors de l\'envoi')
+      } else {
+        const pushInfo = data.pushSent > 0
+          ? `Envoyé à ${data.pushSent} appareil${data.pushSent > 1 ? 's' : ''}`
+          : 'Notification in-app publiée'
+        setAnnoncePushResult(pushInfo + (data.warning ? ' (push désactivé)' : ''))
+        setAnnonces(prev => [{
+          id: data.notificationId,
+          message: annonceMessage.trim(),
+          created_at: new Date().toISOString(),
+          created_by: 'super_admin',
+        }, ...prev].slice(0, 5))
+        setAnnonceMessage('')
+        setAnnonceTitre('')
+      }
+    } catch { setAnnonceError('Erreur réseau') }
     setAnnonceSaving(false)
   }
 
@@ -507,20 +536,42 @@ export default function SuperDashboardClient({
                   <h2 className="text-sm font-bold text-zinc-100">Publier une annonce</h2>
                 </div>
                 {annonceError && <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-2 mb-3">{annonceError}</p>}
-                <div className="flex gap-3">
-                  <input
-                    value={annonceMessage}
-                    onChange={e => setAnnonceMessage(e.target.value)}
-                    placeholder="Message pour tous les élèves…"
-                    className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition"
-                  />
-                  <button
-                    onClick={publierAnnonce}
-                    disabled={annonceSaving || !annonceMessage.trim()}
-                    className="px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 text-blue-400 text-sm font-bold transition flex-shrink-0"
-                  >
-                    {annonceSaving ? '…' : 'Publier'}
-                  </button>
+                {annoncePushResult && <p className="text-xs text-green-400 bg-green-500/10 rounded-lg px-3 py-2 mb-3">{annoncePushResult}</p>}
+                <div className="space-y-2.5">
+                  <div className="flex gap-2">
+                    <input
+                      value={annonceTitre}
+                      onChange={e => setAnnonceTitre(e.target.value)}
+                      placeholder="Titre (ex: Nouveaux cours disponibles)"
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition"
+                    />
+                    <select
+                      value={annonceType}
+                      onChange={e => setAnnonceType(e.target.value as any)}
+                      className="bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:border-blue-500/50 transition"
+                    >
+                      <option value="info">Info</option>
+                      <option value="success">Succès</option>
+                      <option value="warning">Attention</option>
+                      <option value="alert">Alerte</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      value={annonceMessage}
+                      onChange={e => setAnnonceMessage(e.target.value)}
+                      placeholder="Message pour tous les élèves…"
+                      className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-blue-500/50 transition"
+                    />
+                    <button
+                      onClick={publierAnnonce}
+                      disabled={annonceSaving || !annonceMessage.trim()}
+                      className="px-4 py-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 disabled:opacity-40 text-blue-400 text-sm font-bold transition flex-shrink-0"
+                    >
+                      {annonceSaving ? '…' : 'Envoyer'}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-zinc-600">Visible dans le dashboard + notification push sur les appareils des élèves abonnés.</p>
                 </div>
                 {annonces.length > 0 && (
                   <div className="mt-4 space-y-2">

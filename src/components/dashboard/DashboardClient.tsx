@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import InAppBanner from '@/components/notifications/InAppBanner'
 import {
   TrendingUp, Play, Zap, Award, Clock,
   Target, ChevronRight, Flame, BookOpen,
@@ -156,6 +157,7 @@ export default function DashboardClient({ profile, matieres, progressions, exame
 
       {/* ══ DESKTOP ════════════════════════════════════════════════════════════ */}
       <div className="hidden md:block max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <InAppBanner />
 
         {/* Salutation */}
         <div className="flex items-center justify-between">

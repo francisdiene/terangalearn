@@ -5,6 +5,7 @@ import MobileNav from '@/components/dashboard/MobileNav'
 import BottomNav from '@/components/dashboard/BottomNav'
 import PageTransition from '@/components/ui/PageTransition'
 import NuitRevision from '@/components/ui/NuitRevision'
+import NotificationPermission from '@/components/notifications/NotificationPermission'
 
 export default async function DashboardLayout({
   children,
@@ -58,6 +59,7 @@ export default async function DashboardLayout({
       </div>
       <BottomNav />
       <NuitRevision />
+      <NotificationPermission />
     </div>
   )
 }
