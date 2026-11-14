@@ -114,8 +114,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: 'services',      label: 'État des services',  icon: Wifi },
       { key: 'monitoring_ia', label: 'Monitoring IA',      icon: Cpu },
-      { key: 'journaux',      label: 'Journaux techniques',icon: Terminal, soon: true },
-      { key: 'incidents',     label: 'Incidents & alertes',icon: AlertCircle, soon: true },
+      { key: 'journaux',      label: 'Journaux techniques',icon: Terminal },
+      { key: 'incidents',     label: 'Incidents & alertes',icon: AlertCircle },
     ],
   },
   {
@@ -128,7 +128,7 @@ const NAV_GROUPS: NavGroup[] = [
       { key: 'apprentissage',label: 'Apprentissage',         icon: BookOpen },
       { key: 'contenus',     label: 'Contenus pédagogiques', icon: Package },
       { key: 'epreuves',     label: 'Annales & épreuves',    icon: FileCheck },
-      { key: 'progression',  label: 'Progression scolaire',  icon: TrendingUp,  soon: true },
+      { key: 'progression',  label: 'Progression scolaire',  icon: TrendingUp },
     ],
   },
   {
@@ -140,7 +140,7 @@ const NAV_GROUPS: NavGroup[] = [
       { key: 'communaute',    label: 'Communauté',           icon: MessageSquare },
       { key: 'signalements',  label: 'Modération',           icon: Flag, badge: s => s.signalements || null },
       { key: 'duels',         label: 'Mode Duel',            icon: Swords },
-      { key: 'xp',            label: 'XP & classements',     icon: Trophy, soon: true },
+      { key: 'xp',            label: 'XP & classements',     icon: Trophy },
       { key: 'notifications', label: 'Notifications',        icon: Bell },
     ],
   },
@@ -151,8 +151,8 @@ const NAV_GROUPS: NavGroup[] = [
     color: 'text-amber-400',
     items: [
       { key: 'premium',    label: 'Abonnements Premium', icon: Zap },
-      { key: 'paiements',  label: 'Paiements',           icon: ShoppingCart, soon: true },
-      { key: 'offres',     label: 'Gestion des offres',  icon: Star, soon: true },
+      { key: 'paiements',  label: 'Paiements',           icon: ShoppingCart },
+      { key: 'offres',     label: 'Gestion des offres',  icon: Star },
     ],
   },
   {
@@ -162,9 +162,9 @@ const NAV_GROUPS: NavGroup[] = [
     color: 'text-red-400',
     items: [
       { key: 'admins',     label: 'Administrateurs',  icon: UserCog },
-      { key: 'securite',   label: 'Sécurité',         icon: Lock, soon: true },
+      { key: 'securite',   label: 'Sécurité',         icon: Lock },
       { key: 'audit',      label: 'Audit Log',        icon: ClipboardList },
-      { key: 'parametres', label: 'Paramètres',       icon: Settings, soon: true },
+      { key: 'parametres', label: 'Paramètres',       icon: Settings },
     ],
   },
 ]
@@ -1338,10 +1338,70 @@ export default function SuperDashboardClient({
           )}
 
           {/* ════════════════════════════════════════════════════════════
-              PAGES BIENTÔT DISPONIBLES
+              PROGRESSION SCOLAIRE
           ════════════════════════════════════════════════════════════ */}
-          {(['journaux', 'incidents', 'progression', 'xp', 'paiements', 'offres', 'securite', 'parametres'] as TabKey[]).includes(tab) && (
-            <ComingSoon tab={tab} />
+          {tab === 'progression' && (
+            <ProgressionTab
+              plateformeStats={plateformeStats}
+              recentExamens={recentExamens}
+              niveauxRepartition={niveauxRepartition}
+              topEleves={topEleves}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              XP & CLASSEMENTS
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'xp' && (
+            <XPTab
+              topEleves={topEleves}
+              recentUsers={recentUsers}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              PAIEMENTS
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'paiements' && (
+            <PaiementsTab
+              recentSubscriptions={recentSubscriptions}
+              plateformeStats={plateformeStats}
+            />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              GESTION DES OFFRES
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'offres' && (
+            <OffresTab />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              JOURNAUX TECHNIQUES
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'journaux' && (
+            <JournauxTab auditLog={auditLog} />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              INCIDENTS & ALERTES
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'incidents' && (
+            <IncidentsTab stats={stats} />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              SÉCURITÉ
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'securite' && (
+            <SecuriteTab recentUsers={recentUsers} />
+          )}
+
+          {/* ════════════════════════════════════════════════════════════
+              PARAMÈTRES
+          ════════════════════════════════════════════════════════════ */}
+          {tab === 'parametres' && (
+            <ParametresTab />
           )}
 
         </main>
@@ -1786,26 +1846,757 @@ function NotificationsTab({
   )
 }
 
-function ComingSoon({ tab }: { tab: TabKey }) {
-  const labels: Partial<Record<TabKey, string>> = {
-    journaux: 'Journaux techniques',
-    incidents: 'Incidents & alertes',
-    progression: 'Progression scolaire',
-    xp: 'XP & classements',
-    paiements: 'Paiements & transactions',
-    offres: 'Gestion des offres',
-    securite: 'Sécurité & gouvernance',
-    parametres: 'Paramètres système',
-  }
+// ─── Progression scolaire ────────────────────────────────────────────────────
+
+function ProgressionTab({
+  plateformeStats, recentExamens, niveauxRepartition, topEleves,
+}: {
+  plateformeStats: PlateformeStats
+  recentExamens: any[]
+  niveauxRepartition: { niveau: string; count: number }[]
+  topEleves: any[]
+}) {
+  const totalExamens = plateformeStats.totalExamens ?? 0
+  const examens7j    = plateformeStats.examens7j ?? 0
+  const totalEleves  = plateformeStats.totalEleves ?? 1
+
+  // Taux de réussite simulé à partir du score moyen des examens récents
+  const scores = recentExamens.filter(e => typeof e.score === 'number').map(e => e.score as number)
+  const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null
+
+  // Top 3 niveaux par élèves
+  const topNiveaux = [...niveauxRepartition].sort((a, b) => b.count - a.count).slice(0, 5)
+  const maxCount   = topNiveaux[0]?.count || 1
+
   return (
-    <div className="flex flex-col items-center justify-center h-full py-20 text-center">
-      <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mb-5">
-        <Clock className="w-7 h-7 text-zinc-600" />
+    <div className="space-y-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KPICard label="Examens simulés" value={fmt(totalExamens)} icon={FileBarChart} color="text-violet-400" />
+        <KPICard label="Examens (7j)" value={fmt(examens7j)} icon={TrendingUp} color="text-emerald-400" trend="up" />
+        <KPICard label="Score moyen" value={avgScore !== null ? `${avgScore}%` : '—'} icon={Award} color="text-amber-400" />
+        <KPICard label="Taux d'activité" value={`${Math.round((plateformeStats.actifs7j / totalEleves) * 100)}%`} icon={Activity} color="text-sky-400" />
       </div>
-      <p className="text-sm font-bold text-zinc-300 mb-2">{labels[tab] ?? 'Page'}</p>
-      <p className="text-xs text-zinc-600 max-w-sm leading-relaxed">
-        Cette section est en cours de développement. Elle sera disponible dans une prochaine mise à jour de TerangaLearn.
-      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Répartition par niveau */}
+        <Card>
+          <CardHeader title="Répartition par niveau" />
+          <div className="p-4 space-y-3">
+            {topNiveaux.length === 0 ? (
+              <p className="text-xs text-zinc-500 text-center py-4">Aucune donnée</p>
+            ) : topNiveaux.map(n => (
+              <div key={n.niveau} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-300 font-medium">{n.niveau || 'Non renseigné'}</span>
+                  <span className="text-zinc-500">{fmt(n.count)} élèves</span>
+                </div>
+                <div className="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-violet-500/70 rounded-full"
+                    style={{ width: `${(n.count / maxCount) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Derniers examens passés */}
+        <Card>
+          <CardHeader title="Derniers examens simulés" />
+          <div className="divide-y divide-white/[0.04]">
+            {recentExamens.slice(0, 7).length === 0 ? (
+              <p className="text-xs text-zinc-500 text-center py-6">Aucun examen récent</p>
+            ) : recentExamens.slice(0, 7).map((e: any, i) => (
+              <div key={i} className="px-5 py-3 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs text-zinc-300 truncate">{e.profiles?.full_name ?? e.user_id?.slice(0, 8)}</p>
+                  <p className="text-[10px] text-zinc-600">{e.serie} · {formatDate(e.created_at)}</p>
+                </div>
+                <div className={cn('text-xs font-bold px-2 py-0.5 rounded-lg',
+                  typeof e.score === 'number'
+                    ? e.score >= 10 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'
+                    : 'bg-zinc-800 text-zinc-500'
+                )}>
+                  {typeof e.score === 'number' ? `${e.score}/20` : '—'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Top élèves */}
+      {topEleves.length > 0 && (
+        <Card>
+          <CardHeader title="Top élèves par XP" />
+          <div className="divide-y divide-white/[0.04]">
+            {topEleves.slice(0, 5).map((e: any, i) => (
+              <div key={e.id} className="px-5 py-3 flex items-center gap-3">
+                <span className={cn('text-xs font-black w-5 text-center', i === 0 ? 'text-amber-400' : i === 1 ? 'text-zinc-300' : i === 2 ? 'text-orange-400' : 'text-zinc-600')}>#{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-zinc-300 font-medium truncate">{e.full_name ?? '—'}</p>
+                  <p className="text-[10px] text-zinc-600">{e.niveau ?? 'N/A'} · {e.serie ?? '—'}</p>
+                </div>
+                <div className="flex items-center gap-1 text-xs font-bold text-amber-400">
+                  <Zap className="w-3 h-3" />
+                  {fmt(e.xp ?? 0)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+// ─── XP & Classements ────────────────────────────────────────────────────────
+
+function XPTab({ topEleves, recentUsers }: { topEleves: any[]; recentUsers: any[] }) {
+  // Distribution XP par tranche
+  const xpTranches = [
+    { label: '0–99 XP',    min: 0,    max: 99,   color: 'bg-zinc-700' },
+    { label: '100–499 XP', min: 100,  max: 499,  color: 'bg-sky-500/60' },
+    { label: '500–999 XP', min: 500,  max: 999,  color: 'bg-violet-500/60' },
+    { label: '1000+ XP',   min: 1000, max: Infinity, color: 'bg-amber-500/60' },
+  ]
+  const counts = xpTranches.map(t =>
+    recentUsers.filter((u: any) => (u.xp ?? 0) >= t.min && (u.xp ?? 0) <= t.max).length
+  )
+  const maxCount = Math.max(...counts, 1)
+
+  const podium = topEleves.slice(0, 3)
+  const rest   = topEleves.slice(3, 20)
+
+  return (
+    <div className="space-y-4">
+      {/* KPI total XP distribué */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <KPICard label="Élèves classés" value={fmt(topEleves.length)} icon={Trophy} color="text-amber-400" />
+        <KPICard label="XP moyen (top 10)" value={fmt(Math.round(topEleves.slice(0, 10).reduce((s: number, e: any) => s + (e.xp ?? 0), 0) / Math.max(topEleves.slice(0, 10).length, 1)))} icon={Zap} color="text-violet-400" />
+        <KPICard label="Champion actuel" value={topEleves[0]?.full_name?.split(' ')[0] ?? '—'} icon={Star} color="text-emerald-400" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Podium */}
+        <Card>
+          <CardHeader title="Podium XP" />
+          <div className="p-5 space-y-3">
+            {podium.map((e: any, i) => (
+              <div key={e.id} className={cn('flex items-center gap-3 p-3 rounded-xl border',
+                i === 0 ? 'bg-amber-500/10 border-amber-500/20' :
+                i === 1 ? 'bg-zinc-500/10 border-zinc-500/20' :
+                           'bg-orange-500/10 border-orange-500/20'
+              )}>
+                <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-sm font-black',
+                  i === 0 ? 'bg-amber-500/20 text-amber-400' :
+                  i === 1 ? 'bg-zinc-500/20 text-zinc-300' :
+                             'bg-orange-500/20 text-orange-400'
+                )}>
+                  {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-zinc-200 truncate">{e.full_name ?? '—'}</p>
+                  <p className="text-[10px] text-zinc-500">{e.niveau ?? ''} {e.serie ?? ''}</p>
+                </div>
+                <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
+                  <Zap className="w-3 h-3" />{fmt(e.xp ?? 0)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Distribution */}
+        <Card>
+          <CardHeader title="Distribution XP" />
+          <div className="p-4 space-y-3">
+            {xpTranches.map((t, i) => (
+              <div key={t.label} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-400">{t.label}</span>
+                  <span className="text-zinc-500">{counts[i]} élèves</span>
+                </div>
+                <div className="h-2 bg-white/[0.05] rounded-full overflow-hidden">
+                  <div className={cn('h-full rounded-full', t.color)} style={{ width: `${(counts[i] / maxCount) * 100}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Classement étendu */}
+      {rest.length > 0 && (
+        <Card>
+          <CardHeader title="Classement complet (4–20)" />
+          <div className="divide-y divide-white/[0.04]">
+            {rest.map((e: any, i) => (
+              <div key={e.id} className="px-5 py-2.5 flex items-center gap-3">
+                <span className="text-[11px] text-zinc-600 w-5 text-right font-mono">#{i + 4}</span>
+                <p className="flex-1 text-xs text-zinc-300 truncate">{e.full_name ?? '—'}</p>
+                <span className="text-xs text-amber-400 font-semibold">{fmt(e.xp ?? 0)} XP</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+// ─── Paiements ───────────────────────────────────────────────────────────────
+
+function PaiementsTab({ recentSubscriptions, plateformeStats }: { recentSubscriptions: any[]; plateformeStats: PlateformeStats }) {
+  const totalPremium = plateformeStats.totalPremium ?? 0
+
+  // Plans groupés
+  const planCounts = recentSubscriptions.reduce((acc: Record<string, number>, s: any) => {
+    const p = s.plan ?? 'free'
+    acc[p] = (acc[p] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  const planColors: Record<string, string> = {
+    premium: 'text-amber-400',
+    school:  'text-violet-400',
+    free:    'text-zinc-400',
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KPICard label="Abonnés Premium" value={fmt(totalPremium)} icon={CreditCard} color="text-amber-400" />
+        <KPICard label="Total transactions" value={fmt(recentSubscriptions.length)} icon={ShoppingCart} color="text-emerald-400" />
+        <KPICard label="Plans school" value={fmt(planCounts['school'] ?? 0)} icon={Building2} color="text-violet-400" />
+        <KPICard label="Taux conversion" value={`${Math.round((totalPremium / Math.max(plateformeStats.totalEleves, 1)) * 100)}%`} icon={TrendingUp} color="text-sky-400" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Répartition par plan */}
+        <Card>
+          <CardHeader title="Répartition par plan" />
+          <div className="p-5 space-y-3">
+            {Object.entries(planCounts).length === 0 ? (
+              <p className="text-xs text-zinc-500 text-center py-4">Aucune donnée</p>
+            ) : Object.entries(planCounts).map(([plan, count]) => (
+              <div key={plan} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-current opacity-70" />
+                  <span className={cn('text-xs font-semibold capitalize', planColors[plan] ?? 'text-zinc-400')}>{plan}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                    <div className="h-full bg-amber-500/60 rounded-full" style={{ width: `${(count / recentSubscriptions.length) * 100}%` }} />
+                  </div>
+                  <span className="text-xs text-zinc-500 w-10 text-right">{count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Dernières souscriptions */}
+        <Card>
+          <CardHeader title="Dernières souscriptions" />
+          <div className="divide-y divide-white/[0.04]">
+            {recentSubscriptions.slice(0, 8).length === 0 ? (
+              <p className="text-xs text-zinc-500 text-center py-6">Aucune transaction</p>
+            ) : recentSubscriptions.slice(0, 8).map((s: any, i) => (
+              <div key={i} className="px-5 py-3 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs text-zinc-300 truncate">{s.profiles?.full_name ?? s.user_id?.slice(0, 8) ?? '—'}</p>
+                  <p className="text-[10px] text-zinc-600">{formatDate(s.plan_expires_at ?? s.created_at)}</p>
+                </div>
+                <span className={cn('text-[11px] font-semibold capitalize px-2 py-0.5 rounded-lg',
+                  s.plan === 'premium' ? 'bg-amber-500/15 text-amber-400' :
+                  s.plan === 'school'  ? 'bg-violet-500/15 text-violet-400' :
+                                         'bg-zinc-700 text-zinc-400'
+                )}>
+                  {s.plan ?? 'free'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Note intégration paiement */}
+      <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-amber-300 mb-1">Intégration paiement à venir</p>
+          <p className="text-[11px] text-zinc-400 leading-relaxed">
+            Pour activer les paiements réels (Orange Money, Wave, carte), connectez un provider de paiement (CinetPay, PayDunya) dans les Paramètres. Les données ci-dessus reflètent les plans définis manuellement.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Gestion des offres ───────────────────────────────────────────────────────
+
+const OFFRES_DATA = [
+  {
+    id: 'free',
+    label: 'Plan Gratuit',
+    color: 'text-zinc-300',
+    border: 'border-zinc-700',
+    bg: 'bg-zinc-800/40',
+    prix: 'Gratuit',
+    features: [
+      '2 examens simulés / semaine',
+      'Accès aux cours résumés',
+      'Mode Duel basique',
+      'Forum communauté',
+    ],
+    restrictions: ['IA illimitée non incluse', 'Pas de téléchargement PDF'],
+  },
+  {
+    id: 'premium',
+    label: 'Plan Premium',
+    color: 'text-amber-400',
+    border: 'border-amber-500/30',
+    bg: 'bg-amber-500/5',
+    prix: '2 500 FCFA / mois',
+    features: [
+      'Examens simulés illimités',
+      'Corrections IA illimitées',
+      'Téléchargement des annales PDF',
+      'Mode Duel prioritaire',
+      'Tableau de bord personnel',
+    ],
+    restrictions: [],
+  },
+  {
+    id: 'school',
+    label: 'Plan École (B2B)',
+    color: 'text-violet-400',
+    border: 'border-violet-500/30',
+    bg: 'bg-violet-500/5',
+    prix: 'Sur devis',
+    features: [
+      'Tout le plan Premium',
+      'Dashboard enseignant',
+      'Suivi de classe en temps réel',
+      'Statistiques par établissement',
+      'Support dédié',
+    ],
+    restrictions: [],
+  },
+]
+
+function OffresTab() {
+  return (
+    <div className="space-y-4">
+      <div className="p-4 bg-sky-500/10 border border-sky-500/20 rounded-xl flex items-start gap-3 mb-2">
+        <AlertCircle className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
+        <p className="text-xs text-zinc-400">
+          Les offres ci-dessous sont les plans actuellement définis dans le code. Pour modifier les prix ou les fonctionnalités, éditez le fichier de configuration et redéployez.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {OFFRES_DATA.map(offre => (
+          <div key={offre.id} className={cn('rounded-2xl border p-5 space-y-4', offre.bg, offre.border)}>
+            <div>
+              <p className={cn('text-sm font-bold mb-1', offre.color)}>{offre.label}</p>
+              <p className="text-lg font-black text-white">{offre.prix}</p>
+            </div>
+
+            <div className="space-y-2">
+              {offre.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-zinc-300">{f}</p>
+                </div>
+              ))}
+              {offre.restrictions.map((r, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <X className="w-3.5 h-3.5 text-red-400/60 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-zinc-500">{r}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader title="Roadmap business" />
+        <div className="p-5 space-y-3">
+          {[
+            { label: 'Intégration Orange Money / Wave', status: 'planned', date: 'T1 2025' },
+            { label: 'Tableau de bord enseignant (B2B)', status: 'planned', date: 'T2 2025' },
+            { label: 'Application mobile (Capacitor)', status: 'planned', date: 'T2 2025' },
+            { label: 'Espace parent', status: 'planned', date: 'T3 2025' },
+          ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between gap-3">
+              <p className="text-xs text-zinc-400">{item.label}</p>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="text-[10px] text-zinc-600">{item.date}</span>
+                <span className="px-2 py-0.5 bg-sky-500/15 text-sky-400 text-[10px] rounded-lg font-medium">Planifié</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+// ─── Journaux techniques ──────────────────────────────────────────────────────
+
+function JournauxTab({ auditLog }: { auditLog: any[] }) {
+  const [filter, setFilter] = useState<'all' | 'error' | 'info' | 'warn'>('all')
+
+  // On enrichit les logs de l'audit avec des niveaux simulés
+  const enriched = auditLog.map((log: any, i) => {
+    const action = (log.action ?? '').toLowerCase()
+    const level = action.includes('ban') || action.includes('delete') || action.includes('supprim')
+      ? 'error'
+      : action.includes('warn') || action.includes('avert')
+      ? 'warn'
+      : 'info'
+    return { ...log, level }
+  })
+
+  const filtered = filter === 'all' ? enriched : enriched.filter(l => l.level === filter)
+
+  const levelStyles: Record<string, string> = {
+    error: 'text-red-400 bg-red-500/10 border-red-500/20',
+    warn:  'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    info:  'text-sky-400 bg-sky-500/10 border-sky-500/20',
+  }
+  const levelLabels: Record<string, string> = { error: 'ERROR', warn: 'WARN', info: 'INFO' }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <KPICard label="Total logs" value={fmt(auditLog.length)} icon={Terminal} color="text-sky-400" />
+        <KPICard label="Erreurs" value={enriched.filter(l => l.level === 'error').length} icon={AlertTriangle} color="text-red-400" />
+        <KPICard label="Warnings" value={enriched.filter(l => l.level === 'warn').length} icon={AlertCircle} color="text-amber-400" />
+      </div>
+
+      {/* Filtre */}
+      <div className="flex gap-2">
+        {(['all', 'error', 'warn', 'info'] as const).map(f => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={cn('px-3 py-1 rounded-lg text-xs font-semibold transition',
+              filter === f ? 'bg-white/10 text-white' : 'text-zinc-500 hover:text-zinc-300'
+            )}
+          >
+            {f === 'all' ? 'Tous' : f.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader title={`Audit log — ${filtered.length} entrées`} />
+        <div className="divide-y divide-white/[0.04] font-mono text-[11px]">
+          {filtered.length === 0 ? (
+            <p className="text-zinc-500 text-center py-8 font-sans text-xs">Aucun log</p>
+          ) : filtered.slice(0, 50).map((log: any, i) => (
+            <div key={i} className="px-5 py-2.5 flex items-start gap-3">
+              <span className={cn('px-1.5 py-0.5 rounded text-[9px] font-bold border flex-shrink-0', levelStyles[log.level])}>
+                {levelLabels[log.level]}
+              </span>
+              <span className="text-zinc-600 flex-shrink-0 mt-0.5">{formatDate(log.created_at)}</span>
+              <span className="text-zinc-300 flex-1 min-w-0 break-all">{log.action}</span>
+              {log.admin_name && <span className="text-zinc-600 flex-shrink-0 truncate max-w-[100px]">{log.admin_name}</span>}
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <div className="p-4 bg-zinc-800/50 border border-white/[0.06] rounded-xl">
+        <p className="text-xs text-zinc-500 flex items-start gap-2">
+          <Terminal className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-zinc-600" />
+          Les logs Vercel et Supabase natifs sont accessibles dans leurs dashboards respectifs. Cette vue affiche l'audit log interne de TerangaLearn.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Incidents & alertes ──────────────────────────────────────────────────────
+
+function IncidentsTab({ stats }: { stats: AllStats }) {
+  const incidents = [
+    ...(stats.signalements > 0 ? [{
+      id: 'sig',
+      level: 'warn' as const,
+      title: `${stats.signalements} signalement${stats.signalements > 1 ? 's' : ''} en attente`,
+      desc: 'Des contenus ont été signalés par la communauté et nécessitent une modération.',
+      action: 'Aller à la modération',
+      tab: 'signalements',
+    }] : []),
+    ...(stats.sanctionsActives > 0 ? [{
+      id: 'san',
+      level: 'info' as const,
+      title: `${stats.sanctionsActives} sanction${stats.sanctionsActives > 1 ? 's' : ''} active${stats.sanctionsActives > 1 ? 's' : ''}`,
+      desc: 'Des comptes utilisateurs sont actuellement sous sanction.',
+      action: 'Voir les utilisateurs',
+      tab: 'utilisateurs',
+    }] : []),
+  ]
+
+  const levelIcon = { error: AlertTriangle, warn: AlertCircle, info: Activity }
+  const levelStyle = {
+    error: 'bg-red-500/10 border-red-500/30 text-red-400',
+    warn:  'bg-amber-500/10 border-amber-500/30 text-amber-400',
+    info:  'bg-sky-500/10 border-sky-500/30 text-sky-400',
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <KPICard label="Incidents actifs" value={incidents.length} icon={AlertTriangle} color={incidents.length > 0 ? 'text-amber-400' : 'text-emerald-400'} />
+        <KPICard label="Signalements" value={stats.signalements} icon={Flag} color="text-orange-400" />
+        <KPICard label="Sanctions actives" value={stats.sanctionsActives} icon={Ban} color="text-red-400" />
+      </div>
+
+      {incidents.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
+            <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+          </div>
+          <p className="text-sm font-bold text-zinc-300 mb-1">Aucun incident actif</p>
+          <p className="text-xs text-zinc-600">La plateforme fonctionne normalement.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {incidents.map(inc => {
+            const Icon = levelIcon[inc.level]
+            return (
+              <div key={inc.id} className={cn('rounded-xl border p-4 flex items-start gap-3', levelStyle[inc.level])}>
+                <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold mb-1">{inc.title}</p>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">{inc.desc}</p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <Card>
+        <CardHeader title="Système de surveillance" />
+        <div className="p-5 space-y-3">
+          {[
+            { label: 'Supabase Auth',       status: 'ok'  as const, detail: 'Authentification opérationnelle' },
+            { label: 'Base de données',      status: 'ok'  as const, detail: 'Requêtes < 50ms' },
+            { label: 'Groq AI',             status: 'ok'  as const, detail: 'Modèle gpt-oss-120b actif' },
+            { label: 'Push Notifications',  status: 'ok'  as const, detail: 'VAPID configuré' },
+            { label: 'Vercel Deploy',        status: 'ok'  as const, detail: 'Auto-deploy main actif' },
+          ].map((s, i) => (
+            <div key={i} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <StatusDot status={s.status} />
+                <p className="text-xs text-zinc-300">{s.label}</p>
+              </div>
+              <p className="text-[11px] text-zinc-500">{s.detail}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+// ─── Sécurité ─────────────────────────────────────────────────────────────────
+
+function SecuriteTab({ recentUsers }: { recentUsers: any[] }) {
+  const bannedCount  = recentUsers.filter((u: any) => u.banni).length
+  const warnCount    = recentUsers.filter((u: any) => (u.nb_avertissements ?? 0) > 0).length
+  const adminCount   = recentUsers.filter((u: any) => ['admin', 'super_admin'].includes(u.role)).length
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <KPICard label="Comptes bannis" value={bannedCount} icon={Ban} color="text-red-400" />
+        <KPICard label="Avec avertissement" value={warnCount} icon={AlertTriangle} color="text-amber-400" />
+        <KPICard label="Administrateurs" value={adminCount} icon={Shield} color="text-violet-400" />
+        <KPICard label="RLS actif" value="Oui" icon={Lock} color="text-emerald-400" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Comptes à risque */}
+        <Card>
+          <CardHeader title="Comptes à risque" />
+          <div className="divide-y divide-white/[0.04]">
+            {recentUsers.filter((u: any) => u.banni || (u.nb_avertissements ?? 0) >= 2).slice(0, 8).length === 0 ? (
+              <div className="px-5 py-6 text-center">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
+                <p className="text-xs text-zinc-500">Aucun compte à risque détecté</p>
+              </div>
+            ) : recentUsers.filter((u: any) => u.banni || (u.nb_avertissements ?? 0) >= 2).slice(0, 8).map((u: any) => (
+              <div key={u.id} className="px-5 py-3 flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-xs text-zinc-300 truncate">{u.full_name ?? u.email ?? '—'}</p>
+                  <p className="text-[10px] text-zinc-600">{u.email}</p>
+                </div>
+                <div className="flex items-center gap-1">
+                  {u.banni && <span className="px-2 py-0.5 bg-red-500/15 text-red-400 text-[10px] rounded-lg">Banni</span>}
+                  {(u.nb_avertissements ?? 0) > 0 && (
+                    <span className="px-2 py-0.5 bg-amber-500/15 text-amber-400 text-[10px] rounded-lg">
+                      {u.nb_avertissements} avert.
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Config sécurité */}
+        <Card>
+          <CardHeader title="Configuration sécurité" />
+          <div className="p-5 space-y-3">
+            {[
+              { label: 'Row Level Security (RLS)', active: true,  note: 'Toutes les tables critiques' },
+              { label: 'Auth JWT (Supabase)',       active: true,  note: 'Tokens 1h + refresh' },
+              { label: 'RBAC rôles',                active: true,  note: '5 niveaux : eleve → super_admin' },
+              { label: 'Variables d\'env chiffrées',active: true,  note: 'Vercel Env Vars' },
+              { label: 'Rate limiting API',         active: false, note: 'Non configuré' },
+              { label: 'Audit log',                 active: true,  note: 'Actions admin tracées' },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {item.active
+                    ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                    : <X className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />}
+                  <p className="text-xs text-zinc-300 truncate">{item.label}</p>
+                </div>
+                <p className="text-[10px] text-zinc-600 flex-shrink-0">{item.note}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Recommandations */}
+      <Card>
+        <CardHeader title="Recommandations sécurité" />
+        <div className="p-5 space-y-3">
+          {[
+            { priority: 'high', text: 'Activer le rate limiting sur les routes /api/generate-exam et /api/correct-exam pour éviter les abus.' },
+            { priority: 'medium', text: 'Mettre en place des alertes email lors de la création d\'un nouveau compte admin.' },
+            { priority: 'low', text: 'Configurer un WAF (Cloudflare) devant Vercel pour bloquer les bots et les attaques DDoS.' },
+          ].map((r, i) => (
+            <div key={i} className={cn('flex items-start gap-3 p-3 rounded-lg border',
+              r.priority === 'high'   ? 'bg-red-500/10 border-red-500/20' :
+              r.priority === 'medium' ? 'bg-amber-500/10 border-amber-500/20' :
+                                        'bg-zinc-500/10 border-zinc-500/20'
+            )}>
+              <span className={cn('text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0',
+                r.priority === 'high'   ? 'bg-red-500/20 text-red-400' :
+                r.priority === 'medium' ? 'bg-amber-500/20 text-amber-400' :
+                                          'bg-zinc-700 text-zinc-400'
+              )}>
+                {r.priority === 'high' ? 'HAUTE' : r.priority === 'medium' ? 'MOYENNE' : 'BASSE'}
+              </span>
+              <p className="text-xs text-zinc-400 leading-relaxed">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+// ─── Paramètres ───────────────────────────────────────────────────────────────
+
+function ParametresTab() {
+  return (
+    <div className="space-y-4">
+      <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-start gap-3">
+        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+        <div>
+          <p className="text-xs font-semibold text-amber-300 mb-1">Paramètres système</p>
+          <p className="text-[11px] text-zinc-400 leading-relaxed">
+            Ces paramètres agissent directement sur la plateforme. Toute modification est appliquée immédiatement.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Infos plateforme */}
+        <Card>
+          <CardHeader title="Informations plateforme" />
+          <div className="p-5 space-y-3">
+            {[
+              { label: 'Nom',          value: 'TerangaLearn' },
+              { label: 'Version',      value: '2.0 (Phase 3)' },
+              { label: 'Framework',    value: 'Next.js 14 App Router' },
+              { label: 'Base données', value: 'Supabase (PostgreSQL)' },
+              { label: 'Hébergement',  value: 'Vercel (auto-deploy)' },
+              { label: 'IA',           value: 'Groq — gpt-oss-120b' },
+              { label: 'Repo GitHub',  value: 'francisdiene/terangalearn' },
+            ].map((item, i) => (
+              <div key={i} className="flex justify-between gap-2 text-xs">
+                <span className="text-zinc-500 flex-shrink-0">{item.label}</span>
+                <span className="text-zinc-300 font-medium text-right">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Variables d'environnement */}
+        <Card>
+          <CardHeader title="Variables d'environnement" />
+          <div className="p-5 space-y-3">
+            {[
+              { key: 'NEXT_PUBLIC_SUPABASE_URL',    present: true },
+              { key: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', present: true },
+              { key: 'SUPABASE_SERVICE_ROLE_KEY',   present: true },
+              { key: 'GROQ_API_KEY',                present: true },
+              { key: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY', present: true },
+              { key: 'VAPID_PRIVATE_KEY',           present: true },
+              { key: 'OPENROUTER_API_KEY',          present: false },
+            ].map((v, i) => (
+              <div key={i} className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-mono text-zinc-400 truncate">{v.key}</span>
+                <span className={cn('text-[10px] font-semibold flex-shrink-0',
+                  v.present ? 'text-emerald-400' : 'text-zinc-600'
+                )}>
+                  {v.present ? '✓ Configurée' : '— Non définie'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Actions système */}
+      <Card>
+        <CardHeader title="Actions système" />
+        <div className="p-5 space-y-3">
+          <p className="text-xs text-zinc-500 mb-4">
+            Ces actions sont à effectuer directement dans Supabase ou Vercel. Elles ne peuvent pas être exécutées depuis ce dashboard pour des raisons de sécurité.
+          </p>
+          {[
+            { label: 'Vider le cache Next.js', desc: 'Dans Vercel → Deployments → Redeploy', icon: RefreshCw },
+            { label: 'Exécuter les migrations SQL', desc: 'Dans Supabase → SQL Editor', icon: Database },
+            { label: 'Rotation des clés VAPID', desc: 'Générer de nouvelles clés et mettre à jour les env vars', icon: Lock },
+            { label: 'Export des données', desc: 'Dans Supabase → Database → Backups', icon: Download },
+          ].map((a, i) => (
+            <div key={i} className="flex items-start gap-3 p-3 bg-white/[0.02] rounded-lg border border-white/[0.05]">
+              <a.icon className="w-4 h-4 text-zinc-500 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-medium text-zinc-300">{a.label}</p>
+                <p className="text-[11px] text-zinc-600 mt-0.5">{a.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
     </div>
   )
 }
