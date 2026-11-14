@@ -239,7 +239,12 @@ export default function ParametresClient({ userId, email, profile }: Props) {
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Classe</label>
             <select
               value={classe}
-              onChange={e => setClasse(e.target.value)}
+              onChange={e => {
+                const val = e.target.value
+                setClasse(val)
+                // Réinitialiser la série si on repasse en 3ème
+                if (val !== 'terminale') setSerie('')
+              }}
               className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green text-sm bg-white"
             >
               {CLASSES.map(c => (

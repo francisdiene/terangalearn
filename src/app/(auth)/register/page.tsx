@@ -47,7 +47,13 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    // Réinitialiser la série si on repasse en 3ème
+    if (name === 'classe' && value !== 'terminale') {
+      setForm({ ...form, classe: value, serie: '' })
+    } else {
+      setForm({ ...form, [name]: value })
+    }
   }
 
   const paysSelectionne = PAYS_AFRIQUE_OUEST.find(p => p.code === form.pays)
@@ -56,6 +62,13 @@ export default function RegisterPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Validation : série obligatoire pour Terminale
+    if (form.classe === 'terminale' && !form.serie) {
+      setError('Merci de sélectionner ta série (S1, S2, L, G ou STEG).')
+      setLoading(false)
+      return
+    }
 
     if (methode === 'email') {
       const { error } = await supabase.auth.signUp({
