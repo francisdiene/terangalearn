@@ -70,6 +70,9 @@ export default async function SuperAdminPage() {
     // === Inscriptions par jour (30 derniers jours) ===
     { data: inscriptionsParJour },
 
+    // === Répartition par série ===
+    { data: seriesData },
+
   ] = await Promise.all([
     // Tous les utilisateurs (admin inclus)
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -129,11 +132,11 @@ export default async function SuperAdminPage() {
       .select('id, titre, user_id, created_at, profiles(full_name)')
       .order('created_at', { ascending: false }).limit(30),
     supabase.from('examens_simules')
-      .select('id, user_id, score, created_at, profiles(full_name)')
+      .select('id, user_id, serie, score, created_at, profiles(full_name)')
       .order('created_at', { ascending: false }).limit(20),
     supabase.from('profiles')
-      .select('id, full_name, created_at, niveau')
-      .order('created_at', { ascending: false }).limit(10),
+      .select('id, full_name, niveau, serie, xp')
+      .order('xp', { ascending: false }).limit(20),
 
     // Subscriptions
     supabase.from('subscriptions')
@@ -150,6 +153,12 @@ export default async function SuperAdminPage() {
       .select('created_at')
       .gte('created_at', il_y_a_30j)
       .order('created_at', { ascending: true }),
+
+    // Répartition par série (Terminale)
+    supabase.from('profiles')
+      .select('serie')
+      .eq('classe', 'terminale')
+      .not('serie', 'is', null),
   ])
 
   // Count signalements per post
@@ -173,10 +182,10 @@ export default async function SuperAdminPage() {
   // Construire courbe inscriptions par jour
   const inscriptionsChartData = buildInscriptionsChart(inscriptionsParJour ?? [], 30)
 
-  // Répartition par niveau
+  // Répartition par série (sur toutes les terminales, pas juste les 50 derniers)
   const niveauxMap: Record<string, number> = {}
-  for (const u of (recentUsers ?? [])) {
-    if (u.niveau) niveauxMap[u.niveau] = (niveauxMap[u.niveau] ?? 0) + 1
+  for (const u of (seriesData ?? [])) {
+    if (u.serie) niveauxMap[u.serie] = (niveauxMap[u.serie] ?? 0) + 1
   }
 
   return (

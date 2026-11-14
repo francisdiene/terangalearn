@@ -1879,16 +1879,16 @@ function ProgressionTab({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Répartition par niveau */}
+        {/* Répartition par série */}
         <Card>
-          <CardHeader title="Répartition par niveau" />
+          <CardHeader title="Répartition par série (Terminale)" />
           <div className="p-4 space-y-3">
             {topNiveaux.length === 0 ? (
               <p className="text-xs text-zinc-500 text-center py-4">Aucune donnée</p>
             ) : topNiveaux.map(n => (
               <div key={n.niveau} className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="text-zinc-300 font-medium">{n.niveau || 'Non renseigné'}</span>
+                  <span className="text-zinc-300 font-medium">Série {n.niveau || 'Non renseignée'}</span>
                   <span className="text-zinc-500">{fmt(n.count)} élèves</span>
                 </div>
                 <div className="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
