@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Zap, Flame, BookOpen, Trophy, Star } from 'lucide-react'
-import ProfilStats from '@/components/profil/ProfilStats'
 
 export default async function ProfilPage() {
   const supabase = await createClient()

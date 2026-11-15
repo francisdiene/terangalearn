@@ -240,7 +240,7 @@ export default function ParametresClient({ userId, email, profile }: Props) {
             <select
               value={classe}
               onChange={e => {
-                const val = e.target.value
+                const val = e.target.value as 'terminale' | '3eme'
                 setClasse(val)
                 // Réinitialiser la série si on repasse en 3ème
                 if (val !== 'terminale') setSerie('')

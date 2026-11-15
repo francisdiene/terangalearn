@@ -7,12 +7,16 @@ export interface Profile {
   email: string
   classe: Classe
   serie: Serie
+  pays?: string
   avatar_url: string | null
   xp: number
   niveau: number
   streak: number
   last_activity: string | null
   created_at: string
+  // Abonnement
+  plan?: string
+  plan_expires_at?: string | null
   // Modération
   role?: string
   banni?: boolean

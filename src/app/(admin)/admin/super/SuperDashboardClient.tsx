@@ -459,7 +459,7 @@ export default function SuperDashboardClient({
   // ── Current tab info ─────────────────────────────────────────────────────────
 
   let currentLabel = 'Administration'
-  let currentIcon = LayoutDashboard
+  let currentIcon: NavItem['icon'] = LayoutDashboard
   for (const g of NAV_GROUPS) {
     const item = g.items.find(i => i.key === tab)
     if (item) { currentLabel = item.label; currentIcon = item.icon; break }
@@ -1520,7 +1520,7 @@ function ServiceStatusTab() {
       <div className="grid gap-3">
         {services.map(svc => {
           const isVerified = ['nextjs', 'supabase_db', 'supabase_auth', 'vercel'].includes(svc.key)
-          const status = isVerified ? 'ok' : 'unknown'
+          const status: 'ok' | 'warn' | 'error' | 'unknown' = isVerified ? 'ok' : 'unknown'
           return (
             <Card key={svc.key}>
               <div className="flex items-center gap-4 px-5 py-4">
@@ -1531,14 +1531,14 @@ function ServiceStatusTab() {
                 </div>
                 <span className={cn(
                   'text-[10px] font-bold px-2.5 py-1 rounded-full',
-                  status === 'ok' ? 'bg-emerald-500/15 text-emerald-400' :
-                  status === 'warn' ? 'bg-amber-500/15 text-amber-400' :
-                  status === 'error' ? 'bg-red-500/15 text-red-400' :
+                  (status as string) === 'ok'    ? 'bg-emerald-500/15 text-emerald-400' :
+                  (status as string) === 'warn'  ? 'bg-amber-500/15 text-amber-400' :
+                  (status as string) === 'error' ? 'bg-red-500/15 text-red-400' :
                   'bg-zinc-800 text-zinc-500'
                 )}>
-                  {status === 'ok' ? 'Opérationnel' :
-                   status === 'warn' ? 'Dégradé' :
-                   status === 'error' ? 'Indisponible' : 'Non vérifié'}
+                  {(status as string) === 'ok'    ? 'Opérationnel' :
+                   (status as string) === 'warn'  ? 'Dégradé' :
+                   (status as string) === 'error' ? 'Indisponible' : 'Non vérifié'}
                 </span>
               </div>
             </Card>
