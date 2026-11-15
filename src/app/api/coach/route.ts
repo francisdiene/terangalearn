@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODEL   = 'openai/gpt-oss-120b'
 
 const SYSTEM_PROMPT = `
 Tu es **TerangaLearn Coach**, un assistant pédagogique destiné principalement
@@ -384,6 +386,7 @@ export async function POST(req: NextRequest) {
       ? `${message}\n\n[Contexte cours disponible:${contenuCours}]`
       : message
 
+    const t0 = Date.now()
     const response = await fetch(GROQ_API_URL, {
       method: 'POST',
       headers: {
@@ -391,7 +394,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
+        model: GROQ_MODEL,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           ...(contexte || []),
@@ -406,10 +409,12 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const err = await response.json()
       console.error('Groq error:', err)
+      void logAiCall({ userId: user.id, feature: 'coach', model: GROQ_MODEL, tokensIn: 0, tokensOut: 0, durationMs: Date.now() - t0, success: false, errorCode: err?.error?.code ?? 'groq_error' })
       return NextResponse.json({ error: 'Erreur API Groq' }, { status: 500 })
     }
 
     const data = await response.json()
+    void logAiCall({ userId: user.id, feature: 'coach', model: GROQ_MODEL, tokensIn: data.usage?.prompt_tokens ?? 0, tokensOut: data.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: true })
     const reponse = data.choices[0]?.message?.content ?? "Desole, je n'ai pas pu generer une reponse."
 
     return NextResponse.json({ reponse })

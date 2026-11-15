@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const API_URL = process.env.OPENROUTER_API_KEY
   ? 'https://openrouter.ai/api/v1/chat/completions'
@@ -13,6 +15,9 @@ const API_KEY = () => process.env.OPENROUTER_API_KEY ?? process.env.GROQ_API_KEY
 export async function POST(req: NextRequest) {
   try {
     const { questions, reponses } = await req.json()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id ?? null
 
     const corrections: Record<string, any> = {}
     let totalPoints = 0
@@ -93,6 +98,7 @@ RÈGLES :
 - Aucun Markdown.
 - Aucun texte avant ou après le JSON.
 `;
+        const t0 = Date.now()
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
@@ -109,6 +115,7 @@ RÈGLES :
         })
 
         const dataResp = await response.json()
+        void logAiCall({ userId, feature: 'correction', model: MODEL, tokensIn: dataResp.usage?.prompt_tokens ?? 0, tokensOut: dataResp.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: response.ok, errorCode: response.ok ? undefined : 'groq_error' })
         const text = dataResp.choices[0]?.message?.content ?? '{}'
         const clean = text.replace(/```json|```/g, '').trim()
 

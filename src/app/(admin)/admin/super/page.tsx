@@ -73,6 +73,9 @@ export default async function SuperAdminPage() {
     // === Répartition par série ===
     { data: seriesData },
 
+    // === AI Logs (7 derniers jours) ===
+    { data: aiLogs },
+
   ] = await Promise.all([
     // Tous les utilisateurs (admin inclus)
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
@@ -159,6 +162,13 @@ export default async function SuperAdminPage() {
       .select('serie')
       .eq('classe', 'terminale')
       .not('serie', 'is', null),
+
+    // AI Logs (7 derniers jours)
+    supabase.from('ai_logs')
+      .select('id, feature, model, tokens_in, tokens_out, duration_ms, success, error_code, created_at')
+      .gte('created_at', il_y_a_7j)
+      .order('created_at', { ascending: false })
+      .limit(500),
   ])
 
   // Count signalements per post
@@ -224,6 +234,7 @@ export default async function SuperAdminPage() {
       recentSubscriptions={recentSubscriptions ?? []}
       inscriptionsChart={inscriptionsChartData}
       niveauxRepartition={Object.entries(niveauxMap).map(([niveau, count]) => ({ niveau, count }))}
+      aiLogs={aiLogs ?? []}
     />
   )
 }

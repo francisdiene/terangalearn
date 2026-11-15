@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const API_URL = process.env.OPENROUTER_API_KEY
   ? 'https://openrouter.ai/api/v1/chat/completions'
@@ -130,6 +131,7 @@ Aucune balise.
 
       let parsed = null
       for (const model of MODELS) {
+        const t0 = Date.now()
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: {
@@ -148,10 +150,12 @@ Aucune balise.
         if (!response.ok) {
           const errBody = await response.text()
           console.error(`Groq error ${response.status} model=${model} matiere=${matiere}:`, errBody)
+          void logAiCall({ userId: user.id, feature: 'exam', model, tokensIn: 0, tokensOut: 0, durationMs: Date.now() - t0, success: false, errorCode: 'groq_error' })
           continue // essaie le modèle suivant
         }
 
         const data = await response.json()
+        void logAiCall({ userId: user.id, feature: 'exam', model, tokensIn: data.usage?.prompt_tokens ?? 0, tokensOut: data.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: true })
         const text = data.choices?.[0]?.message?.content ?? ''
         console.log(`RAW model=${model} matiere=${matiere}:`, text.slice(0, 300))
 

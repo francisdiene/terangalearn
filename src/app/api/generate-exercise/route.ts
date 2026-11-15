@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const GROQ_MODEL   = 'openai/gpt-oss-120b'
 
 export async function POST(req: NextRequest) {
   try {
     const { coursTitre, coursContenu } = await req.json()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
+    const t0 = Date.now()
     const response = await fetch(GROQ_API_URL, {
       method: 'POST',
       headers: {
@@ -13,7 +19,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
+        model: GROQ_MODEL,
         max_tokens: 1024,
         temperature: 0.7,
         messages: [
@@ -43,10 +49,12 @@ Règles :
     })
 
     if (!response.ok) {
+      void logAiCall({ userId: user?.id ?? null, feature: 'exercise', model: GROQ_MODEL, tokensIn: 0, tokensOut: 0, durationMs: Date.now() - t0, success: false, errorCode: 'groq_error' })
       return NextResponse.json({ error: 'Erreur API Groq' }, { status: 500 })
     }
 
     const data = await response.json()
+    void logAiCall({ userId: user?.id ?? null, feature: 'exercise', model: GROQ_MODEL, tokensIn: data.usage?.prompt_tokens ?? 0, tokensOut: data.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: true })
     const text = data.choices[0]?.message?.content ?? ''
 
     // Parser le JSON

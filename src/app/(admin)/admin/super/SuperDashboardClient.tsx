@@ -258,7 +258,7 @@ function StatusDot({ status }: { status: 'ok' | 'warn' | 'error' | 'unknown' }) 
 export default function SuperDashboardClient({
   currentUserId, stats, recentUsers, recentSignalements, sanctions,
   auditLog, recentPosts, plateformeStats, topEleves, recentExamens,
-  recentSubscriptions, inscriptionsChart, niveauxRepartition,
+  recentSubscriptions, inscriptionsChart, niveauxRepartition, aiLogs,
 }: {
   currentUserId: string
   stats: AllStats
@@ -273,6 +273,7 @@ export default function SuperDashboardClient({
   recentSubscriptions: any[]
   inscriptionsChart: { date: string; count: number }[]
   niveauxRepartition: { niveau: string; count: number }[]
+  aiLogs: any[]
 }) {
   const [tab, setTab]           = useState<TabKey>('overview')
   const [users, setUsers]       = useState(recentUsers)
@@ -900,7 +901,7 @@ export default function SuperDashboardClient({
               MONITORING IA
           ════════════════════════════════════════════════════════════ */}
           {tab === 'monitoring_ia' && (
-            <AIMonitoringTab />
+            <AIMonitoringTab aiLogs={aiLogs} />
           )}
 
           {/* ════════════════════════════════════════════════════════════
@@ -1556,57 +1557,157 @@ function ServiceStatusTab() {
   )
 }
 
-function AIMonitoringTab() {
+function AIMonitoringTab({ aiLogs }: { aiLogs: any[] }) {
+  // ── Calculs agrégés ────────────────────────────────────────────────────────
+  const totalRequetes   = aiLogs.length
+  const totalTokensIn   = aiLogs.reduce((s, l) => s + (l.tokens_in  ?? 0), 0)
+  const totalTokensOut  = aiLogs.reduce((s, l) => s + (l.tokens_out ?? 0), 0)
+  const totalTokens     = totalTokensIn + totalTokensOut
+  const successCount    = aiLogs.filter(l => l.success).length
+  const tauxReussite    = totalRequetes > 0 ? Math.round((successCount / totalRequetes) * 100) : 100
+  const durations       = aiLogs.filter(l => l.duration_ms > 0).map(l => l.duration_ms)
+  const avgDuration     = durations.length > 0 ? Math.round(durations.reduce((s, d) => s + d, 0) / durations.length) : 0
+
+  // Par feature
+  const features = ['coach', 'exam', 'correction', 'resume', 'exercise', 'bulletin']
+  const featureLabels: Record<string, string> = {
+    coach: 'Coach IA', exam: 'Examen simulé', correction: 'Correction', resume: 'Résumé cours', exercise: 'Exercice', bulletin: 'Bulletin'
+  }
+  const featureColors: Record<string, string> = {
+    coach: 'text-sky-400', exam: 'text-violet-400', correction: 'text-orange-400',
+    resume: 'text-emerald-400', exercise: 'text-amber-400', bulletin: 'text-pink-400'
+  }
+  const featureStats = features.map(f => {
+    const logs = aiLogs.filter(l => l.feature === f)
+    const ok   = logs.filter(l => l.success).length
+    return {
+      feature: f, label: featureLabels[f], count: logs.length, success: ok,
+      tokens: logs.reduce((s, l) => s + (l.tokens_in ?? 0) + (l.tokens_out ?? 0), 0),
+      color: featureColors[f],
+    }
+  }).filter(f => f.count > 0)
+
+  // Derniers appels (10)
+  const derniers = [...aiLogs].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 10)
+
+  // Appels par jour (7 derniers jours)
+  const now = new Date()
+  const last7: { date: string; count: number; errors: number }[] = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    const key = d.toISOString().slice(0, 10)
+    const dayLogs = aiLogs.filter(l => l.created_at?.slice(0, 10) === key)
+    last7.push({ date: key, count: dayLogs.length, errors: dayLogs.filter(l => !l.success).length })
+  }
+  const maxCount = Math.max(...last7.map(d => d.count), 1)
+
   return (
     <div className="space-y-6">
-      <SectionTitle
-        title="Monitoring Coach IA"
-        sub="Supervision de l'utilisation de Groq API"
-      />
-      <div className="p-5 bg-sky-500/5 border border-sky-500/20 rounded-xl">
-        <div className="flex items-start gap-3">
-          <Cpu className="w-5 h-5 text-sky-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-zinc-200 mb-1">Table ai_logs requise</p>
-            <p className="text-xs text-zinc-500 leading-relaxed">
-              Pour afficher les statistiques du Coach IA (nombre de requêtes, tokens consommés, temps de réponse, taux d'erreur),
-              il faut créer une table <code className="text-sky-400 bg-sky-500/10 px-1 rounded">ai_logs</code> dans Supabase
-              et enregistrer chaque appel Groq. Cette table n'est pas encore créée.
-            </p>
-            <div className="mt-3 p-3 bg-black/30 rounded-lg border border-white/[0.06]">
-              <p className="text-[10px] text-zinc-600 font-mono mb-1">SQL à exécuter dans Supabase :</p>
-              <pre className="text-[10px] text-zinc-400 font-mono whitespace-pre-wrap">{`CREATE TABLE ai_logs (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id uuid REFERENCES profiles(id),
-  feature text,         -- 'coach', 'resume', 'exam'
-  model text,
-  tokens_in integer,
-  tokens_out integer,
-  duration_ms integer,
-  success boolean,
-  error_code text,
-  created_at timestamptz DEFAULT now()
-);`}</pre>
-            </div>
+      <SectionTitle title="Monitoring IA" sub="Supervision des appels Groq API — 7 derniers jours" />
+
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <KPICard label="Requêtes totales"      value={totalRequetes}  icon={Cpu}       color="text-sky-400"     sub="tous appels IA confondus" />
+        <KPICard label="Tokens consommés"      value={fmt(totalTokens)} icon={Zap}      color="text-amber-400"   sub={`${fmt(totalTokensIn)} in · ${fmt(totalTokensOut)} out`} />
+        <KPICard label="Temps moyen réponse"   value={avgDuration > 0 ? `${avgDuration} ms` : '—'} icon={Clock} color="text-violet-400" sub="latence Groq mesurée" />
+        <KPICard label="Taux de réussite"      value={`${tauxReussite} %`} icon={CheckCircle2} color={tauxReussite >= 95 ? 'text-emerald-400' : 'text-orange-400'} sub={`${successCount} / ${totalRequetes} OK`} />
+        <KPICard label="Erreurs"               value={totalRequetes - successCount} icon={AlertTriangle} color="text-red-400" sub="appels en échec" />
+        <KPICard label="Modèle principal"      value="gpt-oss-120b" icon={Database} color="text-zinc-400" sub="via Groq API" />
+      </div>
+
+      {/* Graphe appels par jour */}
+      <Card>
+        <CardHeader title="Appels par jour (7 derniers jours)" />
+        <div className="p-5">
+          <div className="flex items-end gap-2 h-28">
+            {last7.map(d => (
+              <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                <div className="w-full flex flex-col-reverse gap-0.5" style={{ height: '80px' }}>
+                  <div
+                    className="w-full bg-sky-500/70 rounded-t"
+                    style={{ height: `${Math.round((d.count / maxCount) * 76)}px`, minHeight: d.count > 0 ? '4px' : '0' }}
+                  />
+                  {d.errors > 0 && (
+                    <div
+                      className="w-full bg-red-500/70 rounded-t"
+                      style={{ height: `${Math.round((d.errors / maxCount) * 76)}px`, minHeight: '2px' }}
+                    />
+                  )}
+                </div>
+                <span className="text-[9px] text-zinc-600">{d.date.slice(5)}</span>
+                <span className="text-[9px] text-zinc-400 font-medium">{d.count}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4 mt-3">
+            <span className="flex items-center gap-1.5 text-[10px] text-zinc-500"><span className="w-2 h-2 rounded-sm bg-sky-500/70 inline-block" />Appels OK</span>
+            <span className="flex items-center gap-1.5 text-[10px] text-zinc-500"><span className="w-2 h-2 rounded-sm bg-red-500/70 inline-block" />Erreurs</span>
           </div>
         </div>
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { label: 'Requêtes totales', note: 'Nécessite ai_logs' },
-          { label: 'Tokens consommés', note: 'Nécessite ai_logs' },
-          { label: 'Temps moyen de réponse', note: 'Nécessite ai_logs' },
-          { label: 'Taux de réussite', note: 'Nécessite ai_logs' },
-          { label: 'Coût estimé', note: 'Estimation uniquement' },
-          { label: 'Modèle utilisé', note: 'groq / openai-oss-120b' },
-        ].map(item => (
-          <div key={item.label} className="bg-[#0E1118] border border-white/[0.06] rounded-2xl p-5">
-            <p className="text-xs text-zinc-500 mb-2">{item.label}</p>
-            <p className="text-2xl font-black text-zinc-700">—</p>
-            <p className="text-[10px] text-zinc-700 mt-1.5">{item.note}</p>
+      </Card>
+
+      {/* Par feature */}
+      {featureStats.length > 0 && (
+        <Card>
+          <CardHeader title="Répartition par fonctionnalité" />
+          <div className="divide-y divide-white/[0.04]">
+            {featureStats.sort((a, b) => b.count - a.count).map(f => (
+              <div key={f.feature} className="flex items-center gap-4 px-5 py-3">
+                <div className="w-28 shrink-0">
+                  <span className={cn('text-xs font-semibold', f.color)}>{f.label}</span>
+                </div>
+                <div className="flex-1">
+                  <div className="h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-sky-500/60 rounded-full"
+                      style={{ width: `${Math.round((f.count / totalRequetes) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="w-14 text-right text-xs text-zinc-400 font-medium">{f.count} req.</div>
+                <div className="w-24 text-right text-[10px] text-zinc-600">{fmt(f.tokens)} tokens</div>
+                <div className={cn('w-12 text-right text-[10px]', f.success === f.count ? 'text-emerald-500' : 'text-orange-400')}>
+                  {f.count > 0 ? `${Math.round((f.success / f.count) * 100)}%` : '—'}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </Card>
+      )}
+
+      {/* Derniers appels */}
+      {derniers.length > 0 && (
+        <Card>
+          <CardHeader title="Derniers appels IA" />
+          <div className="divide-y divide-white/[0.04]">
+            {derniers.map(log => (
+              <div key={log.id} className="flex items-center gap-3 px-5 py-2.5">
+                <div className={cn(
+                  'w-1.5 h-1.5 rounded-full flex-shrink-0',
+                  log.success ? 'bg-emerald-500' : 'bg-red-500'
+                )} />
+                <span className={cn('text-[10px] font-semibold w-20 shrink-0', featureColors[log.feature] ?? 'text-zinc-400')}>
+                  {featureLabels[log.feature] ?? log.feature}
+                </span>
+                <span className="text-[10px] text-zinc-600 w-28 shrink-0">{log.model?.split('/').pop() ?? '—'}</span>
+                <span className="text-[10px] text-zinc-500 flex-1">
+                  {fmt((log.tokens_in ?? 0) + (log.tokens_out ?? 0))} tokens · {log.duration_ms ?? 0} ms
+                </span>
+                <span className="text-[10px] text-zinc-700">
+                  {log.created_at ? new Date(log.created_at).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {totalRequetes === 0 && (
+        <div className="p-8 text-center text-zinc-600 text-sm">
+          Aucun appel IA enregistré pour le moment. Les données apparaîtront après les premiers appels Groq.
+        </div>
+      )}
     </div>
   )
 }

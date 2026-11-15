@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
@@ -81,6 +82,7 @@ export async function POST(req: NextRequest) {
 
   const model = isImage ? 'qwen/qwen3.8-27b' : 'openai/gpt-oss-120b'
 
+  const t0 = Date.now()
   const response = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
@@ -99,6 +101,7 @@ export async function POST(req: NextRequest) {
   if (!response.ok) {
     const err = await response.text()
     console.error('Groq error:', err)
+    void logAiCall({ userId: user.id, feature: 'bulletin', model, tokensIn: 0, tokensOut: 0, durationMs: Date.now() - t0, success: false, errorCode: 'groq_error' })
     let errMsg = 'Erreur lors de l\'analyse IA'
     try {
       const parsed = JSON.parse(err)
@@ -108,6 +111,7 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await response.json()
+  void logAiCall({ userId: user.id, feature: 'bulletin', model, tokensIn: result.usage?.prompt_tokens ?? 0, tokensOut: result.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: true })
   const content = result.choices?.[0]?.message?.content
 
   if (!content) {

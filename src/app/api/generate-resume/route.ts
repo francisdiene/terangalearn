@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logAiCall } from '@/lib/logAiCall'
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 const MODEL = 'openai/gpt-oss-120b'
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
     // Tronquer le contenu à 3000 chars pour le prompt
     const contenuCourt = cours.contenu.slice(0, 3000)
 
+    const t0 = Date.now()
     const response = await fetch(GROQ_URL, {
       method: 'POST',
       headers: {
@@ -58,10 +60,12 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
       const err = await response.text()
       console.error('Groq error:', err)
+      void logAiCall({ userId: user.id, feature: 'resume', model: MODEL, tokensIn: 0, tokensOut: 0, durationMs: Date.now() - t0, success: false, errorCode: 'groq_error' })
       return NextResponse.json({ error: 'Erreur IA' }, { status: 500 })
     }
 
     const data = await response.json()
+    void logAiCall({ userId: user.id, feature: 'resume', model: MODEL, tokensIn: data.usage?.prompt_tokens ?? 0, tokensOut: data.usage?.completion_tokens ?? 0, durationMs: Date.now() - t0, success: true })
     const resume = data.choices?.[0]?.message?.content?.trim()
 
     if (!resume) return NextResponse.json({ error: 'Résumé vide' }, { status: 500 })
