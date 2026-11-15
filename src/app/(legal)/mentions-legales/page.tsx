@@ -35,7 +35,7 @@ export default function MentionsLegales() {
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">3. Propriété intellectuelle</h2>
         <p className="text-sm text-gray-600">
-          L'ensemble du contenu de la plateforme TerangaLearn — textes, cours, exercices, illustrations, logo et architecture — est la propriété exclusive d'ODION Technologie, sauf mention contraire. Toute reproduction, représentation, modification ou exploitation sans autorisation préalable écrite est strictement interdite.
+          L'ensemble du contenu de la plateforme TerangaLearn — textes, cours, exercices, illustrations, logo et architecture — est la propriété exclusive de TerangaLearn, sauf mention contraire. Toute reproduction, représentation, modification ou exploitation sans autorisation préalable écrite est strictement interdite.
         </p>
       </section>
 
