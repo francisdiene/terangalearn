@@ -11,7 +11,7 @@ import { Profile } from '@/types'
 import {
   Menu, X, LayoutDashboard, BookOpen, PenTool,
   Bot, Users, GraduationCap, Trophy, User,
-  Calendar, FileText, Library, LogOut, Zap, Flame,
+  Calendar, FileText, Library, LogOut, Zap,
   Settings, Swords
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -71,8 +71,8 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
         {/* XP + Streak + ThemeToggle */}
         <div className="flex items-center gap-1.5 flex-shrink-0">
           {(profile?.streak ?? 0) > 0 && (
-            <span className="text-xs bg-orange-50 dark:bg-orange-950/40 text-orange-500 px-1.5 py-0.5 rounded-full font-medium whitespace-nowrap flex items-center gap-1">
-              <Flame className="w-3 h-3" />{profile?.streak}
+            <span className="text-xs bg-orange-50 dark:bg-orange-950/40 text-orange-500 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+              {profile?.streak}🔥
             </span>
           )}
           <div className="bg-green text-white text-xs px-2 py-1 rounded-full font-medium flex items-center gap-1 whitespace-nowrap">
@@ -138,8 +138,10 @@ export default function MobileNav({ profile }: { profile: Profile | null }) {
               </div>
               {(profile?.streak ?? 0) > 0 && (
                 <div className="flex items-center gap-1 mt-2 text-xs text-orange-500">
-                  <Flame className="w-3 h-3" />
-                  <span>{profile?.streak} jours de streak</span>
+                  <span className="font-semibold">{profile?.streak}🔥</span>
+                  <span className="text-orange-500/70">
+                    {(profile?.streak ?? 0) >= 7 ? 'Série en feu !' : 'jours d\'affilée'}
+                  </span>
                 </div>
               )}
             </div>

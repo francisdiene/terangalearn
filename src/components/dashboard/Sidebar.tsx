@@ -10,10 +10,9 @@ import {
   LayoutDashboard, BookOpen, PenTool, Bot,
   Trophy, User, LogOut, Zap, Users, Calendar,
   GraduationCap, FileText, Library,
-  Settings, Swords, Flame
+  Settings, Swords
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import ThemeToggle from '@/components/ThemeToggle'
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -117,20 +116,16 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
         })}
       </nav>
 
-      {/* Streak + Thème + Logout */}
+      {/* Streak + Logout */}
       <div className="p-4 border-t border-gray-100 dark:border-gray-700 space-y-2">
         {(profile?.streak ?? 0) > 0 && (
           <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 rounded-xl px-4 py-2.5 text-sm font-medium">
-            <Flame className="w-4 h-4 flex-shrink-0" />
-            Streak : {profile?.streak} jour{(profile?.streak ?? 0) > 1 ? 's' : ''}
+            <span>{profile?.streak}🔥</span>
+            <span className="text-orange-500/70 dark:text-orange-400/70 text-xs font-normal">
+              {(profile?.streak ?? 0) >= 7 ? 'Série en feu !' : 'Jours d\'affilée'}
+            </span>
           </div>
         )}
-
-        {/* Bouton thème clair / sombre */}
-        <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800">
-          <span className="text-sm text-gray-500 dark:text-gray-400">Thème</span>
-          <ThemeToggle />
-        </div>
 
         <button
           onClick={handleLogout}
