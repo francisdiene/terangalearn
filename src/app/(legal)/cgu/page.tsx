@@ -55,7 +55,7 @@ export default function CGU() {
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">5. Contenu généré par les utilisateurs</h2>
         <p className="text-sm text-gray-600">
-          En publiant du contenu sur TerangaLearn (messages, réponses, commentaires), vous accordez à ODION Technologie une licence non exclusive d'utilisation de ce contenu dans le cadre de la plateforme. Vous restez propriétaire de vos contenus. Tout contenu contraire aux présentes CGU pourra être modéré ou supprimé sans préavis.
+          En publiant du contenu sur TerangaLearn (messages, réponses, commentaires), vous accordez à TerangaLearn une licence non exclusive d'utilisation de ce contenu dans le cadre de la plateforme. Vous restez propriétaire de vos contenus. Tout contenu contraire aux présentes CGU pourra être modéré ou supprimé sans préavis.
         </p>
       </section>
 
