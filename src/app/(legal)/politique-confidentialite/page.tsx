@@ -86,7 +86,7 @@ export default function PolitiqueConfidentialite() {
         <h2 className="text-lg font-semibold text-gray-800 mb-3">8. Contact</h2>
         <p className="text-sm text-gray-600">
           Pour toute question relative à cette politique : <strong>privacy@terangalearn.sn</strong><br />
-          Responsable du traitement : François Codé Diène — ODION Technologie, Dakar, Sénégal
+          Responsable du traitement : François Codé Diène — TerangaLearn, Dakar, Sénégal
         </p>
       </section>
     </article>
