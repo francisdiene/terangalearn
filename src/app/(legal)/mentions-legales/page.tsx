@@ -13,7 +13,7 @@ export default function MentionsLegales() {
       <section className="mb-8">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">1. Éditeur du site</h2>
         <div className="bg-white rounded-xl border border-gray-100 p-5 text-sm text-gray-600 space-y-1">
-          <p><strong>Dénomination :</strong> ODION Technologie</p>
+          <p><strong>Dénomination :</strong> TerangaLearn</p>
           <p><strong>Forme :</strong> Entreprise individuelle</p>
           <p><strong>Responsable de publication :</strong> François Codé Diène</p>
           <p><strong>Adresse :</strong> Dakar, Sénégal</p>
