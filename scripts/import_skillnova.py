@@ -194,7 +194,9 @@ def main():
         level  = resource.get("level", "")
         subj   = resource.get("subject", "")
         chap   = resource.get("chapter", "")
-        rtype  = resource.get("resource_type", "exercise")
+        # La table epreuves utilise les valeurs en français
+        RTYPE_MAP = {"exercise": "exercice", "lesson": "cours", "correction": "corrige"}
+        rtype = RTYPE_MAP.get(resource.get("resource_type", "exercise"), "exercice")
 
         file_info = resource.get("file", {})
         sha_manifest = file_info.get("sha256", "")
