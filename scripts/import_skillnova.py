@@ -241,13 +241,9 @@ def main():
             rapport["details"].append({"title": title, "status": "skipped_file_not_found"})
             continue
 
-        # 5. SHA-256 (vérification + idempotence)
+        # 5. SHA-256 — on utilise le sha du fichier local (pas celui du manifest)
+        # Les fichiers dans propres peuvent différer des téléchargements Skill Nova
         sha = sha256_file(pdf_path)
-        if sha_manifest and sha != sha_manifest:
-            print(f"{prefix} ⚠️  SHA-256 mismatch — {title[:50]}")
-            rapport["errors"].append({"title": title, "error": "sha256_mismatch",
-                                      "expected": sha_manifest, "computed": sha})
-            continue
 
         if sha in existing_sha256:
             print(f"{prefix} ✅ Déjà importé — {title[:60]}")
