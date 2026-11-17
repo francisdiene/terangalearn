@@ -80,24 +80,31 @@ def normalise_classe(raw: str) -> str | None:
 
 def resolve_pdf_path(resource: dict) -> Path | None:
     """
-    Essaie plusieurs stratégies pour trouver le fichier local.
-    1. PDF_BASE_DIR / local_path (tel quel depuis manifest)
-    2. PDF_BASE_DIR / basename seulement
+    Structure réelle : PDF_BASE_DIR/{classe}/{matiere}/{fichier.pdf}
+    Stratégies dans l'ordre :
+    1. PDF_BASE_DIR/{level}/{subject}/{basename}
+    2. Recherche récursive par basename dans PDF_BASE_DIR
+    3. Chemin complet local_path tel quel
     """
     local_path = resource.get("file", {}).get("local_path", "")
+    level   = resource.get("level", "").lower().strip()    # "3eme", "terminale"
+    subject = resource.get("subject", "").lower().strip()  # "mathématiques", "physique"…
+
     if not local_path:
         return None
 
-    # Stratégie 1 : chemin relatif depuis PDF_BASE_DIR
-    # local_path ressemble à "data/downloads/3eme/non-classe/XXX.pdf"
-    # On extrait uniquement le basename
     basename = Path(local_path).name
 
-    candidate = PDF_BASE_DIR / basename
+    # Stratégie 1 : propres/{level}/{subject}/{basename}
+    candidate = PDF_BASE_DIR / level / subject / basename
     if candidate.exists():
         return candidate
 
-    # Stratégie 2 : chemin complet tel quel
+    # Stratégie 2 : recherche récursive par nom de fichier
+    for found in PDF_BASE_DIR.rglob(basename):
+        return found
+
+    # Stratégie 3 : chemin absolu tel quel dans le manifest
     full = Path(local_path)
     if full.exists():
         return full
