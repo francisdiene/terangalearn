@@ -99,7 +99,7 @@ export default function CGU() {
         <p className="text-sm text-gray-600">
           Pour toute question relative aux présentes CGU :<br />
           <strong>contact@terangalearn.sn</strong><br />
-          ODION Technologie — Dakar, Sénégal
+          TerangaLearn — Dakar, Sénégal
         </p>
       </section>
     </article>
